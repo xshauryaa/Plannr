@@ -1,7 +1,7 @@
 import Event from './Event';
 import Time24 from './Time24';
-import ActivityType from './ActivityType'; // only needed if you're validating type
-import ScheduleDate from './ScheduleDate'; // you'll provide this next
+import ActivityType from './ActivityType';
+import ScheduleDate from './ScheduleDate';
 
 /**
  * Represents a rigid event that has a fixed date and time of occurrence.
