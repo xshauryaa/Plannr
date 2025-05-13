@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Plannr-Frontend",
-    "slug": "Plannr-Frontend",
+    "name": "Plannr",
+    "slug": "Plannr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -1,7 +1,7 @@
 import React, { useState } from 'react' 
-import { Text, View, StyleSheet, FlatList, Image } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 
-const UpcomingTasks = ({ tasks }) => {
+const UpcomingTasks = ({ tasks, onClick }) => {
     let incompleteTasks = []
 
     for (let i = 0; i < tasks.length; i++) {
@@ -13,7 +13,7 @@ const UpcomingTasks = ({ tasks }) => {
     return (
         <View style={styles.card}>
             <FlatList
-                data={incompleteTasks.slice(0, 3)} // Only first 3 items
+                data={incompleteTasks.slice(0, 3)}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => { 
                     return (
@@ -31,8 +31,10 @@ const UpcomingTasks = ({ tasks }) => {
                 }}
             />
             <View style={styles.horizontalGrid}>
-                <Text style={{ fontSize: 12, fontFamily: 'AlbertSans'}}>Tap here to view all of today's tasks</Text>
-                <Image source={require('../../assets/images/Expand.png')} style={styles.icon} />
+                <Text style={{ fontSize: 12, fontFamily: 'AlbertSans'}}>Expand to view all of today's tasks</Text>
+                <TouchableOpacity onPress={onClick}>
+                    <Image source={require('../../assets/images/Expand.png')} style={styles.expandButton} />
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -59,8 +61,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     icon: {
-        width: 18,
-        height: 18,
+        width: 36,
+        height: 36,
     }, 
     taskName: {
         fontSize: 16,
@@ -80,7 +82,11 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.15)',
         marginVertical: 8,
-    }
+    },
+    expandButton: {
+        width: 18,
+        height: 18,
+    },
 })
 
 export default UpcomingTasks
