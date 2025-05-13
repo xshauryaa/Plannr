@@ -1,8 +1,8 @@
-import Time24 from '../Time24';
-import ScheduleDate from '../ScheduleDate';
-import WeekSchedule from '../WeekSchedule';
-import EventDependencies from '../EventDependencies';
-import ActivityType from '../ActivityType';
+import Time24 from './Time24.js';
+import ScheduleDate from './ScheduleDate.js';
+import WeekSchedule from './WeekSchedule.js';
+import EventDependencies from './EventDependencies.js';
+import ActivityType from './ActivityType.js';
 
 /**
  * Represents an abstract scheduling strategy.

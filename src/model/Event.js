@@ -1,4 +1,4 @@
-import ActivityType from './ActivityType';
+import ActivityType from './ActivityType.js';
 
 /**
  * Represents an event or task to be scheduled in the calendar.

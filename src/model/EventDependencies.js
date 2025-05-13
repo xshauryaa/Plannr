@@ -1,4 +1,4 @@
-import CircularDependencyError from './exceptions/CircularDependencyError';
+import CircularDependencyError from './exceptions/CircularDependencyError.js';
 
 /**
  * Represents a collection of events mapped to their dependencies.

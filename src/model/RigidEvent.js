@@ -1,7 +1,7 @@
-import Event from './Event';
-import Time24 from './Time24';
-import ActivityType from './ActivityType';
-import ScheduleDate from './ScheduleDate';
+import Event from './Event.js';
+import Time24 from './Time24.js';
+import ActivityType from './ActivityType.js';
+import ScheduleDate from './ScheduleDate.js';
 
 /**
  * Represents a rigid event that has a fixed date and time of occurrence.

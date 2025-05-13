@@ -1,8 +1,10 @@
-import DaySchedule from './DaySchedule';
-import ScheduleDate from './ScheduleDate';
-import TimeBlock from './TimeBlock';
-import EventConflictError from './exceptions/EventConflictError';
-import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError';
+import DaySchedule from './DaySchedule.js';
+import ScheduleDate from './ScheduleDate.js';
+import TimeBlock from './TimeBlock.js';
+import RigidEvent from './RigidEvent.js';
+import FlexibleEvent from './FlexibleEvent.js';
+import EventConflictError from './exceptions/EventConflictError.js';
+import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -74,8 +76,8 @@ class WeekSchedule {
    * @returns {TimeBlock|null}
    */
   locateTimeBlockForEvent(event) {
-    const flag = event instanceof globalThis.RigidEvent ? 'rigid' :
-                 event instanceof globalThis.FlexibleEvent ? 'flexible' : null;
+    const flag = event instanceof RigidEvent ? 'rigid' :
+                 event instanceof FlexibleEvent ? 'flexible' : null;
     if (!flag) return null;
 
     for (const day of DAYS) {

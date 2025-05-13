@@ -1,8 +1,8 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
-import WeekSchedule from '../WeekSchedule.js';
-import Time24 from '../Time24.js';
-import EventConflictError from '../exceptions/EventConflictError.js';
-import WorkingLimitExceededError from '../exceptions/WorkingLimitExceededError.js';
+import WeekSchedule from './WeekSchedule.js';
+import Time24 from './Time24.js';
+import EventConflictError from './exceptions/EventConflictError.js';
+import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
 
 /**
  * Schedules events as late as possible, while respecting deadlines and dependencies.

@@ -1,5 +1,5 @@
-import Time24 from './Time24';
-import ActivityType from './ActivityType';
+import Time24 from './Time24.js';
+import ActivityType from './ActivityType.js';
 
 /**
  * Represents a block of time in a schedule.

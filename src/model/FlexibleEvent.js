@@ -1,7 +1,7 @@
-import Event from './Event';
-import ActivityType from './ActivityType';
-import ScheduleDate from './ScheduleDate';
-import Priority from './Priority';
+import Event from './Event.js';
+import ActivityType from './ActivityType.js';
+import ScheduleDate from './ScheduleDate.js';
+import Priority from './Priority.js';
 
 /**
  * Represents a flexible event that has no fixed time, but instead a priority and a deadline.

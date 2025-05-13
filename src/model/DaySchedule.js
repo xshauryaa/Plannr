@@ -1,9 +1,9 @@
-import ActivityType from './ActivityType';
-import ScheduleDate from './ScheduleDate';
-import TimeBlock from './TimeBlock';
-import Time24 from './Time24';
-import EventConflictError from './exceptions/EventConflictError';
-import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError';
+import ActivityType from './ActivityType.js';
+import ScheduleDate from './ScheduleDate.js';
+import TimeBlock from './TimeBlock.js';
+import Time24 from './Time24.js';
+import EventConflictError from './exceptions/EventConflictError.js';
+import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
 
 /**
  * Represents a schedule for a single day.

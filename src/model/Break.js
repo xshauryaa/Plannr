@@ -1,4 +1,4 @@
-import Time24 from './Time24';
+import Time24 from './Time24.js';
 
 /**
  * Represents a break in the schedule.
