@@ -1,28 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 
 const TodaysTasksScreen = ({ navigation }) => {
-    let tasks = navigation.getParam('taskData', []);
-    let [complete, setComplete] = useState(false)
+    const tasks = navigation.getParam('taskData', []);
+    const [taskData, setTaskData] = useState(tasks)
+    const [allCompleted, setAllComplete] = useState(false)
 
     const checkTasks = () => {
-        let complete = false
-        for (let i = 0; i < tasks.length; i++) {
-            if (tasks[i].isCompleted === false) {
-                complete = false
-                break
-            } else {
-                complete = true
-            }
-        }
-        return complete
+        return taskData.every(task => task.isCompleted)
     }
+    
+
+    useEffect( () => {
+        const check = taskData.every(task => task.isCompleted)
+        setAllComplete(check)
+    }, [taskData])
 
     const TasksCompletedView = () => {
         return (
             <View style={styles.completion}>
-                <Image style={{ height: 256, width: 256 }} source="../../assets/images/Celebration.png"/>
+                <Image style={{ height: 512, width: 512 }} source={require("../../assets/images/Celebration.png")}/>
                 <Text style={styles.subHeading}>You crushed it today!</Text>
                 <Text style={styles.subHeading}>You have completed all your tasks for the day.</Text>
             </View>
@@ -32,9 +30,9 @@ const TodaysTasksScreen = ({ navigation }) => {
     const TaskListView =() => {
         return (
             <FlatList
-                data={tasks}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => {
+                data={taskData}
+                keyExtractor={(item, index) => index}
+                renderItem={({ item, index }) => {
                         return (
                             <View style={styles.card}>
                                 <Image source={item.icon} style={{ height: 40, width: 40 }} />
@@ -45,9 +43,7 @@ const TodaysTasksScreen = ({ navigation }) => {
                                 <Checkbox 
                                     checked={item.isCompleted} 
                                     onChange={() => { 
-                                        item.isCompleted = !item.isCompleted
-                                        setComplete(checkTasks())
-                                        console.log(`${item.name} is ${item.isCompleted ? 'completed' : 'incomplete'}`)
+                                        setTaskData(prevTasks => {prevTasks[index].isCompleted = !prevTasks[index].isCompleted; return [...prevTasks]})
                                     } }
                                 />
                             </View>
@@ -64,7 +60,7 @@ const TodaysTasksScreen = ({ navigation }) => {
         <View style={styles.container}>
             <Text style={styles.title}>Today's Tasks</Text>
             <Text style={styles.subHeading}>Here's your day for 5th May</Text>
-            { complete
+            { allCompleted
                 ? TasksCompletedView()
                 : TaskListView()
             }
