@@ -27,7 +27,7 @@ const HomeScreen = ({ navigation }) => {
     // if (activeSchedule !== null) {
     //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
     //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
-    //     if (todaysSchedule !== null) {
+    //     if (todaysSchedule !== undefined) {
     //         todaysTasks = todaysSchedule.getTimeBlocks();
     //     }
     // }

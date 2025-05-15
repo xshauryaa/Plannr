@@ -1,16 +1,27 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
+import { AppStateContext } from '../context/AppStateContext.js'
+import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
-const TodaysTasksScreen = ({ navigation }) => {
+const TodaysTasksScreen = () => {
     
-    const tasks = navigation.getParam('taskData', []);
+    const { activeSchedule, currentTime } = useContext(AppStateContext)
+
+    const todaysDate = convertDateToScheduleDate(currentTime);
+    let tasks = []
+
+    // Check if the user has an active schedule
+    if (activeSchedule !== null) {
+        const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+        const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+        if (todaysSchedule !== undefined) {
+            tasks = todaysSchedule.getTimeBlocks();
+        }
+    }
+
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
-
-    const checkTasks = () => {
-        return taskData.every(task => task.isCompleted)
-    }
     
 
     useEffect( () => {
@@ -18,10 +29,19 @@ const TodaysTasksScreen = ({ navigation }) => {
         setAllComplete(check)
     }, [taskData])
 
+    const NoTaskView = () => {
+        return (
+            <View style={styles.completion}>
+                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/NoTasks.png")}/>
+                <Text style={styles.subHeading}>There are no tasks scheduled for the day.</Text>
+            </View>
+        )
+    }
+
     const TasksCompletedView = () => {
         return (
             <View style={styles.completion}>
-                <Image style={{ height: 512, width: 512 }} source={require("../../assets/images/Celebration.png")}/>
+                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/Celebration.png")}/>
                 <Text style={styles.subHeading}>You crushed it today!</Text>
                 <Text style={styles.subHeading}>You have completed all your tasks for the day.</Text>
             </View>
@@ -60,10 +80,12 @@ const TodaysTasksScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Today's Tasks</Text>
-            <Text style={styles.subHeading}>Here's your day for 5th May</Text>
-            { allCompleted
-                ? TasksCompletedView()
-                : TaskListView()
+            <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+            { (taskData.length == 0) 
+                ? NoTaskView()
+                : (allCompleted)
+                    ? TasksCompletedView()
+                    : TaskListView()
             }
         </View>
     )
