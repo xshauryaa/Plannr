@@ -1,5 +1,6 @@
-import React, { useState } from 'react' 
+import React from 'react' 
 import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
+import ActivityTypeIcons from '../model/ActivityTypeIcons'
 
 const UpcomingTasks = ({ tasks, onClick }) => {
     let incompleteTasks = []
@@ -19,10 +20,10 @@ const UpcomingTasks = ({ tasks, onClick }) => {
                     return (
                         <View style={ { height: 64, marginBottom: 4 } }>
                             <View style={styles.taskCard}>
-                                <Image source={item.icon} style={styles.icon} />
+                                <Image source={ActivityTypeIcons[item.activityType]} style={styles.icon} />
                                 <View>
                                     <Text style={styles.taskName}>{item.name}</Text>
-                                    <Text style={styles.time}>{item.startTime} - {item.endTime}</Text>
+                                    <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                 </View>
                             </View>
                             <View style={styles.divider}></View>

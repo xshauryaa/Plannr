@@ -35,10 +35,11 @@ class TimeBlock {
       // Break
       this.name = 'Break';
       this.date = date;
+      this.activityType = ActivityType.BREAK;
       this.startTime = event.getStartTime();
       this.endTime = event.getEndTime();
       this.duration = event.getDuration();
-      this.isCompleted = true;
+      this.isCompleted = false;
       this.type = 'break';
     }
   }

@@ -1,7 +1,7 @@
 /**
  * Enumerates the different types of activities that can be scheduled.
  */
-const ActivityType = Object.freeze({
+const ActivityType = {
     PERSONAL: 'PERSONAL',
     MEETING: 'MEETING',
     WORK: 'WORK',
@@ -11,6 +11,7 @@ const ActivityType = Object.freeze({
     RECREATIONAL: 'RECREATIONAL',
     ERRAND: 'ERRAND',
     OTHER: 'OTHER',
-  });
+    BREAK: 'BREAK'
+  };
   
   export default ActivityType;
