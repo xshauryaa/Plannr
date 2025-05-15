@@ -24,15 +24,16 @@ const HomeScreen = ({ navigation }) => {
     let progress = null
 
     // Check if the user has an active schedule
-    // if (activeSchedule !== null) {
-    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
-    //     if (todaysSchedule !== undefined) {
-    //         todaysTasks = todaysSchedule.getTimeBlocks();
-    //     }
-    // }
+    if (activeSchedule !== null) {
+        const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+        const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+        if (todaysSchedule !== undefined) {
+            todaysTasks = todaysSchedule.getTimeBlocks();
+        }
+    }
     
-    todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // For testing purposes, we are using a hardcoded schedule - TODO: remove this
+    // todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
     
     return (
         <View style={styles.container}>
@@ -76,6 +77,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontFamily: 'PinkSunset',
         marginTop: 64,
+        marginBottom: 8
     },
     subHeading: {
         fontSize: 16,

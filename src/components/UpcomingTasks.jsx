@@ -13,8 +13,9 @@ const UpcomingTasks = ({ tasks, onClick }) => {
 
     const NoTasksView = () => {
         return (
-            <View style={styles.card}>
-                <Text style={styles.centralText}>You have no tasks due for today!</Text>
+            <View style={{ ...styles.card, justifyContent: 'center' }}>
+                <Image source={require('../../assets/images/NoTasks.png')} style={{ width: 128, height: 128, alignSelf: 'center' }} />
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have no tasks due for today!</Text>
             </View>
         )
     }

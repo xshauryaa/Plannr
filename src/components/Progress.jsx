@@ -4,25 +4,41 @@ import * as Font from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const Progress = ({ progress }) => {
+    const NoScheduleView = () => {
+        return (
+            <View style={{ ...styles.card, justifyContent: 'center' }}>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>No schedule to track progress.</Text>
+            </View>
+        )
+    }
+
+    const ScheduleView = () => {
+        return (
+            <View style={styles.card}>
+                <Text style={styles.topText}>You've completed 60% of this week's tasks!</Text>
+                <View style={styles.progressBarBack}>
+                    <LinearGradient
+                        colors={['#3A47E4', '#4166FB']}
+                        start={[0, 0]}
+                        end={[1, 0]}
+                        style={[styles.progressBarFront, { width: `${progress}%` }]}
+                    />
+                </View>
+                <View style={styles.horizontalGrid}>
+                    <Text style={styles.bottomText}>View your current week's schedule</Text>
+                    <Image 
+                        style={styles.icon}
+                        source={require('../../assets/images/GoIcon.png')} 
+                    />
+                </View>
+            </View>
+        )
+    }
+
     return (
-        <View style={styles.card}>
-            <Text style={styles.topText}>You've completed 60% of this week's tasks!</Text>
-            <View style={styles.progressBarBack}>
-                <LinearGradient
-                    colors={['#3A47E4', '#4166FB']}
-                    start={[0, 0]}
-                    end={[1, 0]}
-                    style={[styles.progressBarFront, { width: `${progress}%` }]}
-                />
-            </View>
-            <View style={styles.horizontalGrid}>
-                <Text style={styles.bottomText}>View your current week's schedule</Text>
-                <Image 
-                    style={styles.icon}
-                    source={require('../../assets/images/GoIcon.png')} 
-                />
-            </View>
-        </View>
+        (progress === null) 
+        ? NoScheduleView()
+        : ScheduleView()
     )
 }
 

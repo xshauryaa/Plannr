@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
+import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { AppStateContext } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
@@ -19,6 +20,9 @@ const TodaysTasksScreen = () => {
             tasks = todaysSchedule.getTimeBlocks();
         }
     }
+
+    // For testing purposes, we are using a hardcoded schedule - TODO: remove this
+    // tasks = activeSchedule.getScheduleForDay('Sunday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
@@ -56,10 +60,10 @@ const TodaysTasksScreen = () => {
                 renderItem={({ item, index }) => {
                         return (
                             <View style={styles.card}>
-                                <Image source={item.icon} style={{ height: 40, width: 40 }} />
+                                <Image source={ActivityTypeIcons[item.activityType]} style={{ height: 40, width: 40 }} />
                                 <View>
                                     <Text style={styles.taskName}>{item.name}</Text>
-                                    <Text style={styles.time}>{item.startTime} - {item.endTime}</Text>
+                                    <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                 </View>
                                 <Checkbox 
                                     checked={item.isCompleted} 
