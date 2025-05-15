@@ -11,33 +11,49 @@ const UpcomingTasks = ({ tasks, onClick }) => {
         }
     }
 
-    return (
-        <View style={styles.card}>
-            <FlatList
-                data={incompleteTasks.slice(0, 3)}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => { 
-                    return (
-                        <View style={ { height: 64, marginBottom: 4 } }>
-                            <View style={styles.taskCard}>
-                                <Image source={ActivityTypeIcons[item.activityType]} style={styles.icon} />
-                                <View>
-                                    <Text style={styles.taskName}>{item.name}</Text>
-                                    <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
-                                </View>
-                            </View>
-                            <View style={styles.divider}></View>
-                        </View>
-                    )
-                }}
-            />
-            <View style={styles.horizontalGrid}>
-                <Text style={{ fontSize: 12, fontFamily: 'AlbertSans'}}>Expand to view all of today's tasks</Text>
-                <TouchableOpacity onPress={onClick}>
-                    <Image source={require('../../assets/images/Expand.png')} style={styles.expandButton} />
-                </TouchableOpacity>
+    const NoTasksView = () => {
+        return (
+            <View style={styles.card}>
+                <Text style={styles.centralText}>You have no tasks due for today!</Text>
             </View>
-        </View>
+        )
+    }
+
+    const TasksView = () => {
+        return (
+            <View style={styles.card}>
+                <FlatList
+                    data={incompleteTasks.slice(0, 3)}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => { 
+                        return (
+                            <View style={ { height: 64, marginBottom: 4 } }>
+                                <View style={styles.taskCard}>
+                                    <Image source={ActivityTypeIcons[item.activityType]} style={styles.icon} />
+                                    <View>
+                                        <Text style={styles.taskName}>{item.name}</Text>
+                                        <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.divider}></View>
+                            </View>
+                        )
+                    }}
+                />
+                <View style={styles.horizontalGrid}>
+                    <Text style={{ fontSize: 12, fontFamily: 'AlbertSans'}}>Expand to view all of today's tasks</Text>
+                    <TouchableOpacity onPress={onClick}>
+                        <Image source={require('../../assets/images/Expand.png')} style={styles.expandButton} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
+    }
+
+    return (
+        (tasks.length == 0) 
+        ? NoTasksView() 
+        : TasksView()
     )
 }
 
@@ -88,6 +104,12 @@ const styles = StyleSheet.create({
         width: 18,
         height: 18,
     },
+    centralText: {
+        fontSize: 20,
+        fontFamily: 'PinkSunset',
+        textAlign: 'center',
+        marginTop: 16,
+    }
 })
 
 export default UpcomingTasks

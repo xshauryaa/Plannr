@@ -8,6 +8,7 @@ import Priority from '../model/Priority';
 import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
+import useCurrentTime from '../utils/useCurrentTime';
 
 export const AppStateContext = createContext();
 
@@ -122,7 +123,7 @@ export const AppStateProvider = ({ children }) => {
     const [activeSchedule, setActiveSchedule] = useState(scheduleForTesting)
 
     // Other app state information
-    const [currentDate, setCurrentDate] = useState(new Date())
+    const currentTime = useCurrentTime();
     const [onboarded, setOnboarded] = useState(false)
 
     return (
@@ -131,8 +132,7 @@ export const AppStateProvider = ({ children }) => {
             userPreferences, setUserPreferences,
             savedSchedules, setSavedSchedules,
             activeSchedule, setActiveSchedule,
-            currentDate, setCurrentDate,
-            onboarded, setOnboarded
+            currentTime, onboarded, setOnboarded
         }}>
           {children}
         </AppStateContext.Provider>

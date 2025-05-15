@@ -1,13 +1,16 @@
 import React, { useContext } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import * as Font from 'expo-font';
+
 import UpcomingTasks from '../components/UpcomingTasks';
 import Progress from '../components/Progress';
 import MenuButton from '../components/MenuButton';
+
 import { AppStateContext } from '../context/AppStateContext.js'
+import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const HomeScreen = ({ navigation }) => {
-    const { name, activeSchedule } = useContext(AppStateContext)
+    const { name, activeSchedule, currentTime } = useContext(AppStateContext)
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -16,16 +19,27 @@ const HomeScreen = ({ navigation }) => {
     
     if (!fontsLoaded) return null;
 
+    const todaysDate = convertDateToScheduleDate(currentTime);
+    let todaysTasks = []
+    let progress = null
 
-
-    const tasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // Check if the user has an active schedule
+    // if (activeSchedule !== null) {
+    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    //     if (todaysSchedule !== null) {
+    //         todaysTasks = todaysSchedule.getTimeBlocks();
+    //     }
+    // }
+    
+    todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
     
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Hello {name}</Text>
-            <Text style={styles.subHeading}>Here's your day for 5th May</Text>
-            <UpcomingTasks tasks={tasks} onClick={() => { navigation.navigate("TodaysTasks") }}/>
-            <Progress progress={60} />
+            <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+            <UpcomingTasks tasks={todaysTasks} onClick={() => { navigation.navigate("TodaysTasks") }}/>
+            <Progress progress={progress} />
             <Text style={styles.subHeading}>For Your Current Schedule</Text>
             <View style={styles.horizontalGrid}> 
                 <MenuButton

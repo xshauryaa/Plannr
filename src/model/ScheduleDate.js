@@ -13,10 +13,28 @@ class ScheduleDate {
       this.year = year;
     }
   
-    /** @returns {string} this date in "D-M-YYYY" format */
+    /** @returns {string} this date in "Month DaySuffix, Year" format */
     getDateString() {
-      return `${this.date}-${this.month}-${this.year}`;
+        const monthNames = [
+        '', 'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+    
+        const getOrdinalSuffix = (day) => {
+            if (day >= 11 && day <= 13) return 'th';
+            const lastDigit = day % 10;
+            if (lastDigit === 1) return 'st';
+            if (lastDigit === 2) return 'nd';
+            if (lastDigit === 3) return 'rd';
+            return 'th';
+        };
+    
+        const monthName = monthNames[this.month];
+        const daySuffix = getOrdinalSuffix(this.date);
+    
+        return `${monthName} ${this.date}${daySuffix}, ${this.year}`;
     }
+  
   
     /** @returns {number} the day */
     getDate() {
