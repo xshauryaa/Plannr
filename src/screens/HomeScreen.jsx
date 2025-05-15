@@ -9,13 +9,14 @@ import { AppStateContext } from '../context/AppStateContext.js'
 const HomeScreen = ({ navigation }) => {
     const { name, activeSchedule } = useContext(AppStateContext)
     
-    
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
         'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
       });
     
     if (!fontsLoaded) return null;
+
+
 
     const tasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
     
