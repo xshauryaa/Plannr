@@ -13,16 +13,16 @@ const TodaysTasksScreen = () => {
     let tasks = []
 
     // Check if the user has an active schedule
-    if (activeSchedule !== null) {
-        const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-        const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
-        if (todaysSchedule !== undefined) {
-            tasks = todaysSchedule.getTimeBlocks();
-        }
-    }
+    // if (activeSchedule !== null) {
+    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    //     if (todaysSchedule !== undefined) {
+    //         tasks = todaysSchedule.getTimeBlocks();
+    //     }
+    // }
 
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    // tasks = activeSchedule.getScheduleForDay('Sunday').getTimeBlocks();
+    tasks = activeSchedule.getScheduleForDay('Sunday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
@@ -84,13 +84,15 @@ const TodaysTasksScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Today's Tasks</Text>
-            <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
-            { (taskData.length == 0) 
-                ? NoTaskView()
-                : (allCompleted)
-                    ? TasksCompletedView()
-                    : TaskListView()
-            }
+            <View style={styles.subContainer}>
+                <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+                { (taskData.length == 0) 
+                    ? NoTaskView()
+                    : (allCompleted)
+                        ? TasksCompletedView()
+                        : TaskListView()
+                }
+            </View>
         </View>
     )
 }
@@ -100,6 +102,9 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#FFFFFF',
         height: '100%',
+    },
+    subContainer: {
+        height: '80%',
     },
     card: {
         height: 72,

@@ -6,7 +6,7 @@ const useCurrentTime = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
-    }, 30000); // update every minute
+    }, 30000);
 
     return () => clearInterval(timer);
   }, []);

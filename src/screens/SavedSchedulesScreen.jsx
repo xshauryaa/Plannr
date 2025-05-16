@@ -1,20 +1,14 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
 import { AppStateContext } from '../context/AppStateContext'
-import DeleteScheduleModal from '../components/DeleteScheduleModal'
 
-const SavedSchedulesAndPreferencesScreen = () => {
-    const { 
-        savedSchedules, 
-        name, setName, 
-        userPreferences, setUserPreferences } = useContext(AppStateContext)
-
-    const [isVisible, setIsVisible] = useState(false)
+const SavedSchedulesScreen = () => {
+    const { savedSchedules } = useContext(AppStateContext)
 
     const SavedSchedules = () => {
         return (
             <View>
-                <Text style={styles.title}>Saved Schedules</Text>
+                <Text style={{ ...styles.title, marginTop: 64, }}>Saved Schedules</Text>
                 {
                     savedSchedules.length === 0 
                     ? <View style={{ alignItems: 'center' }}>
@@ -23,8 +17,8 @@ const SavedSchedulesAndPreferencesScreen = () => {
                     : null
                 }
                 <FlatList
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
+                    style={styles.subContainer}
+                    showsVerticalScrollIndicator={false}
                     data={savedSchedules}
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => {
@@ -42,12 +36,9 @@ const SavedSchedulesAndPreferencesScreen = () => {
                                             <TouchableOpacity onPress={() => {}}> 
                                                 <Image source={require('../../assets/images/EditIcon.png')} style={{ width: 24, height: 24 }} />
                                             </TouchableOpacity> 
-                                            <TouchableOpacity onPress={() => { setIsVisible(true) }}>
-                                                <Image source={require('../../assets/images/DeleteIcon.png')} style={{ width: 24, height: 24 }} />
-                                            </TouchableOpacity>
                                         </View>
                                     </View>
-                                    <DeleteScheduleModal isVisible={isVisible} toDelete={item.name} onClose={() => { setIsVisible(false) }}/>
+                                    <View style={styles.divider}></View>
                                 </View>
                             )
                         }
@@ -57,15 +48,12 @@ const SavedSchedulesAndPreferencesScreen = () => {
         )
     }
 
-    const UserPreferences = () => {
-
-    }
+    
 
     return (
         <View style={styles.container}>
             { SavedSchedules() }
-            <View style={styles.divider}></View>
-            { UserPreferences() }
+            { /* UserPreferences() */ }
         </View>
     )
 }
@@ -76,15 +64,18 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         height: '100%',
     },
+    subContainer: {
+        height: '80%',
+    },
     title: {
         fontSize: 32,
         fontFamily: 'PinkSunset',
-        marginTop: 64,
+        marginTop: 16,
         marginBottom: 8
     },
     card: {
-        width: 361,
-        height: 262,
+        width: '97%',
+        height: 202,
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
@@ -94,17 +85,18 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 12,
-        marginVertical: 16,
+        marginVertical: 12,
         margin: 8,
+        alignSelf: 'center',
     },
     bgImage: {
-        width: 361,
-        height: 262,
+        width: '100%',
+        height: 202,
         borderRadius: 12,
     },
     bottomCover: {
-        width: 361,
-        height: 120,
+        width: '100%',
+        height: 90,
         borderBottomLeftRadius: 12,
         borderBottomRightRadius: 12,
         backgroundColor: '#FFFFFF',
@@ -115,19 +107,38 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     heading: { 
-        fontSize: 20, 
-        fontFamily: 'AlbertSans',
+        fontSize: 24, 
+        fontFamily: 'PinkSunset',
         marginBottom: 8,
     },
     subHeading: { 
         fontSize: 16, 
         fontFamily: 'AlbertSans',
+        marginBottom: 12,
     },
     divider: {
         height: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.15)',
-        marginVertical: 8,
+        marginVertical: 12,
     },
+    input: {
+        height: 40,
+        borderRadius: 12, 
+        fontSize: 16,
+        fontFamily: 'AlbertSans',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#F0F0F0',
+    },
+    strategyButton: {
+        width: '100%',
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: '#F0F0F0' ,
+        paddingHorizontal: 16,
+        justifyContent: 'center',
+        marginBottom: 8,
+    }
 })
 
-export default SavedSchedulesAndPreferencesScreen
+export default SavedSchedulesScreen

@@ -1,20 +1,48 @@
-import React from 'react' 
+import React, { useContext, useState, useEffect } from 'react' 
 import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
+import { AppStateContext } from '../context/AppStateContext.js'
 
-const UpcomingTasks = ({ tasks, onClick }) => {
-    let incompleteTasks = []
+const UpcomingTasks = ({ onClick }) => {
+    const { activeSchedule } = useContext(AppStateContext)
 
-    for (let i = 0; i < tasks.length; i++) {
-        if (!tasks[i].isCompleted) {
-            incompleteTasks.push(tasks[i])
-        }
-    }
+    // Check if the user has an active schedule
+    // if (activeSchedule !== null) {
+    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    //     if (todaysSchedule !== undefined) {
+    //         todaysTasks = todaysSchedule.getTimeBlocks();
+    //     }
+    // }
+    
+    // For testing purposes, we are using a hardcoded schedule - TODO: remove this
+    let todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+
+    const [incompleteTasks, setIncompleteTasks] = useState([])
+    const [allCompleted, setAllComplete] = useState(false)
+
+    useEffect( () => {
+        const timer = setInterval(() => {
+            todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+            const check = todaysTasks.every(task => task.isCompleted)
+            setAllComplete(check)
+            const tasksLeft = todaysTasks.filter(task => !task.isCompleted)
+            setIncompleteTasks(tasksLeft)
+          }, 30000);
+      
+        return () => clearInterval(timer);
+        }, [todaysTasks])
+
+    // for (let i = 0; i < todaysTasks.length; i++) {
+    //     if (!todaysTasks[i].isCompleted) {
+    //         incompleteTasks.push(todaysTasks[i])
+    //     }
+    // }
 
     const NoTasksView = () => {
         return (
             <View style={{ ...styles.card, justifyContent: 'center' }}>
-                <Image source={require('../../assets/images/NoTasks.png')} style={{ width: 128, height: 128, alignSelf: 'center' }} />
+                <Image source={require('../../assets/images/NoTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
                 <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have no tasks due for today!</Text>
             </View>
         )
@@ -51,10 +79,21 @@ const UpcomingTasks = ({ tasks, onClick }) => {
         )
     }
 
+    const CompletedTasksView = () => {
+        return (
+            <View style={styles.card}>
+                <Image source={require('../../assets/images/Celebration.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have completed all your tasks for today!</Text>
+            </View>
+        )
+    }
+
     return (
-        (tasks.length == 0) 
+        (todaysTasks.length == 0) 
         ? NoTasksView() 
-        : TasksView()
+        : (allCompleted) 
+            ? CompletedTasksView() 
+            : TasksView() 
     )
 }
 

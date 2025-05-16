@@ -24,13 +24,13 @@ const HomeScreen = ({ navigation }) => {
     let progress = null
 
     // Check if the user has an active schedule
-    if (activeSchedule !== null) {
-        const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-        const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
-        if (todaysSchedule !== undefined) {
-            todaysTasks = todaysSchedule.getTimeBlocks();
-        }
-    }
+    // if (activeSchedule !== null) {
+    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    //     if (todaysSchedule !== undefined) {
+    //         todaysTasks = todaysSchedule.getTimeBlocks();
+    //     }
+    // }
     
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
     // todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
@@ -38,31 +38,33 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Hello {name}</Text>
-            <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
-            <UpcomingTasks tasks={todaysTasks} onClick={() => { navigation.navigate("TodaysTasks") }}/>
-            <Progress progress={progress} />
-            <Text style={styles.subHeading}>For Your Current Schedule</Text>
-            <View style={styles.horizontalGrid}> 
-                <MenuButton
-                    title="Add New Task to Schedule"
-                    icon={require('../../assets/images/PlusIcon.png')}
-                />
-                <MenuButton
-                    title="Mid-Week Strategy Change"
-                    icon={require('../../assets/images/SwapIcon.png')}
-                />
-            </View>
-            <Text style={styles.subHeading}>For New Schedules & Preferences</Text>
-            <View style={styles.horizontalGrid}> 
-                <MenuButton
-                    title="Generate New Schedule"
-                    icon={require('../../assets/images/CalendarIcon.png')}
-                />
-                <MenuButton
-                    title="Saved Schedules & Preferences"
-                    icon={require('../../assets/images/PreferencesIcon.png')}
-                    navTo={() => { navigation.navigate("SavedAndPreferences") }}
-                />
+            <View style={styles.subContainer}>
+                <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+                <UpcomingTasks onClick={() => { navigation.navigate("TodaysTasks") }}/>
+                <Progress progress={progress} />
+                <Text style={styles.subHeading}>For Your Current Schedule</Text>
+                <View style={styles.horizontalGrid}> 
+                    <MenuButton
+                        title="Edit Existing Schedules"
+                        icon={require('../../assets/images/EditIcon.png')}
+                    />
+                    <MenuButton
+                        title="View Your Saved Schedules"
+                        icon={require('../../assets/images/CalendarIcon.png')}
+                        navTo={() => { navigation.navigate("SavedSchedules") }}
+                    />
+                </View>
+                <Text style={styles.subHeading}>For New Schedules & Preferences</Text>
+                <View style={styles.horizontalGrid}> 
+                    <MenuButton
+                        title="Generate New Schedule"
+                        icon={require('../../assets/images/PlusIcon.png')}
+                    />
+                    <MenuButton
+                        title="Change Preferences"
+                        icon={require('../../assets/images/PreferencesIcon.png')}
+                    />
+                </View>
             </View>
         </View>
     )
@@ -73,6 +75,9 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#FFFFFF',
         height: '100%',
+    },
+    subContainer: {
+        height: '80%',
     },
     title: {
         fontSize: 32,

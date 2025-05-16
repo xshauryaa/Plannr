@@ -4,16 +4,16 @@ import { AppStateProvider } from './src/context/AppStateContext.js';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';
-import SavedSchedulesAndPreferencesScreen from './src/screens/SavedSchedulesAndPreferencesScreen';
+import SavedSchedulesScreen from './src/screens/SavedSchedulesScreen.jsx';
 
 const navigator = createStackNavigator(
   {
     Home: HomeScreen,
     TodaysTasks: TodaysTasksScreen,
-    SavedAndPreferences: SavedSchedulesAndPreferencesScreen,
+    SavedSchedules: SavedSchedulesScreen,
   },
   {
-    initialRouteName: 'SavedAndPreferences',
+    initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerShown: false,
     },
