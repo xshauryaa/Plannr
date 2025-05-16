@@ -42,13 +42,10 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
                 <UpcomingTasks onClick={() => { navigation.navigate("TodaysTasks") }}/>
                 <Progress progress={progress} />
-                <Text style={styles.subHeading}>For Your Current Schedule</Text>
-                <View style={styles.horizontalGrid}> 
+                <Text style={styles.subHeading}>For Your Existing Schedule</Text>
+                <View style={styles.horizontalGrid}>
                     <MenuButton
-                        title="Edit Existing Schedules"
-                        icon={require('../../assets/images/EditIcon.png')}
-                    />
-                    <MenuButton
+                        broad={true}
                         title="View Your Saved Schedules"
                         icon={require('../../assets/images/CalendarIcon.png')}
                         navTo={() => { navigation.navigate("SavedSchedules") }}
