@@ -119,7 +119,13 @@ export const AppStateProvider = ({ children }) => {
     })
 
     // Schedule-based information
-    const [savedSchedules, setSavedSchedules] = useState([scheduleForTesting])
+    const [savedSchedules, setSavedSchedules] = useState([
+        { name: "Test Schedule 1", schedule: scheduleForTesting },
+        { name: "Test Schedule 2", schedule: scheduleForTesting },
+        { name: "Test Schedule 3", schedule: scheduleForTesting }, 
+        { name: "Test Schedule 4", schedule: scheduleForTesting },
+        { name: "Test Schedule 5", schedule: scheduleForTesting }
+        ])
     const [activeSchedule, setActiveSchedule] = useState(scheduleForTesting)
 
     // Other app state information

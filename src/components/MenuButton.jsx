@@ -3,7 +3,7 @@ import { Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 
 const MenuButton = ({ title, icon, navTo }) => {
     return (
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={navTo}>
             <Text style={styles.text}>{title}</Text>
             <Image
                 source={icon}

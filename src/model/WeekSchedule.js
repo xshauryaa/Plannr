@@ -19,6 +19,7 @@ class WeekSchedule {
    * @param {number} workingHoursLimit - Max working hours per day
    */
   constructor(minGap, day1Date, day1Day, workingHoursLimit) {
+    this.day1Date = day1Date; // the first date of the week
     this.weekSchedule = new Map(); // ordered map of day → DaySchedule
     this._initiateWeekSchedule(minGap, day1Date, day1Day, workingHoursLimit);
   }
@@ -26,6 +27,11 @@ class WeekSchedule {
   /** @returns {Map<string, DaySchedule>} the full week schedule */
   getWeekSchedule() {
     return this.weekSchedule;
+  }
+
+  /** @returns {ScheduleDate} the first date of the week */
+  getFirstDate() {
+    return this.day1Date;
   }
 
   /**

@@ -119,6 +119,19 @@ class ScheduleDate {
   
       return new ScheduleDate(nextDate, nextMonth, nextYear);
     }
+
+    /**
+     * @param {number} days - Number of days to add
+     * @returns {ScheduleDate} the date after the given number of days
+     */
+    getDateAfter(days) {
+        let result = new ScheduleDate(this.date, this.month, this.year);
+        for (let i = 0; i < days; i++) {
+        result = result.getNextDate();
+        }
+        return result;
+    }
+  
   
     /**
      * @param {any} other 

@@ -59,8 +59,9 @@ const HomeScreen = ({ navigation }) => {
                     icon={require('../../assets/images/CalendarIcon.png')}
                 />
                 <MenuButton
-                    title="Change Preferences"
+                    title="Saved Schedules & Preferences"
                     icon={require('../../assets/images/PreferencesIcon.png')}
+                    navTo={() => { navigation.navigate("SavedAndPreferences") }}
                 />
             </View>
         </View>
