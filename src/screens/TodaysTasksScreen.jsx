@@ -22,7 +22,7 @@ const TodaysTasksScreen = () => {
     // }
 
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    tasks = activeSchedule.getScheduleForDay('Sunday').getTimeBlocks();
+    tasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
@@ -32,15 +32,6 @@ const TodaysTasksScreen = () => {
         const check = taskData.every(task => task.isCompleted)
         setAllComplete(check)
     }, [taskData])
-
-    const NoTaskView = () => {
-        return (
-            <View style={styles.completion}>
-                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/NoTasks.png")}/>
-                <Text style={styles.subHeading}>There are no tasks scheduled for the day.</Text>
-            </View>
-        )
-    }
 
     const TasksCompletedView = () => {
         return (
@@ -69,6 +60,9 @@ const TodaysTasksScreen = () => {
                                     checked={item.isCompleted} 
                                     onChange={() => { 
                                         setTaskData(prevTasks => {prevTasks[index].isCompleted = !prevTasks[index].isCompleted; return [...prevTasks]})
+                                        for (const tb of activeSchedule.getScheduleForDay('Monday').getTimeBlocks()) {
+                                            console.log(tb.isCompleted)
+                                        }
                                     } }
                                 />
                             </View>
@@ -86,9 +80,7 @@ const TodaysTasksScreen = () => {
             <Text style={styles.title}>Today's Tasks</Text>
             <View style={styles.subContainer}>
                 <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
-                { (taskData.length == 0) 
-                    ? NoTaskView()
-                    : (allCompleted)
+                { (allCompleted)
                         ? TasksCompletedView()
                         : TaskListView()
                 }
@@ -104,7 +96,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: '80%',
+        height: '85%',
     },
     card: {
         height: 72,

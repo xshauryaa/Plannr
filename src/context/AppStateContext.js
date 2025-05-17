@@ -111,11 +111,12 @@ export const AppStateProvider = ({ children }) => {
     const [userPreferences, setUserPreferences] = useState({
         theme: 'light',
         defaultStrategy: 'earliest-fit',
-        defaultStartTime: 800,
-        defaultEndTime: 1700,
-        defaultMinGap: 15,
-        defaultMaxWorkingHours: 8,
-        notificationEnabled: true
+        defaultStartTime: '800',
+        defaultEndTime: '1700',
+        defaultMinGap: '15',
+        defaultMaxWorkingHours: '8',
+        incompleteTaskNotification: 0,
+        taskRemindersEnabled: true
     })
 
     // Schedule-based information

@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: '80%',
+        height: '85%',
     },
     title: {
         fontSize: 32,
@@ -121,24 +121,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.15)',
         marginVertical: 12,
     },
-    input: {
-        height: 40,
-        borderRadius: 12, 
-        fontSize: 16,
-        fontFamily: 'AlbertSans',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        backgroundColor: '#F0F0F0',
-    },
-    strategyButton: {
-        width: '100%',
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: '#F0F0F0' ,
-        paddingHorizontal: 16,
-        justifyContent: 'center',
-        marginBottom: 8,
-    }
 })
 
 export default SavedSchedulesScreen

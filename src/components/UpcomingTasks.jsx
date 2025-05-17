@@ -2,9 +2,10 @@ import React, { useContext, useState, useEffect } from 'react'
 import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { AppStateContext } from '../context/AppStateContext.js'
+import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
 
 const UpcomingTasks = ({ onClick }) => {
-    const { activeSchedule } = useContext(AppStateContext)
+    const { activeSchedule, currentTime } = useContext(AppStateContext)
 
     // Check if the user has an active schedule
     // if (activeSchedule !== null) {
@@ -18,7 +19,7 @@ const UpcomingTasks = ({ onClick }) => {
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
     let todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
-    const [incompleteTasks, setIncompleteTasks] = useState([])
+    const [upcomingTasks, setUpcomingTasks] = useState([])
     const [allCompleted, setAllComplete] = useState(false)
 
     useEffect( () => {
@@ -26,18 +27,24 @@ const UpcomingTasks = ({ onClick }) => {
             todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
             const check = todaysTasks.every(task => task.isCompleted)
             setAllComplete(check)
-            const tasksLeft = todaysTasks.filter(task => !task.isCompleted)
-            setIncompleteTasks(tasksLeft)
-          }, 30000);
+            const tasksLeft = todaysTasks.filter(task => {
+                let curr = convertTimeToTime24(currentTime)
+                return curr.isBefore(task.endTime)
+            })
+            setUpcomingTasks(tasksLeft)
+          }, 5000);
       
         return () => clearInterval(timer);
         }, [todaysTasks])
 
-    // for (let i = 0; i < todaysTasks.length; i++) {
-    //     if (!todaysTasks[i].isCompleted) {
-    //         incompleteTasks.push(todaysTasks[i])
-    //     }
-    // }
+    const NoUpcomingTasksView = () => {
+        return (
+            <View style={styles.card}>
+                <Image source={require('../../assets/images/NoUpcomingTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have completed all your tasks for today!</Text>
+            </View>
+        )
+    }
 
     const NoTasksView = () => {
         return (
@@ -52,7 +59,7 @@ const UpcomingTasks = ({ onClick }) => {
         return (
             <View style={styles.card}>
                 <FlatList
-                    data={incompleteTasks.slice(0, 3)}
+                    data={upcomingTasks.slice(0, 3)}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => { 
                         return (
@@ -93,7 +100,9 @@ const UpcomingTasks = ({ onClick }) => {
         ? NoTasksView() 
         : (allCompleted) 
             ? CompletedTasksView() 
-            : TasksView() 
+            : (upcomingTasks.length == 0)
+                ? NoUpcomingTasksView()
+                : TasksView() 
     )
 }
 

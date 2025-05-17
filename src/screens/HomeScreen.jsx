@@ -60,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
                     <MenuButton
                         title="Change Preferences"
                         icon={require('../../assets/images/PreferencesIcon.png')}
+                        navTo={() => { navigation.navigate("Preferences") }}
                     />
                 </View>
             </View>
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: '80%',
+        height: '850%',
     },
     title: {
         fontSize: 32,
