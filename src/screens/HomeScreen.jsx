@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: '85%',
+        height: '90%',
     },
     title: {
         fontSize: 32,

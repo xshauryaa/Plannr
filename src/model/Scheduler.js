@@ -44,12 +44,20 @@ class Scheduler {
     this.breaks.push([day, breakTime]);
   }
 
+  setBreaks(breaks) {
+    this.breaks = breaks
+  }
+
   /**
    * Adds a break that applies to all days.
    * @param {Break} breakTime 
    */
   addRepeatedBreak(breakTime) {
     this.repeatedBreaks.push(breakTime);
+  }
+
+  setRepeatedBreaks(repeatedBreaks) {
+    this.repeatedBreaks = repeatedBreaks
   }
 
   /**
@@ -60,12 +68,20 @@ class Scheduler {
     this.rigidEvents.push(event);
   }
 
+  setRigidEvents(events) {
+    this.rigidEvents = events
+  }
+
   /**
    * Adds a flexible (unscheduled) event.
    * @param {FlexibleEvent} event 
    */
   addFlexibleEvent(event) {
     this.flexibleEvents.push(event);
+  }
+
+  setFlexibleEvents(events) {
+    this.flexibleEvents = events
   }
 
   /**
