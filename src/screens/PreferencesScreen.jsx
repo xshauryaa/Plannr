@@ -116,7 +116,7 @@ const PreferencesScreen = () => {
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Start Time</Text>
+                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Min. Gap (mins)</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
                                 value={userPreferences.defaultMinGap}
@@ -128,7 +128,7 @@ const PreferencesScreen = () => {
                             />
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>End Time</Text>
+                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Max. Working Hours</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
                                 value={userPreferences.defaultMaxWorkingHours}

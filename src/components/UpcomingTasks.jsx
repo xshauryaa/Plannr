@@ -41,7 +41,7 @@ const UpcomingTasks = ({ onClick }) => {
         return (
             <View style={styles.card}>
                 <Image source={require('../../assets/images/NoUpcomingTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have completed all your tasks for today!</Text>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have no upcoming tasks for today!</Text>
             </View>
         )
     }

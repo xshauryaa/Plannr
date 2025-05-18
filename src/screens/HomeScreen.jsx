@@ -10,7 +10,7 @@ import { AppStateContext } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const HomeScreen = ({ navigation }) => {
-    const { name, activeSchedule, currentTime } = useContext(AppStateContext)
+    const { name, currentTime } = useContext(AppStateContext)
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -40,7 +40,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.title}>Hello {name}</Text>
             <View style={styles.subContainer}>
                 <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
-                <UpcomingTasks onClick={() => { navigation.navigate("TodaysTasks") }}/>
+                <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
                 <Progress progress={progress} />
                 <Text style={styles.subHeading}>For Your Existing Schedule</Text>
                 <View style={styles.horizontalGrid}>
@@ -48,7 +48,7 @@ const HomeScreen = ({ navigation }) => {
                         broad={true}
                         title="View Your Saved Schedules"
                         icon={require('../../assets/images/CalendarIcon.png')}
-                        navTo={() => { navigation.navigate("SavedSchedules") }}
+                        navTo={() => { navigation.navigate("Saved") }}
                     />
                 </View>
                 <Text style={styles.subHeading}>For New Schedules & Preferences</Text>
@@ -56,6 +56,7 @@ const HomeScreen = ({ navigation }) => {
                     <MenuButton
                         title="Generate New Schedule"
                         icon={require('../../assets/images/PlusIcon.png')}
+                        navTo={() => { navigation.navigate("Generate") }}
                     />
                     <MenuButton
                         title="Change Preferences"
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: '850%',
+        height: '85%',
     },
     title: {
         fontSize: 32,
