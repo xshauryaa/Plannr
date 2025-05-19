@@ -12,13 +12,14 @@ import Scheduler from '../model/Scheduler'
 
 const GenerateScheduleScreen = () => {
     const [genStage, setGenStage] = useState(0)
-    const [scheduler, setScheduler] = useState(null)
+    const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8))
     const [breaks, setBreaks] = useState([])
     const [repeatedBreaks, setRepeatedBreaks] = useState([])
     const [rigidEvents, setRigidEvents] = useState([])
     const [flexibleEvents, setFlexibleEvents] = useState([])
     const [deps, setDeps] = useState(null)
     const [schedule, setSchedule] = useState(null)
+    const [firstDate, setFirstDate] = useState(new Date())
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Final Information']
 
@@ -30,6 +31,8 @@ const GenerateScheduleScreen = () => {
 
         setScheduler(new Scheduler(startDate, dayString, minGap, maxHours))
         setGenStage(1)
+
+        setFirstDate(date)
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
@@ -60,7 +63,7 @@ const GenerateScheduleScreen = () => {
 
     const views = [
         <InfoView onNext={SchedulerInitialization}/>,
-        <BreaksView onNext={BreaksSetup}/>,
+        <BreaksView onNext={BreaksSetup} minDate={firstDate}/>,
         <RigidEventsView onNext={RigidEventsSetup}/>,
         <FlexibleEventsView onNext={FlexibleEventsSetup}/>,
         <EventDependenciesView onNext={EventDepsSetup}/>,

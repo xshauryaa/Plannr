@@ -113,8 +113,16 @@ class WeekSchedule {
    * @param {string} day 
    * @param {Break} breakTime 
    */
-  addBreak(day, breakTime) {
-    this.weekSchedule.get(day).addBreak(breakTime);
+  addBreak(date, breakTime) {
+    let dayToAdd = ''
+    for (const day of DAYS) {
+        const schedule = this.getScheduleForDay(day);
+        if (schedule && schedule.getDate().equals(date)) {
+          dayToAdd = day
+          break
+        }
+    }
+    this.weekSchedule.get(dayToAdd).addBreak(breakTime);
   }
 
   /**

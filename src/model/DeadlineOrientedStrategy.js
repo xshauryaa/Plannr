@@ -35,8 +35,8 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
 
   /** @private */
   _scheduleBreaks() {
-    for (const [day, breakTime] of this.breaks) {
-      this.deadlineOrientedSchedule.addBreak(day, breakTime);
+    for (const [date, breakTime] of this.breaks) {
+      this.deadlineOrientedSchedule.addBreak(date, breakTime);
     }
 
     for (const breakTime of this.repeatedBreaks) {

@@ -110,6 +110,16 @@ class Time24 {
       const paddedMinute = this.minute < 10 ? `0${this.minute}` : `${this.minute}`;
       return `${this.hour}:${paddedMinute}`;
     }
+
+    /**
+     * @returns {string} a 12-hour string representation in "HH:MM AM/PM" format
+     */
+    to12HourString() {
+        const suffix = (this.hour < 12) ? "AM" : "PM"
+        const fixedHour = (this.hour == 0) ? 12 : (this.hour <= 12) ? this.hour : this.hour - 12
+        const paddedMinute = this.minute < 10 ? `0${this.minute}` : `${this.minute}`;
+        return `${fixedHour}:${paddedMinute} ${suffix}`;
+    }
   }
   
   export default Time24;

@@ -46,8 +46,8 @@ class EarliestFitStrategy extends SchedulingStrategy {
    */
   _scheduleBreaks() {
     for (const entry of this.breaks) {
-      const [day, breakTime] = entry;
-      this.earliestFitSchedule.addBreak(day, breakTime);
+      const [date, breakTime] = entry;
+      this.earliestFitSchedule.addBreak(date, breakTime);
     }
 
     for (const breakTime of this.repeatedBreaks) {

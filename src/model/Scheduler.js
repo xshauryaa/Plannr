@@ -19,7 +19,7 @@ class Scheduler {
     this.minGap = minGap;
     this.workingHoursLimit = workingHoursLimit;
 
-    /** @type {[string, Break][]} */
+    /** @type {[ScheduleDate, Break][]} */
     this.breaks = [];
 
     /** @type {Break[]} */
@@ -37,11 +37,11 @@ class Scheduler {
 
   /**
    * Adds a one-day break.
-   * @param {string} day 
+   * @param {ScheduleDate} date 
    * @param {Break} breakTime 
    */
-  addBreak(day, breakTime) {
-    this.breaks.push([day, breakTime]);
+  addBreak(date, breakTime) {
+    this.breaks.push([date, breakTime]);
   }
 
   setBreaks(breaks) {

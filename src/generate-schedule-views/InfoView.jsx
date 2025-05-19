@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { View, Image, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity } from 'react-native' 
+import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { AppStateContext } from '../context/AppStateContext'
 

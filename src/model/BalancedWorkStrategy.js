@@ -45,8 +45,8 @@ class BalancedWorkStrategy extends SchedulingStrategy {
    * @private
    */
   _scheduleBreaks() {
-    for (const [day, breakTime] of this.breaks) {
-      this.balancedWorkSchedule.addBreak(day, breakTime);
+    for (const [date, breakTime] of this.breaks) {
+      this.balancedWorkSchedule.addBreak(date, breakTime);
     }
 
     for (const breakTime of this.repeatedBreaks) {
