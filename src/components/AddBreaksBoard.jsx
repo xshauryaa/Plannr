@@ -3,6 +3,7 @@ import { Text, Image, View, StyleSheet, TouchableOpacity, TextInput, Pressable, 
 
 import { AppStateContext } from '../context/AppStateContext.js'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
 
 const AddBreaksBoard = ({ onClick, minDate }) => {
     const { currentTime } = useContext(AppStateContext)
@@ -14,9 +15,12 @@ const AddBreaksBoard = ({ onClick, minDate }) => {
     const [showStartPicker, setShowStartPicker] = useState(false)
     const [showEndPicker, setShowEndPicker] = useState(false)
     const [showDatePicker, setShowDatePicker] = useState(false)
+    const [showWarning, setShowWarning] = useState(false)
 
     const maxDate = new Date()
     maxDate.setDate(minDate.getDate() + 6)
+
+    const warning = "End time must be after start time"
 
     return (
         <View style={styles.card}>
@@ -130,10 +134,21 @@ const AddBreaksBoard = ({ onClick, minDate }) => {
                 <Text style={{ ...styles.subHeading, marginBottom: 0 }}>Check this box to add this break on all days</Text>
             </View>
 
+            {showWarning && <Text style={styles.warning}>{warning}</Text>}
+
             { /* Add Break Button */ }
             <TouchableOpacity 
                 style={styles.button}
-                onPress={() => onClick(startTime, endTime, repeated, dateOfBreak)}
+                onPress={() => {
+                    const endT = convertTimeToTime24(endTime)
+                    const startT = convertTimeToTime24(startTime)
+                    if ((endT.isBefore(startT)) || endT.equals(startT)) {
+                        setShowWarning(true)
+                    } else {
+                        setShowWarning(false)
+                        onClick(startTime, endTime, repeated, dateOfBreak)
+                    }
+                }}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
             </TouchableOpacity>
@@ -182,7 +197,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 4,
         alignSelf: 'center'
-    }
+    },
+    warning: {
+        fontSize: 12,
+        fontFamily: 'AlbertSans',
+        marginBottom: 12,
+        color: '#FF0000',
+        alignSelf: 'center'
+    },
 })
 
 export default AddBreaksBoard

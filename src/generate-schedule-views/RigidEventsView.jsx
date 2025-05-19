@@ -1,12 +1,104 @@
-import React from 'react'
-import { View, Image, Text, StyleSheet } from 'react-native' 
+import React, { useState } from 'react'
+import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
+import RigidEvent from '../model/RigidEvent'
+import AddRigidEventsBoard from '../components/AddRigidEventsBoard'
+import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
+import convertTimeToTime24 from '../utils/convertTimeToTime24'
 
-const RigidEventsView = () => {
+const RigidEventsView = ({ onNext, minDate }) => {
+    const [rigidEvents, setRigidEvents] = useState([])
 
+    const addRigidEvent = (name, type, date, startTime, endTime) => {
+        const eventDate = convertDateToScheduleDate(date)
+        const start = convertTimeToTime24(startTime)
+        const end = convertTimeToTime24(endTime)
+        const duration = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
+        const newEvent = new RigidEvent(name, type, duration, eventDate, start.toInt(), end.toInt())
+
+        setRigidEvents([...rigidEvents, newEvent])
+    }
+
+    const eventRender = (eventObj, indexToRemove) => {
+        return (
+            <View style={styles.eventCard}>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ ...styles.subHeading, fontSize: 12 }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
+                </View>
+                <TouchableOpacity onPress={() => { setRigidEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
+                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    return (
+        <View style={styles.subContainer}>
+            <Text style={styles.subHeading}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
+            <AddRigidEventsBoard
+                onClick={addRigidEvent}
+                minDate={minDate}
+            />
+            <View style={{ ...styles.card, height: 200 }}>
+                <FlatList
+                    data={rigidEvents}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={({ item, index }) => index}
+                    renderItem={({ item, index }) => eventRender(item, index)}
+                />
+            </View>
+            <TouchableOpacity 
+                style={styles.button}
+                onPress={() => onNext(rigidEvents)}
+            >
+                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+            </TouchableOpacity>
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
-
+    subContainer: {
+        height: '90%',
+    },
+    subHeading: {
+        fontSize: 16,
+        fontFamily: 'AlbertSans',
+        marginVertical: 8
+    },
+    card: {
+        width: '95%',
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: {
+        width: 0,
+        height: 0,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 24,
+        marginVertical: 16,
+        padding: 16,
+        alignSelf: 'center'
+    },
+    eventCard: {
+        height: 40, 
+        backgroundColor: "#F0F0F0",
+        borderRadius: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        marginBottom: 12
+    },
+    button: {
+        width: '92%',
+        borderRadius: 12,
+        backgroundColor: '#000' ,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginVertical: 16,
+        alignSelf: 'center'
+    }
 })
 
 export default RigidEventsView
