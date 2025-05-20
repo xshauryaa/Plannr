@@ -33,7 +33,7 @@ const RigidEventsView = ({ onNext, minDate }) => {
 
     return (
         <View style={styles.subContainer}>
-            <Text style={styles.subHeading}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
+            <Text style={styles.subHeading}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
             <AddRigidEventsBoard
                 onClick={addRigidEvent}
                 minDate={minDate}

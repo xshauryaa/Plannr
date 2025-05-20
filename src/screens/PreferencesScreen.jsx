@@ -143,6 +143,7 @@ const PreferencesScreen = () => {
                 </View>
                 <Text style={styles.subHeading}>Task Reminders</Text>
                 <View style={{ ...styles.card, gap: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: 'rgba(0, 0, 0, 0.5)'}}>{(userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
                     <Switch
                         trackColor={{ false: '#000000', true: '#4166FB' }}
                         thumbColor={'#FFFFFF'}
@@ -152,7 +153,6 @@ const PreferencesScreen = () => {
                             setUserPreferences({...userPreferences, taskRemindersEnabled: !currPref }) }}
                         value={userPreferences.taskRemindersEnabled}
                     />
-                    <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: 'rgba(0, 0, 0, 0.5)'}}>{(userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
                 </View>
                 <Text style={styles.subHeading}>Incomplete Task Notification</Text>
                 <View style={{ ...styles.card, gap: 12}}>

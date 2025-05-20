@@ -36,23 +36,28 @@ const GenerateScheduleScreen = () => {
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
-        setBreaks(breakList)
-        setRepeatedBreaks(repeatedBreakList)
+        // setBreaks(breakList)
+        // setRepeatedBreaks(repeatedBreakList)
+        scheduler.setBreaks(breakList)
+        scheduler.setRepeatedBreaks(repeatedBreakList)
         setGenStage(2)
     }
 
     const RigidEventsSetup = (eventsList) => {
-        setRigidEvents(eventsList)
+        // setRigidEvents(eventsList)
+        scheduler.setRigidEvents(eventsList)
         setGenStage(3)
     }
 
     const FlexibleEventsSetup = (eventsList) => {
-        setFlexibleEvents(eventsList)
+        // setFlexibleEvents(eventsList)
+        scheduler.setFlexibleEvents(eventsList)
         setGenStage(4)
     }
 
     const EventDepsSetup = (eventDeps) => {
-        setDeps(eventDeps)
+        // setDeps(eventDeps)
+        scheduler.setEventDependencies(eventDeps)
         setGenStage(5)
     }
 

@@ -1,29 +1,25 @@
-import React, { useState, useContext } from 'react' 
+import React, { useState } from 'react' 
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
 
-import { AppStateContext } from '../context/AppStateContext.js'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
-import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
+import Priority from '../model/Priority.js'
 
-const AddRigidEventsBoard = ({ onClick, minDate }) => {
-    const { currentTime } = useContext(AppStateContext)
+const AddFlexibleEventsBoard = ({ onClick, minDate }) => {
+    const maxDate = new Date()
+    maxDate.setDate(minDate.getDate() + 6)
 
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
-    const [startTime, setStartTime] = useState(currentTime)
-    const [endTime, setEndTime] = useState(currentTime)
-    const [dateOfEvent, setDateOfEvent] = useState(currentTime)
-    const [showStartPicker, setShowStartPicker] = useState(false)
-    const [showEndPicker, setShowEndPicker] = useState(false)
+    const [duration, setDuration] = useState('0')
+    const [priority, setPriority] = useState(Priority.MEDIUM)
+    const [deadline, setDeadline] = useState(maxDate)
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showTypePicker, setShowTypePicker] = useState(false)
+    const [showPriorityPicker, setShowPriorityPicker] = useState(false)
     const [warning, setWarning] = useState('')
     const [showWarning, setShowWarning] = useState(false)
-
-    const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + 6)
 
     const getActivityLabel = (activityType) => {
         const labelMap = {
@@ -39,7 +35,17 @@ const AddRigidEventsBoard = ({ onClick, minDate }) => {
         };
       
         return labelMap[activityType] || 'Unknown';
-    }      
+    }
+    
+    const getPriorityLabel = (priority) => {
+        const labelMap = {
+          [Priority.LOW]: 'Low',
+          [Priority.MEDIUM]: 'Medium',
+          [Priority.HIGH]: 'High',
+        };
+      
+        return labelMap[priority] || 'Unknown';
+    }
 
     {/* Name & Activity Type inputs */}
     const Panel1 = () => {
@@ -59,7 +65,7 @@ const AddRigidEventsBoard = ({ onClick, minDate }) => {
                 </View>
                 <View style={{ width: '50%' }}>
                     <Text style={styles.subHeading}>Type</Text>
-                    <Pressable onPress={() => setShowTypePicker(true)}>
+                    <Pressable onPress={() => { setShowTypePicker(true); setShowPriorityPicker(false); setShowDatePicker(false); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%' }}
                             pointerEvents="none"
@@ -72,28 +78,29 @@ const AddRigidEventsBoard = ({ onClick, minDate }) => {
         )
     }
 
-    {/* Start Time & End Time inputs + their respective time pickers */}
+    {/* Event Duration & Priorty inputs */}
     const Panel2 = () => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Start Time</Text>
-                    <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); setShowDatePicker(false); }}>
-                        <TextInput
-                            style={{ ...styles.input, width: '90%' }}
-                            pointerEvents="none"
-                            value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            editable={false}
-                        />
-                    </Pressable>
+                    <Text style={styles.subHeading}>Duration (est.)</Text>
+                    <TextInput
+                        style={{ ...styles.input, width: '90%' }}
+                        value={duration}
+                        autoCorrect={false}
+                        autoCapitalize='words'
+                        onChange={ ({ nativeEvent }) => { 
+                            setDuration(nativeEvent.text)
+                        } }
+                    />
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>End Time</Text>
-                    <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); setShowDatePicker(false); }}>
+                    <Text style={styles.subHeading}>Priority</Text>
+                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(true); setShowDatePicker(false); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%' }}
                             pointerEvents="none"
-                            value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            value={getPriorityLabel(priority)}
                             editable={false}
                         />
                     </Pressable>
@@ -109,62 +116,26 @@ const AddRigidEventsBoard = ({ onClick, minDate }) => {
 
             {/* Panel 2 - Start Time + End Time */}
             {Panel2()}
-            {showStartPicker && (
-                <View>
-                    <DateTimePicker
-                        value={startTime}
-                        mode="time"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={(event, time) => {
-                            if (time) setStartTime(time);
-                        }}
-                    />
-                    <TouchableOpacity 
-                        style={styles.button}
-                        onPress={() => setShowStartPicker(false)}
-                    >
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-            {showEndPicker && (
-                <View>
-                    <DateTimePicker
-                        value={endTime}
-                        mode="time"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={(event, time) => {
-                            if (time) setEndTime(time);
-                        }}
-                    />
-                    <TouchableOpacity 
-                        style={styles.button}
-                        onPress={() => setShowEndPicker(false)}
-                    >
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
 
             {/* Panel 3 - Date Picker */}
             <View>
                 <Text style={styles.subHeading}>Date</Text>
-                <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(false); setShowDatePicker(true); }}>
+                <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(false); setShowDatePicker(true); }}>
                     <TextInput
                         style={styles.input}
                         pointerEvents="none"
-                        value={dateOfEvent.toLocaleDateString()}
+                        value={deadline.toLocaleDateString()}
                         editable={false}
                     />
                 </Pressable>
                 {showDatePicker && (
                     <View>
                         <DateTimePicker
-                            value={dateOfBreak}
+                            value={deadline}
                             mode="date"
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                             onChange={(event, date) => {
-                                if (date) setDateOfEvent(date);
+                                if (date) setDeadline(date);
                             }}
                             minimumDate={minDate}
                             maximumDate={maxDate}
@@ -205,23 +176,38 @@ const AddRigidEventsBoard = ({ onClick, minDate }) => {
                 </View>
             }
 
+            {/* Priority Picker */}
+            {showPriorityPicker && 
+                <View>
+                    <Picker
+                        selectedValue={priority}
+                        onValueChange={(itemValue) => setPriority(itemValue)}
+                    >
+                        <Picker.Item label="High" value={Priority.HIGH} />
+                        <Picker.Item label="Medium" value={Priority.MEDIUM} />
+                        <Picker.Item label="Low" value={Priority.LOW} />
+                    </Picker>
+                    <TouchableOpacity 
+                        style={styles.button}
+                        onPress={() => setShowPriorityPicker(false)}
+                    >
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                    </TouchableOpacity>
+                </View>
+            }
+
             {showWarning && <Text style={styles.warning}>{warning}</Text>}
 
             { /* Add Rigid Event Button */ }
             <TouchableOpacity 
                 style={styles.button}
                 onPress={() => {
-                    const endT = convertTimeToTime24(endTime)
-                    const startT = convertTimeToTime24(startTime)
                     if (name.length == 0) {
                         setWarning("Name of event cannot be empty")
                         setShowWarning(true)
-                    } else if ((endT.isBefore(startT)) || endT.equals(startT)) {
-                        setWarning("End time must be after start time")
-                        setShowWarning(true)
                     } else {
                         setShowWarning(false)
-                        onClick(name, type, dateOfEvent, startTime, endTime)
+                        onClick(name, type, duration, priority, deadline)
                     }
                 }}
             >
@@ -282,4 +268,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default AddRigidEventsBoard
+export default AddFlexibleEventsBoard
