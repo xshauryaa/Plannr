@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useState, useEffect, useContext } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import initialAppState from './initialAppState';
 
@@ -33,8 +33,10 @@ export const AppStateProvider = ({ children }) => {
     }, [appState]);
 
     return (
-        <AppStateContext.Provider value={{ appState, setAppState }}>
+        <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>
           {children}
         </AppStateContext.Provider>
       )
 }
+
+export const useAppState = () => useContext(AppStateContext);

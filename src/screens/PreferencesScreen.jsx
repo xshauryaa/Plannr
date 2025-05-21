@@ -1,9 +1,10 @@
 import React, { useContext } from 'react'
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Switch } from 'react-native'
-import { AppStateContext } from '../context/AppStateContext.js'
+import { useAppState } from '../context/AppStateContext.js'
 
 const PreferencesScreen = () => {
-    const { appState, setAppState } = useContext(AppStateContext)
+    const { appState, setAppState } = useAppState();
+    
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Preferences</Text>

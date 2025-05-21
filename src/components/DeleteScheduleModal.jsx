@@ -1,10 +1,10 @@
 import React, { useContext } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity  } from 'react-native'
 import Modal from 'react-native-modal';
-import { AppStateContext } from '../context/AppStateContext'
+import { useAppState } from '../context/AppStateContext'
 
 const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
-    const { appState, setAppState } = useContext(AppStateContext)
+    const { appState, setAppState } = useAppState();
     return (
         <Modal 
             isVisible={isVisible} 

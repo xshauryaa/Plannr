@@ -1,4 +1,4 @@
-import React, { useState } from 'react' 
+import React from 'react' 
 import { Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 
 const MenuButton = ({ broad, title, icon, navTo }) => {

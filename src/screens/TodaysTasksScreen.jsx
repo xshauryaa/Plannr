@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from 'react'
 import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
-import { AppStateContext } from '../context/AppStateContext.js'
+import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const TodaysTasksScreen = () => {
     
-    const { appState } = useContext(AppStateContext)
+    const { appState } = useAppState();
 
     const todaysDate = convertDateToScheduleDate(appState.currentTime);
     let tasks = []

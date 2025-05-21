@@ -127,4 +127,4 @@ const initialAppState = {
     onboarded: false
 };
 
-export default initialAppState;
+export default initialAppState

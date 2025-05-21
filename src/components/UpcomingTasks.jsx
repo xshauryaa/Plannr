@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react' 
 import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
-import { AppStateContext } from '../context/AppStateContext.js'
+import { useAppState } from '../context/AppStateContext.js'
 import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
 
 const UpcomingTasks = ({ onClick }) => {
-    const { appState } = useContext(AppStateContext)
+    const { appState } = useAppState();
 
     // Check if the user has an active schedule
     // if (appState.activeSchedule !== null) {

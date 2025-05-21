@@ -2,15 +2,18 @@ import React, { useContext } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import * as Font from 'expo-font';
 
+import LoadingScreen from './LoadingScreen';
 import UpcomingTasks from '../components/UpcomingTasks';
 import Progress from '../components/Progress';
 import MenuButton from '../components/MenuButton';
 
-import { AppStateContext } from '../context/AppStateContext.js'
+import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const HomeScreen = ({ navigation }) => {
-    const { appState } = useContext(AppStateContext)
+    const { appState, storageLoaded } = useAppState();
+
+    // if (!storageLoaded) { return (<LoadingScreen/>) }
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),

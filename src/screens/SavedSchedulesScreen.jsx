@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
-import { AppStateContext } from '../context/AppStateContext'
+import { useAppState } from '../context/AppStateContext'
 
 const SavedSchedulesScreen = () => {
-    const { appState } = useContext(AppStateContext)
+    const { appState } = useAppState();
 
     const SavedSchedules = () => {
         return (
