@@ -10,7 +10,7 @@ import { AppStateContext } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const HomeScreen = ({ navigation }) => {
-    const { name, currentTime } = useContext(AppStateContext)
+    const { appState } = useContext(AppStateContext)
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -19,11 +19,10 @@ const HomeScreen = ({ navigation }) => {
     
     if (!fontsLoaded) return null;
 
-    const todaysDate = convertDateToScheduleDate(currentTime);
-    let todaysTasks = []
+    const todaysDate = convertDateToScheduleDate(appState.currentTime);
     let progress = null
 
-    // Check if the user has an active schedule
+    // Check if the user has an active schedule, and return progress if true
     // if (activeSchedule !== null) {
     //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
     //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
@@ -37,7 +36,7 @@ const HomeScreen = ({ navigation }) => {
     
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Hello {name}</Text>
+            <Text style={styles.title}>Hello {appState.name}</Text>
             <View style={styles.subContainer}>
                 <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
                 <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>

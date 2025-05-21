@@ -5,30 +5,30 @@ import { AppStateContext } from '../context/AppStateContext.js'
 import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
 
 const UpcomingTasks = ({ onClick }) => {
-    const { activeSchedule, currentTime } = useContext(AppStateContext)
+    const { appState } = useContext(AppStateContext)
 
     // Check if the user has an active schedule
-    // if (activeSchedule !== null) {
-    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    // if (appState.activeSchedule !== null) {
+    //     const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
     //     if (todaysSchedule !== undefined) {
     //         todaysTasks = todaysSchedule.getTimeBlocks();
     //     }
     // }
     
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    let todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    let todaysTasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
     const [upcomingTasks, setUpcomingTasks] = useState([])
     const [allCompleted, setAllComplete] = useState(false)
 
     useEffect( () => {
         const timer = setInterval(() => {
-            todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+            todaysTasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
             const check = todaysTasks.every(task => task.isCompleted)
             setAllComplete(check)
             const tasksLeft = todaysTasks.filter(task => {
-                let curr = convertTimeToTime24(currentTime)
+                let curr = convertTimeToTime24(appState.currentTime)
                 return curr.isBefore(task.endTime)
             })
             setUpcomingTasks(tasksLeft)

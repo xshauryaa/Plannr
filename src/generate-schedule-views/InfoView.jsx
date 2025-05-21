@@ -4,69 +4,71 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { AppStateContext } from '../context/AppStateContext'
 
 const InfoView = ({ onNext }) => {
-    const { currentTime, userPreferences } = useContext(AppStateContext)
+    const { appState } = useContext(AppStateContext)
     const [showPicker, setShowPicker] = useState(false)
-    const [startDate, setStartDate] = useState(currentTime)
-    const [minGap, setMinGap] = useState(userPreferences.defaultMinGap)
-    const [maxHours, setMaxHours] = useState(userPreferences.defaultMaxWorkingHours)
+    const [startDate, setStartDate] = useState(new Date())
+    const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap)
+    const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours)
 
     return (
         <View style={styles.subContainer}>
-            <Text style={styles.subHeading}>First, enter some information about what you'd like from the schedule.</Text>
-            <Text style={styles.subHeading}>What date would you like to schedule from?</Text>
-            <View style={styles.card}>
-                <Pressable onPress={() => setShowPicker(true)}>
+            <View>
+                <Text style={styles.subHeading}>First, enter some information about what you'd like from the schedule.</Text>
+                <Text style={styles.subHeading}>What date would you like to schedule from?</Text>
+                <View style={styles.card}>
+                    <Pressable onPress={() => setShowPicker(true)}>
+                        <TextInput
+                            style={styles.input}
+                            pointerEvents="none"
+                            value={startDate.toLocaleDateString()}
+                            editable={false}
+                        />
+                    </Pressable>
+                    {showPicker && (
+                        <View>
+                            <DateTimePicker
+                                value={startDate}
+                                mode="date"
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onChange={(event, date) => {
+                                    setShowPicker(Platform.OS === 'ios'); // keep open for iOS
+                                    if (date) setStartDate(date);
+                                }}
+                                minimumDate={new Date()}
+                            />
+                            <TouchableOpacity 
+                                style={styles.button}
+                                onPress={() => setShowPicker(false)}
+                            >
+                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+                <Text style={styles.subHeading}>Minimum gap between scheduled events (in mins)</Text>
+                <View style={styles.card}>
                     <TextInput
                         style={styles.input}
-                        pointerEvents="none"
-                        value={startDate.toLocaleDateString()}
-                        editable={false}
+                        value={minGap}
+                        autoCorrect={false}
+                        autoCapitalize='words'
+                        onChange={ ({ nativeEvent }) => { 
+                            setMinGap(nativeEvent.text)
+                        } }
                     />
-                </Pressable>
-                {showPicker && (
-                    <View>
-                        <DateTimePicker
-                            value={startDate}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={(event, date) => {
-                                setShowPicker(Platform.OS === 'ios'); // keep open for iOS
-                                if (date) setStartDate(date);
-                            }}
-                            minimumDate={new Date()}
-                        />
-                        <TouchableOpacity 
-                            style={styles.button}
-                            onPress={() => setShowPicker(false)}
-                        >
-                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-            <Text style={styles.subHeading}>Minimum gap between scheduled events (in mins)</Text>
-            <View style={styles.card}>
-                <TextInput
-                    style={styles.input}
-                    value={minGap}
-                    autoCorrect={false}
-                    autoCapitalize='words'
-                    onChange={ ({ nativeEvent }) => { 
-                        setMinGap(nativeEvent.text)
-                    } }
-                />
-            </View>
-            <Text style={styles.subHeading}>Maximum working hours per day</Text>
-            <View style={styles.card}>
-                <TextInput
-                    style={styles.input}
-                    value={maxHours}
-                    autoCorrect={false}
-                    autoCapitalize='words'
-                    onChange={ ({ nativeEvent }) => { 
-                        setMaxHours(nativeEvent.text)
-                    } }
-                />
+                </View>
+                <Text style={styles.subHeading}>Maximum working hours per day</Text>
+                <View style={styles.card}>
+                    <TextInput
+                        style={styles.input}
+                        value={maxHours}
+                        autoCorrect={false}
+                        autoCapitalize='words'
+                        onChange={ ({ nativeEvent }) => { 
+                            setMaxHours(nativeEvent.text)
+                        } }
+                    />
+                </View>
             </View>
             <TouchableOpacity 
                 style={styles.button}
@@ -81,6 +83,7 @@ const InfoView = ({ onNext }) => {
 const styles = StyleSheet.create({
     subContainer: {
         height: '90%',
+        justifyContent: 'space-between',
     },
     subHeading: {
         fontSize: 16,

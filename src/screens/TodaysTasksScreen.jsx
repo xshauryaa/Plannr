@@ -7,22 +7,22 @@ import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
 
 const TodaysTasksScreen = () => {
     
-    const { activeSchedule, currentTime } = useContext(AppStateContext)
+    const { appState } = useContext(AppStateContext)
 
-    const todaysDate = convertDateToScheduleDate(currentTime);
+    const todaysDate = convertDateToScheduleDate(appState.currentTime);
     let tasks = []
 
     // Check if the user has an active schedule
-    // if (activeSchedule !== null) {
-    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    // if (appState.activeSchedule !== null) {
+    //     const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
+    //     const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
     //     if (todaysSchedule !== undefined) {
     //         tasks = todaysSchedule.getTimeBlocks();
     //     }
     // }
 
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    tasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    tasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
@@ -60,7 +60,7 @@ const TodaysTasksScreen = () => {
                                     checked={item.isCompleted} 
                                     onChange={() => { 
                                         setTaskData(prevTasks => {prevTasks[index].isCompleted = !prevTasks[index].isCompleted; return [...prevTasks]})
-                                        for (const tb of activeSchedule.getScheduleForDay('Monday').getTimeBlocks()) {
+                                        for (const tb of appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks()) {
                                             console.log(tb.isCompleted)
                                         }
                                     } }

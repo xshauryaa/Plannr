@@ -4,7 +4,7 @@ import Modal from 'react-native-modal';
 import { AppStateContext } from '../context/AppStateContext'
 
 const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
-    const { savedSchedules, setSavedSchedules } = useContext(AppStateContext)
+    const { appState, setAppState } = useContext(AppStateContext)
     return (
         <Modal 
             isVisible={isVisible} 
@@ -23,13 +23,13 @@ const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
                     <TouchableOpacity 
                         onPress={() => {
                             let i = 0
-                            for (i = 0; i < savedSchedules.length; i++) {
-                                if (savedSchedules[i].name === toDelete) {
+                            for (i = 0; i < appState.savedSchedules.length; i++) {
+                                if (appState.savedSchedules[i].name === toDelete) {
                                     break
                                 }
                             }
-                            const updatedSchedules = savedSchedules.filter((_, index) => index !== i)
-                            setSavedSchedules(updatedSchedules)
+                            const updatedSchedules = appState.savedSchedules.filter((_, index) => index !== i)
+                            setAppState({ ...appState, savedSchedules: updatedSchedules })
                             onClose()
                         }} 
                         style={{ backgroundColor: '#F00', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 24 }}

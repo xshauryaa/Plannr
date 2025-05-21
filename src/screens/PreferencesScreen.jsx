@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image,
 import { AppStateContext } from '../context/AppStateContext.js'
 
 const PreferencesScreen = () => {
-    const { name, setName, userPreferences, setUserPreferences } = useContext(AppStateContext)
+    const { appState, setAppState } = useContext(AppStateContext)
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Preferences</Text>
@@ -12,35 +12,35 @@ const PreferencesScreen = () => {
                 <View style={styles.card}>
                     <TextInput
                         style={styles.input}
-                        value={name}
+                        value={appState.name}
                         autoCorrect={false}
                         autoCapitalize='words'
                         onChange={ ({ nativeEvent }) => { 
-                            setName(nativeEvent.text)
+                            setAppState({ ...appState, name: nativeEvent.text })
                         } }
                     />
                 </View>
                 <Text style={styles.subHeading}>App Theme</Text>
                 <View style={{ ...styles.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <TouchableOpacity 
-                            style={(userPreferences.theme == 'light') ? styles.uiModeButtonSelected : styles.uiModeButtonDefault}
-                            onPress={() => setUserPreferences({ ...userPreferences, theme: 'light' })}
+                            style={(appState.userPreferences.theme == 'light') ? styles.uiModeButtonSelected : styles.uiModeButtonDefault}
+                            onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'light' }})}
                         >
                             <View>
                                 <Image 
-                                    source={(userPreferences.theme == 'light') ? require('../../assets/images/LightMode-Selected.png') : require('../../assets/images/LightMode.png')} 
+                                    source={(appState.userPreferences.theme == 'light') ? require('../../assets/images/LightMode-Selected.png') : require('../../assets/images/LightMode.png')} 
                                     style={{ width: 32, height: 32, marginBottom: 4 }}
                                     />
                                 <Text style={{ fontFamily: 'AlbertSans' }}>Light</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            style={(userPreferences.theme == 'dark') ? styles.uiModeButtonSelected : styles.uiModeButtonDefault}
-                            onPress={() => setUserPreferences({ ...userPreferences, theme: 'dark' })}
+                            style={(appState.userPreferences.theme == 'dark') ? styles.uiModeButtonSelected : styles.uiModeButtonDefault}
+                            onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'dark' }})}
                         >
                             <View>
                                 <Image 
-                                    source={(userPreferences.theme == 'dark') ? require('../../assets/images/DarkMode-Selected.png') : require('../../assets/images/DarkMode.png')} 
+                                    source={(appState.userPreferences.theme == 'dark') ? require('../../assets/images/DarkMode-Selected.png') : require('../../assets/images/DarkMode.png')} 
                                     style={{ width: 32, height: 32, marginBottom: 4 }}
                                     />
                                 <Text style={{ fontFamily: 'AlbertSans' }}>Dark</Text>
@@ -55,10 +55,10 @@ const PreferencesScreen = () => {
                             style={{ width: 20, height: 20 }}
                         />
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (userPreferences.defaultStrategy == 'earliest-fit') ? '#000' : '#F0F0F0'  }}
-                            onPress={() => {setUserPreferences({ ...userPreferences, defaultStrategy: 'earliest-fit' })}}
+                            style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? '#000' : '#F0F0F0'  }}
+                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'earliest-fit' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (userPreferences.defaultStrategy == 'earliest-fit') ? '#FFFFFF' : '#000'}}>Earliest Fit</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? '#FFFFFF' : '#000'}}>Earliest Fit</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -67,10 +67,10 @@ const PreferencesScreen = () => {
                             style={{ width: 20, height: 20 }}
                         />
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (userPreferences.defaultStrategy == 'balanced-work') ? '#000' : '#F0F0F0'  }}
-                            onPress={() => {setUserPreferences({ ...userPreferences, defaultStrategy: 'balanced-work' })}}
+                            style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'balanced-work') ? '#000' : '#F0F0F0'  }}
+                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'balanced-work' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (userPreferences.defaultStrategy == 'balanced-work') ? '#FFFFFF' : '#000'}}>Balanced Work</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'balanced-work') ? '#FFFFFF' : '#000'}}>Balanced Work</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -79,10 +79,10 @@ const PreferencesScreen = () => {
                             style={{ width: 20, height: 20 }}
                         />
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (userPreferences.defaultStrategy == 'deadline-oriented') ? '#000' : '#F0F0F0'  }}
-                            onPress={() => {setUserPreferences({ ...userPreferences, defaultStrategy: 'deadline-oriented' })}}
+                            style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? '#000' : '#F0F0F0'  }}
+                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (userPreferences.defaultStrategy == 'deadline-oriented') ? '#FFFFFF' : '#000'}}>Deadline Oriented</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? '#FFFFFF' : '#000'}}>Deadline Oriented</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -93,11 +93,11 @@ const PreferencesScreen = () => {
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Start Time</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
-                                value={userPreferences.defaultStartTime}
+                                value={appState.userPreferences.defaultStartTime}
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
-                                    setUserPreferences({ ...userPreferences, defaultStartTime: nativeEvent.text})
+                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStartTime: nativeEvent.text }})
                                 } }
                             />
                         </View>
@@ -105,11 +105,11 @@ const PreferencesScreen = () => {
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>End Time</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
-                                value={userPreferences.defaultEndTime}
+                                value={appState.userPreferences.defaultEndTime}
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
-                                    setUserPreferences({ ...userPreferences, defaultEndTime: nativeEvent.text})
+                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultEndTime: nativeEvent.text }})
                                 } }
                             />
                         </View>
@@ -119,11 +119,11 @@ const PreferencesScreen = () => {
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Min. Gap (mins)</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
-                                value={userPreferences.defaultMinGap}
+                                value={appState.userPreferences.defaultMinGap}
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
-                                    setUserPreferences({ ...userPreferences, defaultMinGap: nativeEvent.text})
+                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMinGap: nativeEvent.text }})
                                 } }
                             />
                         </View>
@@ -131,11 +131,11 @@ const PreferencesScreen = () => {
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Max. Working Hours</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%' }}
-                                value={userPreferences.defaultMaxWorkingHours}
+                                value={appState.userPreferences.defaultMaxWorkingHours}
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
-                                    setUserPreferences({ ...userPreferences, defaultMaxWorkingHours: nativeEvent.text})
+                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMaxWorkingHours: nativeEvent.text }})
                                 } }
                             />
                         </View>
@@ -143,34 +143,34 @@ const PreferencesScreen = () => {
                 </View>
                 <Text style={styles.subHeading}>Task Reminders</Text>
                 <View style={{ ...styles.card, gap: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: 'rgba(0, 0, 0, 0.5)'}}>{(userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
+                    <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: 'rgba(0, 0, 0, 0.5)'}}>{(appState.userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
                     <Switch
                         trackColor={{ false: '#000000', true: '#4166FB' }}
                         thumbColor={'#FFFFFF'}
                         ios_backgroundColor={'#000000'}
                         onValueChange={() => { 
-                            const currPref = userPreferences.taskRemindersEnabled
-                            setUserPreferences({...userPreferences, taskRemindersEnabled: !currPref }) }}
-                        value={userPreferences.taskRemindersEnabled}
+                            const currPref = appState.userPreferences.taskRemindersEnabled
+                            setAppState({ ...appState, userPreferences: {...appState.userPreferences, taskRemindersEnabled: !currPref }}) }}
+                        value={appState.userPreferences.taskRemindersEnabled}
                     />
                 </View>
                 <Text style={styles.subHeading}>Incomplete Task Notification</Text>
                 <View style={{ ...styles.card, gap: 12}}>
                     <TouchableOpacity 
-                        style={{ ...styles.choiceButton, width: '100%', backgroundColor: (userPreferences.incompleteTaskNotification == 0) ? '#000' : '#F0F0F0', flexDirection: 'row' }}
-                        onPress={() => setUserPreferences({ ...userPreferences, incompleteTaskNotification: 0})}
+                        style={{ ...styles.choiceButton, width: '100%', backgroundColor: (appState.userPreferences.incompleteTaskNotification == 0) ? '#000' : '#F0F0F0', flexDirection: 'row' }}
+                        onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, incompleteTaskNotification: 0 }})}
                     >
-                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (userPreferences.incompleteTaskNotification == 0) ? '#FFFFFF' : '#000'}}>Notify 15 minutes after task's end time</Text>
-                        {(userPreferences.incompleteTaskNotification == 0) 
+                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.incompleteTaskNotification == 0) ? '#FFFFFF' : '#000'}}>Notify 15 minutes after task's end time</Text>
+                        {(appState.userPreferences.incompleteTaskNotification == 0) 
                             ? <Image source={require('../../assets/images/CheckIcon.png')} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
                             : <Image/>}
                     </TouchableOpacity>
                     <TouchableOpacity 
-                        style={{ ...styles.choiceButton, width: '100%', backgroundColor: (userPreferences.incompleteTaskNotification == 1) ? '#000' : '#F0F0F0', flexDirection: 'row' }}
-                        onPress={() => setUserPreferences({ ...userPreferences, incompleteTaskNotification: 1})}
+                        style={{ ...styles.choiceButton, width: '100%', backgroundColor: (appState.userPreferences.incompleteTaskNotification == 1) ? '#000' : '#F0F0F0', flexDirection: 'row' }}
+                        onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, incompleteTaskNotification: 1 } })}
                     >
-                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (userPreferences.incompleteTaskNotification == 1) ? '#FFFFFF' : '#000'}}>Notify at the end of the day of the task</Text>
-                        {(userPreferences.incompleteTaskNotification == 1) 
+                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.incompleteTaskNotification == 1) ? '#FFFFFF' : '#000'}}>Notify at the end of the day of the task</Text>
+                        {(appState.userPreferences.incompleteTaskNotification == 1) 
                             ? <Image source={require('../../assets/images/CheckIcon.png')} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
                             : <Image/>}
                     </TouchableOpacity>

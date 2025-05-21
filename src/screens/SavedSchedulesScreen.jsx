@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react
 import { AppStateContext } from '../context/AppStateContext'
 
 const SavedSchedulesScreen = () => {
-    const { savedSchedules } = useContext(AppStateContext)
+    const { appState } = useContext(AppStateContext)
 
     const SavedSchedules = () => {
         return (
             <View>
                 <Text style={{ ...styles.title, marginTop: 64, }}>Saved Schedules</Text>
                 {
-                    savedSchedules.length === 0 
+                    appState.savedSchedules.length === 0 
                     ? <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', marginVertical: 16 }}>You have no saved schedules.</Text>
                     </View> 
@@ -19,7 +19,7 @@ const SavedSchedulesScreen = () => {
                 <FlatList
                     style={styles.subContainer}
                     showsVerticalScrollIndicator={false}
-                    data={savedSchedules}
+                    data={appState.savedSchedules}
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => {
                             return (
