@@ -68,11 +68,11 @@ const GenerateScheduleScreen = () => {
 
     const views = [
         <InfoView onNext={SchedulerInitialization}/>,
-        <BreaksView onNext={BreaksSetup} minDate={firstDate}/>,
-        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate}/>,
-        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate}/>,
-        <EventDependenciesView onNext={EventDepsSetup}/>,
-        <FinalCheckView onNext={Generation}/>
+        <BreaksView onNext={BreaksSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <EventDependenciesView onNext={EventDepsSetup} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <FinalCheckView onNext={Generation} onBack={() => {setGenStage(genStage - 1)}}/>
     ]
     return (
         <View style={styles.container}>

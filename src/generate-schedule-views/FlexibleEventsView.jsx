@@ -2,17 +2,18 @@ import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity, Pressable } from 'react-native' 
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
 import FlexibleEvent from '../model/FlexibleEvent'
-import AddFlexibleEventsBoard from '../components/AddFlexibleEventsBoard'
+import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
 
 const FlexibleEventsView = ({ onNext, minDate}) => {
     const [flexibleEvents, setFlexibleEvents] = useState([])
+    const [showModal, setShowModal] = useState(false)
 
     const addFlexibleEvent = (name, type, duration, priority, deadline) => {
         const eventDeadline = convertDateToScheduleDate(deadline)
         const newEvent = new FlexibleEvent(name, type, duration, priority, eventDeadline)
 
         setFlexibleEvents([...flexibleEvents, newEvent])
-        console.log(newEvent)
+        setShowModal(false)
     }
 
     const eventRender = (eventObj, indexToRemove) => {
@@ -30,18 +31,24 @@ const FlexibleEventsView = ({ onNext, minDate}) => {
 
     return (
         <View style={styles.subContainer}>
-            <Text style={styles.subHeading}>Flexible events are ones that have deadlines - such as assignments, pre-requisites, etc.</Text>
-            <AddFlexibleEventsBoard
-                onClick={addFlexibleEvent}
-                minDate={minDate}
-            />
-            <View style={{ ...styles.card, height: 200 }}>
-                <FlatList
-                    data={flexibleEvents}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={({ item, index }) => index}
-                    renderItem={({ item, index }) => eventRender(item, index)}
-                />
+            <View>
+                <Text style={styles.subHeading}>Flexible events are ones that have deadlines - such as assignments, pre-requisites, etc.</Text>
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => setShowModal(true)}
+                >
+                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
+                </TouchableOpacity>
+                <Text style={styles.subHeading}>Events</Text>
+                <View style={{ ...styles.card, height: '60%' }}>
+                    <FlatList
+                        data={flexibleEvents}
+                        showsVerticalScrollIndicator={false}
+                        keyExtractor={({ item, index }) => index}
+                        renderItem={({ item, index }) => eventRender(item, index)}
+                    />
+                </View>
             </View>
             <TouchableOpacity 
                 style={styles.button}
@@ -49,6 +56,11 @@ const FlexibleEventsView = ({ onNext, minDate}) => {
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>
+            <AddFlexibleEventsModal
+                isVisible={showModal}
+                onClick={addFlexibleEvent}
+                minDate={minDate}
+            />
         </View>
     )
 }
@@ -56,6 +68,7 @@ const FlexibleEventsView = ({ onNext, minDate}) => {
 const styles = StyleSheet.create({
     subContainer: {
         height: '90%',
+        justifyContent: 'space-between'
     },
     subHeading: {
         fontSize: 16,
@@ -94,7 +107,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginVertical: 16,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12
     }
 })
 

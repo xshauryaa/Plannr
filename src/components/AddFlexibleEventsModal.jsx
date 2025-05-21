@@ -1,12 +1,13 @@
 import React, { useState } from 'react' 
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
-
+import Modal from 'react-native-modal'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker'
+
 import ActivityType from '../model/ActivityType.js'
 import Priority from '../model/Priority.js'
 
-const AddFlexibleEventsBoard = ({ onClick, minDate }) => {
+const AddFlexibleEventsModal = ({ isVisible, onClick, minDate }) => {
     const maxDate = new Date()
     maxDate.setDate(minDate.getDate() + 6)
 
@@ -110,110 +111,117 @@ const AddFlexibleEventsBoard = ({ onClick, minDate }) => {
     }
 
     return (
-        <View style={styles.card}>
-            {/* Panel 1 - Name + Activity Type */}
-            {Panel1()}
+        <Modal
+            isVisible={isVisible}
+            style={{ justifyContent: 'center', alignItems: 'center' }}
+            animationInTiming={500}
+            animationOutTiming={500}
+        >
+            <View style={styles.card}>
+                {/* Panel 1 - Name + Activity Type */}
+                {Panel1()}
 
-            {/* Panel 2 - Start Time + End Time */}
-            {Panel2()}
+                {/* Panel 2 - Start Time + End Time */}
+                {Panel2()}
 
-            {/* Panel 3 - Date Picker */}
-            <View>
-                <Text style={styles.subHeading}>Date</Text>
-                <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(false); setShowDatePicker(true); }}>
-                    <TextInput
-                        style={styles.input}
-                        pointerEvents="none"
-                        value={deadline.toLocaleDateString()}
-                        editable={false}
-                    />
-                </Pressable>
-                {showDatePicker && (
-                    <View>
-                        <DateTimePicker
-                            value={deadline}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={(event, date) => {
-                                if (date) setDeadline(date);
-                            }}
-                            minimumDate={minDate}
-                            maximumDate={maxDate}
+                {/* Panel 3 - Date Picker */}
+                <View>
+                    <Text style={styles.subHeading}>Date</Text>
+                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(false); setShowDatePicker(true); }}>
+                        <TextInput
+                            style={styles.input}
+                            pointerEvents="none"
+                            value={deadline.toLocaleDateString()}
+                            editable={false}
                         />
+                    </Pressable>
+                    {showDatePicker && (
+                        <View>
+                            <DateTimePicker
+                                value={deadline}
+                                mode="date"
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onChange={(event, date) => {
+                                    if (date) setDeadline(date);
+                                }}
+                                minimumDate={minDate}
+                                maximumDate={maxDate}
+                            />
+                            <TouchableOpacity 
+                                style={styles.button}
+                                onPress={() => setShowDatePicker(false)}
+                            >
+                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
+                {/* Activity Type Picker */}
+                {showTypePicker && 
+                    <View>
+                        <Picker
+                            selectedValue={type}
+                            onValueChange={(itemValue) => setType(itemValue)}
+                        >
+                            <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
+                            <Picker.Item label="Meeting" value={ActivityType.MEETING} />
+                            <Picker.Item label="Work" value={ActivityType.WORK} />
+                            <Picker.Item label="Event" value={ActivityType.EVENT} />
+                            <Picker.Item label="Education" value={ActivityType.EDUCATION} />
+                            <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
+                            <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
+                            <Picker.Item label="Errand" value={ActivityType.ERRAND} />
+                            <Picker.Item label="Other" value={ActivityType.OTHER} />
+                        </Picker>
                         <TouchableOpacity 
                             style={styles.button}
-                            onPress={() => setShowDatePicker(false)}
+                            onPress={() => setShowTypePicker(false)}
                         >
                             <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
                         </TouchableOpacity>
                     </View>
-                )}
+                }
+
+                {/* Priority Picker */}
+                {showPriorityPicker && 
+                    <View>
+                        <Picker
+                            selectedValue={priority}
+                            onValueChange={(itemValue) => setPriority(itemValue)}
+                        >
+                            <Picker.Item label="High" value={Priority.HIGH} />
+                            <Picker.Item label="Medium" value={Priority.MEDIUM} />
+                            <Picker.Item label="Low" value={Priority.LOW} />
+                        </Picker>
+                        <TouchableOpacity 
+                            style={styles.button}
+                            onPress={() => setShowPriorityPicker(false)}
+                        >
+                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
+
+                {showWarning && <Text style={styles.warning}>{warning}</Text>}
+
+                { /* Add Rigid Event Button */ }
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => {
+                        if (name.length == 0) {
+                            setWarning("Name of event cannot be empty")
+                            setShowWarning(true)
+                        } else {
+                            setShowWarning(false)
+                            onClick(name, type, duration, priority, deadline)
+                        }
+                    }}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
+                </TouchableOpacity>
             </View>
-
-            {/* Activity Type Picker */}
-            {showTypePicker && 
-                <View>
-                    <Picker
-                        selectedValue={type}
-                        onValueChange={(itemValue) => setType(itemValue)}
-                    >
-                        <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
-                        <Picker.Item label="Meeting" value={ActivityType.MEETING} />
-                        <Picker.Item label="Work" value={ActivityType.WORK} />
-                        <Picker.Item label="Event" value={ActivityType.EVENT} />
-                        <Picker.Item label="Education" value={ActivityType.EDUCATION} />
-                        <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
-                        <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
-                        <Picker.Item label="Errand" value={ActivityType.ERRAND} />
-                        <Picker.Item label="Other" value={ActivityType.OTHER} />
-                    </Picker>
-                    <TouchableOpacity 
-                        style={styles.button}
-                        onPress={() => setShowTypePicker(false)}
-                    >
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-            }
-
-            {/* Priority Picker */}
-            {showPriorityPicker && 
-                <View>
-                    <Picker
-                        selectedValue={priority}
-                        onValueChange={(itemValue) => setPriority(itemValue)}
-                    >
-                        <Picker.Item label="High" value={Priority.HIGH} />
-                        <Picker.Item label="Medium" value={Priority.MEDIUM} />
-                        <Picker.Item label="Low" value={Priority.LOW} />
-                    </Picker>
-                    <TouchableOpacity 
-                        style={styles.button}
-                        onPress={() => setShowPriorityPicker(false)}
-                    >
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-            }
-
-            {showWarning && <Text style={styles.warning}>{warning}</Text>}
-
-            { /* Add Rigid Event Button */ }
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => {
-                    if (name.length == 0) {
-                        setWarning("Name of event cannot be empty")
-                        setShowWarning(true)
-                    } else {
-                        setShowWarning(false)
-                        onClick(name, type, duration, priority, deadline)
-                    }
-                }}
-            >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
-            </TouchableOpacity>
-        </View>
+        </Modal>
     )
 }
 
@@ -268,4 +276,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default AddFlexibleEventsBoard
+export default AddFlexibleEventsModal

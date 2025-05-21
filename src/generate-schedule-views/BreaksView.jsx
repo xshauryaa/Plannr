@@ -4,11 +4,12 @@ import convertTimeToTime24 from '../utils/convertTimeToTime24'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
 import Break from '../model/Break'
 
-import AddBreaksBoard from '../components/AddBreaksBoard'
+import AddBreaksModal from '../components/AddBreaksModal'
 
 const BreaksView = ({ onNext, minDate }) => {
     const [breaks, setBreaks] = useState([])
     const [repBreaks, setRepBreaks] = useState([])
+    const [showModal, setShowModal] = useState(false)
 
     const addBreak = (startTime, endTime, repeated, date) => {
         const start = convertTimeToTime24(startTime)
@@ -20,6 +21,8 @@ const BreaksView = ({ onNext, minDate }) => {
         { (repeated)
         ? setRepBreaks([ ...repBreaks, newBreak]) 
         : setBreaks([ ...breaks, [breakDate, newBreak]])}
+
+        setShowModal(false)
     }
 
     const breakCardRender = (breakObj, indexToRemove) => {
@@ -50,21 +53,15 @@ const BreaksView = ({ onNext, minDate }) => {
 
     return (
         <View style={styles.subContainer}>
-            <Text style={styles.subHeading}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
-            <AddBreaksBoard
-                onClick={addBreak}
-                minDate={minDate}
-            />
-            <ScrollView showsVerticalScrollIndicator={true}>
-                <Text style={styles.subHeading}>Breaks</Text>
-                <View style={{ ...styles.card, height: 200 }}>
-                    <FlatList
-                        data={breaks}
-                        showsVerticalScrollIndicator={false}
-                        keyExtractor={({ item, index }) => index}
-                        renderItem={({ item, index }) => breakCardRender(item, index)}
-                    />
-                </View>
+            <View>
+                <Text style={styles.subHeading}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => setShowModal(true)}
+                >
+                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Break</Text>
+                </TouchableOpacity>
                 <Text style={styles.subHeading}>Everyday Breaks</Text>
                 <View style={{ ...styles.card, height: 200 }}>
                     <FlatList
@@ -74,13 +71,27 @@ const BreaksView = ({ onNext, minDate }) => {
                         renderItem={({ item, index }) => repBreakCardRender(item, index)}
                     />
                 </View>
-            </ScrollView>
+                <Text style={styles.subHeading}>Single Breaks</Text>
+                <View style={{ ...styles.card, height: 200 }}>
+                    <FlatList
+                        data={breaks}
+                        showsVerticalScrollIndicator={false}
+                        keyExtractor={({ item, index }) => index}
+                        renderItem={({ item, index }) => breakCardRender(item, index)}
+                    />
+                </View>
+            </View>
             <TouchableOpacity 
                 style={styles.button}
                 onPress={() => onNext(breaks, repBreaks)}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>
+            <AddBreaksModal
+                isVisible={showModal}
+                onClick={addBreak}
+                minDate={minDate}
+            />
         </View>
     )
 }
@@ -103,6 +114,7 @@ const styles = StyleSheet.create({
     },
     subContainer: {
         height: '90%',
+        justifyContent: 'space-between'
     },
     subHeading: {
         fontSize: 16,
@@ -126,7 +138,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginVertical: 16,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12
     }
 })
 

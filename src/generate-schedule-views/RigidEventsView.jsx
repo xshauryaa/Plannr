@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
 import RigidEvent from '../model/RigidEvent'
-import AddRigidEventsBoard from '../components/AddRigidEventsBoard'
+import AddRigidEventsModal from '../components/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
 import convertTimeToTime24 from '../utils/convertTimeToTime24'
 
 const RigidEventsView = ({ onNext, minDate }) => {
     const [rigidEvents, setRigidEvents] = useState([])
+    const [showModal, setShowModal] = useState(false)
 
     const addRigidEvent = (name, type, date, startTime, endTime) => {
         const eventDate = convertDateToScheduleDate(date)
@@ -16,6 +17,7 @@ const RigidEventsView = ({ onNext, minDate }) => {
         const newEvent = new RigidEvent(name, type, duration, eventDate, start.toInt(), end.toInt())
 
         setRigidEvents([...rigidEvents, newEvent])
+        setShowModal(false)
     }
 
     const eventRender = (eventObj, indexToRemove) => {
@@ -33,18 +35,24 @@ const RigidEventsView = ({ onNext, minDate }) => {
 
     return (
         <View style={styles.subContainer}>
-            <Text style={styles.subHeading}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
-            <AddRigidEventsBoard
-                onClick={addRigidEvent}
-                minDate={minDate}
-            />
-            <View style={{ ...styles.card, height: 200 }}>
-                <FlatList
-                    data={rigidEvents}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={({ item, index }) => index}
-                    renderItem={({ item, index }) => eventRender(item, index)}
-                />
+            <View>
+                <Text style={styles.subHeading}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => setShowModal(true)}
+                >
+                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
+                </TouchableOpacity>
+                <Text style={styles.subHeading}>Events</Text>
+                <View style={{ ...styles.card, height: '60%' }}>
+                    <FlatList
+                        data={rigidEvents}
+                        showsVerticalScrollIndicator={false}
+                        keyExtractor={({ item, index }) => index}
+                        renderItem={({ item, index }) => eventRender(item, index)}
+                    />
+                </View>
             </View>
             <TouchableOpacity 
                 style={styles.button}
@@ -52,6 +60,11 @@ const RigidEventsView = ({ onNext, minDate }) => {
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>
+            <AddRigidEventsModal
+                isVisible={showModal}
+                onClick={addRigidEvent}
+                minDate={minDate}
+            />
         </View>
     )
 }
@@ -59,6 +72,7 @@ const RigidEventsView = ({ onNext, minDate }) => {
 const styles = StyleSheet.create({
     subContainer: {
         height: '90%',
+        justifyContent: 'space-between'
     },
     subHeading: {
         fontSize: 16,
@@ -97,7 +111,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginVertical: 16,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12
     }
 })
 
