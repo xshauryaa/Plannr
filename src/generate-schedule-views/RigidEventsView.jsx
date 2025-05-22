@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
 import RigidEvent from '../model/RigidEvent'
 import AddRigidEventsModal from '../components/AddRigidEventsModal'
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
-import convertTimeToTime24 from '../utils/convertTimeToTime24'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
+import convertTimeToTime24 from '../utils/timeConversion.js'
 
 const RigidEventsView = ({ onNext, minDate }) => {
     const [rigidEvents, setRigidEvents] = useState([])

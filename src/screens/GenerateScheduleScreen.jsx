@@ -7,7 +7,7 @@ import RigidEventsView from '../generate-schedule-views/RigidEventsView'
 import FlexibleEventsView from '../generate-schedule-views/FlexibleEventsView'
 import EventDependenciesView from '../generate-schedule-views/EventDependenciesView'
 import FinalCheckView from '../generate-schedule-views/FinalCheckView'
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
 
 const GenerateScheduleScreen = () => {

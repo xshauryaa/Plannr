@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native' 
-import convertTimeToTime24 from '../utils/convertTimeToTime24'
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
+import convertTimeToTime24 from '../utils/timeConversion.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Break from '../model/Break'
 
 import AddBreaksModal from '../components/AddBreaksModal'

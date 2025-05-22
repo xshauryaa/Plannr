@@ -8,7 +8,7 @@ import Progress from '../components/Progress';
 import MenuButton from '../components/MenuButton';
 
 import { useAppState } from '../context/AppStateContext.js'
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
@@ -23,6 +23,7 @@ const HomeScreen = ({ navigation }) => {
     if (!fontsLoaded) return null;
 
     const todaysDate = convertDateToScheduleDate(appState.currentTime);
+
     let progress = null
 
     // Check if the user has an active schedule, and return progress if true

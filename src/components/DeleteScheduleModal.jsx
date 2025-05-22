@@ -5,6 +5,7 @@ import { useAppState } from '../context/AppStateContext'
 
 const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
     const { appState, setAppState } = useAppState();
+    
     return (
         <Modal 
             isVisible={isVisible} 

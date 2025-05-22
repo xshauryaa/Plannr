@@ -3,7 +3,7 @@ import { Text, Image, View, StyleSheet, TouchableOpacity, TextInput, Pressable, 
 import Modal from 'react-native-modal'
 
 import DateTimePicker from '@react-native-community/datetimepicker'
-import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
+import convertTimeToTime24 from '../utils/timeConversion.js'
 
 const AddBreaksModal = ({ isVisible, onClick, minDate, }) => {
     const [startTime, setStartTime] = useState(new Date())

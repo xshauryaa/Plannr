@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 
 const TodaysTasksScreen = () => {
     

@@ -123,7 +123,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        alignSelf: 'center'
+        marginVertical: 16,
+        alignSelf: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12
     }
 })
 

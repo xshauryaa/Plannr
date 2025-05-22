@@ -3,8 +3,7 @@ import ScheduleDate from './ScheduleDate.js';
 import TimeBlock from './TimeBlock.js';
 import RigidEvent from './RigidEvent.js';
 import FlexibleEvent from './FlexibleEvent.js';
-import EventConflictError from './exceptions/EventConflictError.js';
-import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
+import { serializeWeekSchedule } from '../persistence/weekScheduleHandler.js';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -18,10 +17,13 @@ class WeekSchedule {
    * @param {string} day1Day - The day of the week on which the schedule starts
    * @param {number} workingHoursLimit - Max working hours per day
    */
-  constructor(minGap, day1Date, day1Day, workingHoursLimit) {
+  constructor(minGap, day1Date, day1Day, workingHoursLimit, schedule) {
     this.day1Date = day1Date; // the first date of the week
-    this.weekSchedule = new Map(); // ordered map of day → DaySchedule
-    this._initiateWeekSchedule(minGap, day1Date, day1Day, workingHoursLimit);
+    this.weekSchedule = schedule; // ordered map of day → DaySchedule
+    if (!this.weekSchedule) {
+        this.weekSchedule = new Map();
+        this._initiateWeekSchedule(minGap, day1Date, day1Day, workingHoursLimit);
+    }
   }
 
   /** @returns {Map<string, DaySchedule>} the full week schedule */
@@ -181,11 +183,15 @@ class WeekSchedule {
 
     for (let i = 0; i < 7; i++) {
       const dayName = DAYS[index % 7];
-      const schedule = new DaySchedule(dayName, currDate, minGap, workingHoursLimit);
+      const schedule = new DaySchedule(dayName, currDate, minGap, workingHoursLimit, [], [], []);
       this.weekSchedule.set(dayName, schedule);
       currDate = currDate.getNextDate();
       index++;
     }
+  }
+
+  toJSON() {
+    return serializeWeekSchedule(this);
   }
 }
 

@@ -5,7 +5,7 @@ import Modal from 'react-native-modal'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
-import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
+import convertTimeToTime24 from '../utils/timeConversion.js'
 
 const AddRigidEventsModal = ({ isVisible, onClick, minDate }) => {
     const [name, setName] = useState('')

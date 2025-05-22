@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity, Pressable } from 'react-native' 
-import convertDateToScheduleDate from '../utils/convertDateToScheduleDate'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 import FlexibleEvent from '../model/FlexibleEvent'
 import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
 

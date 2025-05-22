@@ -23,7 +23,7 @@ class BalancedWorkStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.balancedWorkSchedule = new WeekSchedule(minGap, firstDate, firstDay, workingHoursLimit);
+    this.balancedWorkSchedule = new WeekSchedule(minGap, firstDate, firstDay, workingHoursLimit, null);
   }
 
   /**

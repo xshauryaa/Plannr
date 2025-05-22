@@ -15,14 +15,14 @@ class DaySchedule {
    * @param {number} minGap - Minimum gap between events in minutes
    * @param {number} workingHoursLimit - Maximum working hours per day
    */
-  constructor(day, date, minGap, workingHoursLimit) {
+  constructor(day, date, minGap, workingHoursLimit, events, breaks, timeBlocks) {
     this.day = day;
     this.date = date;
     this.minGap = minGap;
     this.workingHoursLimit = workingHoursLimit;
-    this.events = [];     // list of events (RigidEvent or FlexibleEvent)
-    this.breaks = [];     // list of break objects
-    this.timeBlocks = []; // list of TimeBlock objects
+    this.events = events;
+    this.breaks = breaks;
+    this.timeBlocks = timeBlocks;
   }
 
   /** @returns {string} the day of the week */
@@ -74,7 +74,7 @@ class DaySchedule {
    */
   addEvent(event) {
     this.events.push(event);
-    this.timeBlocks.push(new TimeBlock(event));
+    this.timeBlocks.push(new TimeBlock(event), false);
     this.sortSchedule();
   }
 
@@ -94,7 +94,7 @@ class DaySchedule {
       throw new WorkingLimitExceededError();
     } else {
       this.events.push(event);
-      this.timeBlocks.push(new TimeBlock(event, this.date, startTime, endTime));
+      this.timeBlocks.push(new TimeBlock(event, false, this.date, startTime, endTime));
       this.sortSchedule();
     }
   }
@@ -106,7 +106,7 @@ class DaySchedule {
    */
   addBreak(breakTime) {
     this.breaks.push(breakTime);
-    this.timeBlocks.push(new TimeBlock(breakTime, this.date));
+    this.timeBlocks.push(new TimeBlock(breakTime, false, this.date));
     this.sortSchedule();
   }
 

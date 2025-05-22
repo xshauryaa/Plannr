@@ -1,5 +1,6 @@
 import Time24 from './Time24.js';
 import ActivityType from './ActivityType.js';
+import Priority from './Priority.js';
 
 /**
  * Represents a block of time in a schedule.
@@ -10,36 +11,42 @@ class TimeBlock {
    * Constructs a TimeBlock from a RigidEvent.
    * @param {RigidEvent} event 
    */
-  constructor(event, date, startTime, endTime) {
+  constructor(event, isCompleted, date, startTime, endTime) {
     if (event.getType && event.getStartTime && event.getEndTime) {
       // RigidEvent
       this.name = event.getName();
       this.date = event.getDate();
       this.activityType = event.getType();
+      this.priority = Priority.HIGH;
       this.startTime = event.getStartTime();
       this.endTime = event.getEndTime();
       this.duration = event.getDuration();
-      this.isCompleted = false;
+      this.isCompleted = isCompleted;
+      this.deadline = event.getDate();
       this.type = 'rigid';
     } else if (event.getDuration && typeof startTime === 'number' && typeof endTime === 'number') {
       // FlexibleEvent
       this.name = event.getName();
       this.date = date;
       this.activityType = event.getType();
+      this.priority = event.getPriority();
       this.startTime = new Time24(startTime);
       this.endTime = new Time24(endTime);
       this.duration = event.getDuration();
-      this.isCompleted = false;
+      this.isCompleted = isCompleted;
+      this.deadline = event.getDeadline();
       this.type = 'flexible';
     } else {
       // Break
       this.name = 'Break';
       this.date = date;
       this.activityType = ActivityType.BREAK;
+      this.priority = Priority.LOW;
       this.startTime = event.getStartTime();
       this.endTime = event.getEndTime();
       this.duration = event.getDuration();
-      this.isCompleted = false;
+      this.isCompleted = isCompleted;
+      this.deadline = date;
       this.type = 'break';
     }
   }

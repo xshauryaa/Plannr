@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
-import convertTimeToTime24 from '../utils/convertTimeToTime24.js'
+import convertTimeToTime24 from '../utils/timeConversion.js'
 
 const UpcomingTasks = ({ onClick }) => {
     const { appState } = useAppState();

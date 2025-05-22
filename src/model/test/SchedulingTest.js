@@ -48,10 +48,10 @@ function schedulerTest1() {
   flexibleEvents.forEach(e => scheduler.addFlexibleEvent(e));
 
   // --- Breaks ---
-  scheduler.addBreak('Monday', new Break(30, 1300, 1330));
-  scheduler.addBreak('Wednesday', new Break(30, 1200, 1230));
-  scheduler.addBreak('Thursday', new Break(30, 1000, 1030));
-  scheduler.addBreak('Friday', new Break(30, 900, 930));
+  scheduler.addBreak(new ScheduleDate(7, 4, 2025), new Break(30, 1300, 1330));
+  scheduler.addBreak(new ScheduleDate(9, 4, 2025), new Break(30, 1200, 1230));
+  scheduler.addBreak(new ScheduleDate(10, 4, 2025), new Break(30, 1000, 1030));
+  scheduler.addBreak(new ScheduleDate(11, 4, 2025), new Break(30, 900, 930));
   scheduler.addRepeatedBreak(new Break(30, 1700, 1730));
 
   // --- Dependencies ---
