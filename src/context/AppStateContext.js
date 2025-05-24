@@ -11,6 +11,9 @@ import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import useCurrentTime from '../utils/useCurrentTime';
 import { serializeWeekSchedule, parseWeekSchedule } from '../persistence/WeekScheduleHandler.js';
+import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
+import NotificationService from '../notifications/NotificationService.js';
+import TimeBlock from '../model/TimeBlock.js';
 
 export const AppStateContext = createContext();
 
@@ -122,7 +125,8 @@ export const AppStateProvider = ({ children }) => {
             defaultMinGap: '15',
             defaultMaxWorkingHours: '8',
             incompleteTaskNotification: 0,
-            taskRemindersEnabled: true
+            taskRemindersEnabled: true,
+            leadMinutes: 30,
         },
         savedSchedules: [],
         activeSchedule: scheduleForTesting,
@@ -151,6 +155,15 @@ export const AppStateProvider = ({ children }) => {
             AsyncStorage.setItem('appState', JSON.stringify(serializeAppState(appState)));
         }
     }, [appState]);
+
+    if (appState.userPreferences.taskRemindersEnabled) {
+        useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences.userPreferences);
+    }
+
+    // NotificationService.requestPermissions();
+    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(25, 5, 2025), 400, 500);
+    // const testTb = TimeBlock.fromRigidEvent(event, false);
+    // NotificationService.scheduleTaskReminder(testTb, 2);
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>
