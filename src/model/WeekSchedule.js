@@ -3,7 +3,6 @@ import ScheduleDate from './ScheduleDate.js';
 import TimeBlock from './TimeBlock.js';
 import RigidEvent from './RigidEvent.js';
 import FlexibleEvent from './FlexibleEvent.js';
-import { serializeWeekSchedule } from '../persistence/weekScheduleHandler.js';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -19,8 +18,11 @@ class WeekSchedule {
    */
   constructor(minGap, day1Date, day1Day, workingHoursLimit, schedule) {
     this.day1Date = day1Date; // the first date of the week
+    this.day1Day = day1Day; // the first day of the week
+    this.minGap = minGap; // minimum gap between events
+    this.workingHoursLimit = workingHoursLimit; // max working hours per day
     this.weekSchedule = schedule; // ordered map of day → DaySchedule
-    if (!this.weekSchedule) {
+    if (this.weekSchedule == null) {
         this.weekSchedule = new Map();
         this._initiateWeekSchedule(minGap, day1Date, day1Day, workingHoursLimit);
     }
@@ -188,10 +190,6 @@ class WeekSchedule {
       currDate = currDate.getNextDate();
       index++;
     }
-  }
-
-  toJSON() {
-    return serializeWeekSchedule(this);
   }
 }
 

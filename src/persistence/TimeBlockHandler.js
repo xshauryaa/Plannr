@@ -1,9 +1,12 @@
-import TimeBlock from "../model/TimeBlock";
-import { serializeScheduleDate, parseScheduleDate } from "./scheduleDateHandler";
-import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler";
-import { serializeTime24, parseTime24 } from "./Time24Handler";
-import { serializePriority, parsePriority } from "./PriorityHandler";
-import FlexibleEvent from "../model/FlexibleEvent";
+import TimeBlock from "../model/TimeBlock.js";
+
+import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
+import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler.js";
+import { serializeTime24, parseTime24 } from "./Time24Handler.js";
+import { serializePriority, parsePriority } from "./PriorityHandler.js";
+import FlexibleEvent from "../model/FlexibleEvent.js";
+import RigidEvent from "../model/RigidEvent.js";
+import Break from "../model/Break.js";
 
 export const serializeTimeBlock = (timeBlock) => {
     if (!timeBlock) return null;
@@ -23,31 +26,31 @@ export const serializeTimeBlock = (timeBlock) => {
 }
 
 export const parseTimeBlock = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.date == null || rawObj.activityType == null || rawObj.priority == null || rawObj.startTime == null || rawObj.endTime == null || rawObj.duration == null || rawObj.isCompleted == null || rawObj.deadline == null || rawObj.type == null) {
+    if (!rawObj || rawObj.name == null || rawObj.date == null || rawObj.activityType == null || rawObj.priority == null || rawObj.startTime == null || rawObj.endTime == null || rawObj.duration == null || rawObj.deadline == null || rawObj.type == null) {
         return null;
     }
 
     if (rawObj.type == 'flexible') {
-        const event = new FlexibleEvent(rawObj.name, parseActivityType(rawObj.type), rawObj.duration, parsePriority(rawObj.priority), parseScheduleDate(rawObj.deadline));
-        return new TimeBlock(
+        const event = new FlexibleEvent(rawObj.name, parseActivityType(rawObj.activityType), rawObj.duration, parsePriority(rawObj.priority), parseScheduleDate(rawObj.deadline));
+        return TimeBlock.fromFlexibleEvent(
             event,
-            rawObj.isCompleted,
             parseScheduleDate(rawObj.date),
-            parseTime24(rawObj.startTime),
-            parseTime24(rawObj.endTime)
+            parseTime24(rawObj.startTime).toInt(),
+            parseTime24(rawObj.endTime).toInt(),
+            rawObj.isCompleted
         );
     } else if (rawObj.type == 'rigid') {
-        const event = new RigidEvent(rawObj.name, parseActivityType(rawObj.type), rawObj.duration, parseScheduleDate(rawObj.date), parseTime24(rawObj.startTime), parseTime24(rawObj.endTime));
-        return new TimeBlock(
+        const event = new RigidEvent(rawObj.name, parseActivityType(rawObj.activityType), rawObj.duration, parseScheduleDate(rawObj.date), parseTime24(rawObj.startTime).toInt(), parseTime24(rawObj.endTime).toInt());
+        return TimeBlock.fromRigidEvent(
             event,
             rawObj.isCompleted
         );
     } else if (rawObj.type == 'break') {
-        const breakObj = new Break(rawObj.duration, parseTime24(rawObj.startTime), parseTime24(rawObj.endTime));
-        return new TimeBlock(
+        const breakObj = new Break(rawObj.duration, parseTime24(rawObj.startTime).toInt(), parseTime24(rawObj.endTime).toInt());
+        return TimeBlock.fromBreak(
             breakObj,
-            rawObj.isCompleted,
             parseScheduleDate(rawObj.date),
+            rawObj.isCompleted
         );
     }
 }

@@ -9,11 +9,13 @@ import MenuButton from '../components/MenuButton';
 
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import useCurrentTime from '../utils/useCurrentTime.js'
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
+    const currentTime = useCurrentTime();
 
-    // if (!storageLoaded) { return (<LoadingScreen/>) }
+    if (!storageLoaded) { return (<LoadingScreen/>) }
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -22,7 +24,7 @@ const HomeScreen = ({ navigation }) => {
     
     if (!fontsLoaded) return null;
 
-    const todaysDate = convertDateToScheduleDate(appState.currentTime);
+    const todaysDate = convertDateToScheduleDate(currentTime);
 
     let progress = null
 

@@ -1,7 +1,7 @@
-import FlexibleEvent from "../model/FlexibleEvent";
-import { serializeScheduleDate, parseScheduleDate } from "./scheduleDateHandler";
-import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler";
-import { serializePriority, parsePriority } from "./PriorityHandler";
+import FlexibleEvent from "../model/FlexibleEvent.js";
+import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
+import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler.js";
+import { serializePriority, parsePriority } from "./PriorityHandler.js";
 
 export const serializeFlexibleEvent = (eventObj) => {
     if (!eventObj) return null;

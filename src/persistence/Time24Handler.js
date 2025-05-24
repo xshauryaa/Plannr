@@ -1,4 +1,4 @@
-import Time24 from '../model/Time24';
+import Time24 from '../model/Time24.js';
 
 export const serializeTime24 = (timeObj) => {
     if (!timeObj) return null;

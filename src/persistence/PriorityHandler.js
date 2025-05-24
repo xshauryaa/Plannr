@@ -1,4 +1,4 @@
-import Priority from '../model/Priority';
+import Priority from '../model/Priority.js';
 
 export const serializePriority = (priority) => {
     return priority;

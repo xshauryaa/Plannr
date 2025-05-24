@@ -1,4 +1,4 @@
-import ScheduleDate from '../model/ScheduleDate';
+import ScheduleDate from '../model/ScheduleDate.js';
 
 export const serializeScheduleDate = (dateObj) => {
     if (!dateObj) return null;

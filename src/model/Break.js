@@ -40,8 +40,8 @@ class Break {
     return (
       other instanceof Break &&
       this.duration === other.duration &&
-      this.startTime === other.startTime &&
-      this.endTime === other.endTime
+      this.startTime.equals(other.startTime) &&
+      this.endTime.equals(other.endTime)
     );
   }
 }

@@ -1,6 +1,6 @@
-import WeekSchedule, { DAYS } from "../model/WeekSchedule";
-import { serializeScheduleDate, parseScheduleDate } from "./scheduleDateHandler";
-import { serializeDaySchedule, parseDaySchedule } from "./dayScheduleHandler";
+import WeekSchedule, { DAYS } from "../model/WeekSchedule.js";
+import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
+import { serializeDaySchedule, parseDaySchedule } from "./DayScheduleHandler.js";
 
 
 export const serializeWeekSchedule = (weekSchedule) => {
@@ -13,6 +13,9 @@ export const serializeWeekSchedule = (weekSchedule) => {
 
     return {
         day1Date: serializeScheduleDate(weekSchedule.day1Date),
+        day1Day: weekSchedule.day1Day,
+        minGap: weekSchedule.minGap,
+        workingHoursLimit: weekSchedule.workingHoursLimit,
         weekSchedule: daysList
     };
 }
@@ -23,11 +26,19 @@ export const parseWeekSchedule = (rawObj) => {
     }
 
     let schedule = new Map();
-    for (const [day, daySchedule] of rawObj.weekSchedule) {
-        schedule.set(day, parseDaySchedule(daySchedule));
+    for (const [day, rawDaySchedule] of rawObj.weekSchedule) {
+        const parsedDay = parseDaySchedule(rawDaySchedule);
+        if (!parsedDay) {
+            continue;
+        }
+        schedule.set(day, parsedDay);
     }
 
-    let weekSchedule = new WeekSchedule(parseScheduleDate(rawObj.day1Date), schedule);
+    const minGap = rawObj.minGap;
+    const workingHoursLimit = rawObj.workingHoursLimit;
+    let day1Day = rawObj.day1Day;
+
+    let weekSchedule = new WeekSchedule(minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, schedule);
 
 
     return weekSchedule;

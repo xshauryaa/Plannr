@@ -74,7 +74,12 @@ class DaySchedule {
    */
   addEvent(event) {
     this.events.push(event);
-    this.timeBlocks.push(new TimeBlock(event), false);
+    const tb = TimeBlock.fromRigidEvent(event);
+    if (tb) {
+        this.timeBlocks.push(tb);
+    } else {
+        console.warn("Null TimeBlock created, skipping");
+    }
     this.sortSchedule();
   }
 
@@ -94,7 +99,12 @@ class DaySchedule {
       throw new WorkingLimitExceededError();
     } else {
       this.events.push(event);
-      this.timeBlocks.push(new TimeBlock(event, false, this.date, startTime, endTime));
+      const tb = TimeBlock.fromFlexibleEvent(event, this.date, startTime, endTime)
+      if (tb) {
+        this.timeBlocks.push(tb);
+      } else {
+        console.warn("Null TimeBlock created, skipping");
+      }
       this.sortSchedule();
     }
   }
@@ -106,7 +116,12 @@ class DaySchedule {
    */
   addBreak(breakTime) {
     this.breaks.push(breakTime);
-    this.timeBlocks.push(new TimeBlock(breakTime, false, this.date));
+    const tb = TimeBlock.fromBreak(breakTime, this.date)
+    if (tb) {
+        this.timeBlocks.push(tb);
+    } else {
+        console.warn("Null TimeBlock created, skipping");
+    }
     this.sortSchedule();
   }
 

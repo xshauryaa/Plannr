@@ -11,44 +11,17 @@ class TimeBlock {
    * Constructs a TimeBlock from a RigidEvent.
    * @param {RigidEvent} event 
    */
-  constructor(event, isCompleted, date, startTime, endTime) {
-    if (event.getType && event.getStartTime && event.getEndTime) {
-      // RigidEvent
-      this.name = event.getName();
-      this.date = event.getDate();
-      this.activityType = event.getType();
-      this.priority = Priority.HIGH;
-      this.startTime = event.getStartTime();
-      this.endTime = event.getEndTime();
-      this.duration = event.getDuration();
-      this.isCompleted = isCompleted;
-      this.deadline = event.getDate();
-      this.type = 'rigid';
-    } else if (event.getDuration && typeof startTime === 'number' && typeof endTime === 'number') {
-      // FlexibleEvent
-      this.name = event.getName();
-      this.date = date;
-      this.activityType = event.getType();
-      this.priority = event.getPriority();
-      this.startTime = new Time24(startTime);
-      this.endTime = new Time24(endTime);
-      this.duration = event.getDuration();
-      this.isCompleted = isCompleted;
-      this.deadline = event.getDeadline();
-      this.type = 'flexible';
-    } else {
-      // Break
-      this.name = 'Break';
-      this.date = date;
-      this.activityType = ActivityType.BREAK;
-      this.priority = Priority.LOW;
-      this.startTime = event.getStartTime();
-      this.endTime = event.getEndTime();
-      this.duration = event.getDuration();
-      this.isCompleted = isCompleted;
-      this.deadline = date;
-      this.type = 'break';
-    }
+  constructor(name, type, duration, date, startTime, endTime, activityType, priority, deadline, isCompleted) {
+    this.name = name;
+    this.type = type; // "rigid", "flexible", "break"
+    this.date = date;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.duration = duration;
+    this.activityType = activityType;
+    this.priority = priority;
+    this.deadline = deadline;
+    this.isCompleted = isCompleted;
   }
 
   /** @returns {string} name of the time block */
@@ -86,6 +59,16 @@ class TimeBlock {
     return this.duration;
   }
 
+  /** @returns {Priority} priority of the time block */
+  getPriority() {
+    return this.priority;
+  }
+
+  /** @returns {ScheduleDate} deadline of the time block */
+  getDeadline() {
+    return this.deadline;
+  }
+
   /** @returns {boolean} true if completed */
   isCompleted() {
     return this.isCompleted;
@@ -111,7 +94,10 @@ class TimeBlock {
       this.startTime.equals(other.getStartTime()) &&
       this.endTime.equals(other.getEndTime()) &&
       this.duration === other.getDuration() &&
-      this.type === other.getType()
+      this.type === other.getType() &&
+      this.activityType === other.getActivityType() &&
+      this.priority === other.getPriority() &&
+      this.deadline.equals(other.getDeadline())
     );
   }
 
@@ -134,6 +120,51 @@ class TimeBlock {
   getUID() {
     const uid = `${this.date.toString()}-${this.startTime.toString()}-${this.name.replace(/\s+/g, '_')}`;
     return `${uid}@plannr.scheduler`.toLowerCase();
+  }
+
+  static fromRigidEvent(event, isCompleted = false) {
+    return new TimeBlock(
+        event.getName(),
+        'rigid',
+        event.getDuration(),
+        event.getDate(),
+        event.getStartTime(),
+        event.getEndTime(),
+        event.getType(),
+        Priority.HIGH,
+        event.getDate(),
+        isCompleted
+    )
+  }
+
+  static fromFlexibleEvent(event, date, startTime, endTime, isCompleted = false) {
+    return new TimeBlock(
+        event.getName(),
+        'flexible',
+        event.getDuration(),
+        date,
+        new Time24(startTime),
+        new Time24(endTime),
+        event.getType(),
+        event.getPriority(),
+        event.getDeadline(),
+        isCompleted
+    )
+  }
+
+  static fromBreak(breakObj, date, isCompleted = false) {
+    return new TimeBlock(
+        'Break',
+        'break',
+        breakObj.getDuration(),
+        date,
+        breakObj.getStartTime(),
+        breakObj.getEndTime(),
+        ActivityType.BREAK,
+        Priority.LOW,
+        date,
+        isCompleted
+    )
   }
 }
 

@@ -1,7 +1,7 @@
-import RigidEvent from "../model/RigidEvent";
-import { serializeScheduleDate, parseScheduleDate } from "./scheduleDateHandler";
-import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler";
-import { serializeTime24, parseTime24 } from "./Time24Handler";
+import RigidEvent from "../model/RigidEvent.js";
+import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
+import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler.js";
+import { serializeTime24, parseTime24 } from "./Time24Handler.js";
 
 export const serializeRigidEvent = (eventObj) => {
     if (!eventObj) return null;

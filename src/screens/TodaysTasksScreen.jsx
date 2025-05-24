@@ -4,29 +4,30 @@ import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import useCurrentTime from '../utils/useCurrentTime.js'
 
 const TodaysTasksScreen = () => {
     
-    const { appState } = useAppState();
+    const { appState, setAppState } = useAppState();
+    const currentTime = useCurrentTime();
 
-    const todaysDate = convertDateToScheduleDate(appState.currentTime);
+    const todaysDate = convertDateToScheduleDate(currentTime);
     let tasks = []
 
     // Check if the user has an active schedule
-    // if (appState.activeSchedule !== null) {
-    //     const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
-    //     if (todaysSchedule !== undefined) {
-    //         tasks = todaysSchedule.getTimeBlocks();
-    //     }
-    // }
+    if (appState.activeSchedule !== null) {
+        const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
+        const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
+        if (todaysSchedule !== undefined) {
+            tasks = todaysSchedule.getTimeBlocks();
+        }
+    }
 
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    tasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // tasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
-    
 
     useEffect( () => {
         const check = taskData.every(task => task.isCompleted)
@@ -58,12 +59,49 @@ const TodaysTasksScreen = () => {
                                 </View>
                                 <Checkbox 
                                     checked={item.isCompleted} 
-                                    onChange={() => { 
-                                        setTaskData(prevTasks => {prevTasks[index].isCompleted = !prevTasks[index].isCompleted; return [...prevTasks]})
-                                        for (const tb of appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks()) {
-                                            console.log(tb.isCompleted)
-                                        }
-                                    } }
+                                    onChange={() => {
+                                        // 1. Update local UI
+                                        const updatedTasks = [...taskData];
+                                        const updatedTask = { ...updatedTasks[index] };
+                                        updatedTask.isCompleted = !updatedTask.isCompleted;
+                                        updatedTasks[index] = updatedTask;
+                                        setTaskData(updatedTasks);
+                                      
+                                        // 2. Update appState.activeSchedule.weekSchedule
+                                        const todayStr = appState.activeSchedule.getDayFromDate(todaysDate);
+                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDay(todayStr);
+                                      
+                                        const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
+                                        const updatedBlock = { ...updatedTimeBlocks[index] };
+                                        updatedBlock.isCompleted = !updatedBlock.isCompleted;
+                                        updatedTimeBlocks[index] = updatedBlock;
+                                      
+                                        const updatedDaySchedule = new currentDaySchedule.constructor(
+                                          currentDaySchedule.day,
+                                          currentDaySchedule.date,
+                                          currentDaySchedule.minGap,
+                                          currentDaySchedule.workingHoursLimit,
+                                          currentDaySchedule.events,
+                                          currentDaySchedule.breaks,
+                                          updatedTimeBlocks
+                                        );
+                                      
+                                        const updatedWeekSchedule = new Map(appState.activeSchedule.weekSchedule);
+                                        updatedWeekSchedule.set(todayStr, updatedDaySchedule);
+                                      
+                                        const updatedSchedule = new appState.activeSchedule.constructor(
+                                          appState.activeSchedule.minGap,
+                                          appState.activeSchedule.day1Date,
+                                          appState.activeSchedule.day1Day,
+                                          appState.activeSchedule.workingHoursLimit,
+                                          updatedWeekSchedule
+                                        );
+                                      
+                                        setAppState(prev => ({
+                                          ...prev,
+                                          activeSchedule: updatedSchedule
+                                        }));
+                                      }}
                                 />
                             </View>
                         )

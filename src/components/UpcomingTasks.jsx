@@ -3,36 +3,46 @@ import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
+import useCurrentTime from '../utils/useCurrentTime.js'
 
 const UpcomingTasks = ({ onClick }) => {
     const { appState } = useAppState();
+    const currentTime = useCurrentTime();
 
-    // Check if the user has an active schedule
-    // if (appState.activeSchedule !== null) {
-    //     const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
-    //     if (todaysSchedule !== undefined) {
-    //         todaysTasks = todaysSchedule.getTimeBlocks();
-    //     }
-    // }
+    const todaysDate = convertDateToScheduleDate(currentTime);
+    let todaysTasks = []
+
+    const loadTodaysTasks = () => {
+        // Check if the user has an active schedule
+        if (appState.activeSchedule !== null) {
+            const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
+            const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
+            if (todaysSchedule !== undefined) {
+                todaysTasks = todaysSchedule.getTimeBlocks();
+            }
+        }
+    }
+
+    loadTodaysTasks()
     
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    let todaysTasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // let todaysTasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
 
     const [upcomingTasks, setUpcomingTasks] = useState([])
     const [allCompleted, setAllComplete] = useState(false)
 
     useEffect( () => {
         const timer = setInterval(() => {
-            todaysTasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+            loadTodaysTasks()
             const check = todaysTasks.every(task => task.isCompleted)
             setAllComplete(check)
             const tasksLeft = todaysTasks.filter(task => {
-                let curr = convertTimeToTime24(appState.currentTime)
+                let curr = convertTimeToTime24(currentTime)
                 return curr.isBefore(task.endTime)
             })
             setUpcomingTasks(tasksLeft)
-          }, 5000);
+          }, 1000);
       
         return () => clearInterval(timer);
         }, [todaysTasks])

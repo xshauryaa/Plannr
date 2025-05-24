@@ -10,6 +10,7 @@ import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import useCurrentTime from '../utils/useCurrentTime';
+import { serializeWeekSchedule, parseWeekSchedule } from '../persistence/WeekScheduleHandler.js';
 
 export const AppStateContext = createContext();
 
@@ -17,48 +18,48 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
     function schedulerTest1() {
-        const scheduler = new Scheduler(new ScheduleDate(6, 4, 2025), 'Sunday', 30, 6);
+        const scheduler = new Scheduler(new ScheduleDate(23, 5, 2025), 'Friday', 30, 6);
         
         // --- Rigid Events ---
         const rigidEvents = [
-            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, new ScheduleDate(6, 4, 2025), 1000, 1100),
-            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, new ScheduleDate(7, 4, 2025), 1000, 1200),
-            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, new ScheduleDate(8, 4, 2025), 900, 930),
-            new RigidEvent("Team Workshop", ActivityType.WORK, 120, new ScheduleDate(9, 4, 2025), 1400, 1600),
-            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, new ScheduleDate(9, 4, 2025), 900, 1000),
-            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, new ScheduleDate(10, 4, 2025), 1100, 1200),
-            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, new ScheduleDate(10, 4, 2025), 1500, 1530),
-            new RigidEvent("Final Presentation", ActivityType.WORK, 60, new ScheduleDate(11, 4, 2025), 1500, 1600),
-            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, new ScheduleDate(12, 4, 2025), 1900, 2100)
+            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, new ScheduleDate(23, 5, 2025), 1000, 1100),
+            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, new ScheduleDate(24, 5, 2025), 1000, 1200),
+            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, new ScheduleDate(25, 5, 2025), 900, 930),
+            new RigidEvent("Team Workshop", ActivityType.WORK, 120, new ScheduleDate(26, 5, 2025), 1400, 1600),
+            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, new ScheduleDate(26, 5, 2025), 900, 1000),
+            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, new ScheduleDate(27, 5, 2025), 1100, 1200),
+            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, new ScheduleDate(27, 5, 2025), 1500, 1530),
+            new RigidEvent("Final Presentation", ActivityType.WORK, 60, new ScheduleDate(28, 5, 2025), 1500, 1600),
+            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, new ScheduleDate(29, 5, 2025), 1900, 2100)
         ];
         rigidEvents.forEach(e => scheduler.addRigidEvent(e));
         
         // --- Flexible Events ---
         const flexibleEvents = [
-            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, new ScheduleDate(7, 4, 2025)),
-            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(8, 4, 2025)),
-            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(9, 4, 2025)),
-            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, new ScheduleDate(10, 4, 2025)),
-            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 4, 2025)),
-            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 4, 2025)),
-            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, new ScheduleDate(11, 4, 2025)),
-            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(11, 4, 2025)),
-            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, new ScheduleDate(11, 4, 2025)),
-            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, new ScheduleDate(12, 4, 2025)),
-            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, new ScheduleDate(12, 4, 2025)),
-            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(6, 4, 2025)),
-            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, new ScheduleDate(9, 4, 2025)),
-            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, new ScheduleDate(11, 4, 2025)),
-            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 4, 2025)),
-            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 4, 2025))
+            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, new ScheduleDate(24, 5, 2025)),
+            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(25, 5, 2025)),
+            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(26, 5, 2025)),
+            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, new ScheduleDate(27, 5, 2025)),
+            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(27, 5, 2025)),
+            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(29, 5, 2025)),
+            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, new ScheduleDate(28, 5, 2025)),
+            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(28, 5, 2025)),
+            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, new ScheduleDate(28, 5, 2025)),
+            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, new ScheduleDate(29, 5, 2025)),
+            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, new ScheduleDate(29, 5, 2025)),
+            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(23, 5, 2025)),
+            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, new ScheduleDate(26, 5, 2025)),
+            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, new ScheduleDate(28, 5, 2025)),
+            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(27, 5, 2025)),
+            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(29, 5, 2025))
         ];
         flexibleEvents.forEach(e => scheduler.addFlexibleEvent(e));
         
         // --- Breaks ---
-        scheduler.addBreak(new ScheduleDate(7, 4, 2025), new Break(30, 1300, 1330));
-        scheduler.addBreak(new ScheduleDate(9, 4, 2025), new Break(30, 1200, 1230));
-        scheduler.addBreak(new ScheduleDate(10, 4, 2025), new Break(30, 1000, 1030));
-        scheduler.addBreak(new ScheduleDate(11, 4, 2025), new Break(30, 900, 930));
+        scheduler.addBreak(new ScheduleDate(24, 5, 2025), new Break(30, 1300, 1330));
+        scheduler.addBreak(new ScheduleDate(26, 5, 2025), new Break(30, 1200, 1230));
+        scheduler.addBreak(new ScheduleDate(27, 5, 2025), new Break(30, 1000, 1030));
+        scheduler.addBreak(new ScheduleDate(28, 5, 2025), new Break(30, 900, 930));
         scheduler.addRepeatedBreak(new Break(30, 1700, 1730));
         
         // --- Dependencies ---
@@ -108,6 +109,8 @@ export const AppStateProvider = ({ children }) => {
     }
 
     scheduleForTesting = schedulerTest1()
+
+    // console.log(scheduleForTesting.getScheduleForDay('Friday').getTimeBlocks())
     
     const [appState, setAppState] = useState({
         name: 'Shaurya',
@@ -121,41 +124,31 @@ export const AppStateProvider = ({ children }) => {
             incompleteTaskNotification: 0,
             taskRemindersEnabled: true
         },
-        savedSchedules: [
-            { name: "Test Schedule 1", schedule: scheduleForTesting },
-            { name: "Test Schedule 2", schedule: scheduleForTesting },
-            { name: "Test Schedule 3", schedule: scheduleForTesting }, 
-            { name: "Test Schedule 4", schedule: scheduleForTesting },
-            { name: "Test Schedule 5", schedule: scheduleForTesting }
-        ],
-        activeSchedule: { name: "Test Schedule 1", schedule: scheduleForTesting },
-        currentTime: useCurrentTime(),
+        savedSchedules: [],
+        activeSchedule: scheduleForTesting,
         onboarded: false
     });
-    const [storageLoaded, setStorageLoaded] = useState(false);
-
-    // useEffect(() => {
-    //     const loadAppState = async () => {
-    //         try {
-    //             const raw = await AsyncStorage.getItem('appState');
-    //             if (raw) {
-    //                 const newState = JSON.parse(raw);
-    //                 console.log(newState)
-    //                 setAppState(newState);
-    //             }
-    //         } catch (e) {
-    //             console.error('Failed to load app state from storage', e);
-    //         } finally {
-    //             setStorageLoaded(true);
-    //         }
-    //     };
-
-    //     loadAppState();
-    // }, []);
+    const [storageLoaded, setStorageLoaded] = useState(true);
 
     useEffect(() => {
+        const loadAppState = async () => {
+            try {
+                const raw = await AsyncStorage.getItem('appState');
+                const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
+                setAppState(parsed);
+            } catch (e) {
+                console.error('Failed to load app state from storage', e);
+            } finally {
+                setStorageLoaded(true);
+            }
+        };
+        loadAppState();
+    }, []);
+
+    useEffect(() => {
+        console.log("Writing state")
         if (storageLoaded) {
-            AsyncStorage.setItem('appState', JSON.stringify(appState));
+            AsyncStorage.setItem('appState', JSON.stringify(serializeAppState(appState)));
         }
     }, [appState]);
 
@@ -176,26 +169,24 @@ const serializeAppState = (appState) => {
             name: schedule.name,
             schedule: serializeWeekSchedule(schedule.schedule)
         })),
-        activeSchedule: { name: appState.activeSchedule.name, schedule: serializeWeekSchedule(appState.activeSchedule) },
-        currentTime: appState.currentTime,
+        activeSchedule: serializeWeekSchedule(appState.activeSchedule),
         onboarded: appState.onboarded
     };
 }
 
 const parseAppState = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.activeSchedule == null || rawObj.currentTime == null || rawObj.onboarded == null) {
+    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.activeSchedule == null || rawObj.onboarded == null) {
         return null;
     }
 
     return {
         name: rawObj.name,
         userPreferences: rawObj.userPreferences,
-        savedSchedules: rawObj.savedSchedules.map(schedule => ({
-            name: schedule.name,
-            schedule: parseWeekSchedule(schedule.schedule)
+        savedSchedules: rawObj.savedSchedules.map(sched => ({
+            name: sched.name,
+            schedule: parseWeekSchedule(sched.schedule)
         })),
-        activeSchedule: { name: rawObj.activeSchedule.name, schedule: parseWeekSchedule(rawObj.activeSchedule.schedule) },
-        currentTime: rawObj.currentTime,
+        activeSchedule: parseWeekSchedule(rawObj.activeSchedule),
         onboarded: rawObj.onboarded
     };
 }

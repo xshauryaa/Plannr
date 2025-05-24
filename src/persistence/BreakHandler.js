@@ -1,6 +1,5 @@
-import { serializeTime24 } from './Time24Serializer';
-import Break from '../model/Break';
-import { parseTime24 } from './Time24Serializer';
+import { serializeTime24, parseTime24 } from './Time24Handler.js';
+import Break from '../model/Break.js';
 
 export const serializeBreak = (breakObj) => {
     if (!breakObj) return null;

@@ -1,12 +1,12 @@
-import DaySchedule from "../model/DaySchedule";
+import DaySchedule from "../model/DaySchedule.js";
 
-import { serializeScheduleDate, parseScheduleDate } from "./scheduleDateHandler";
-import { serializeBreak, parseBreak } from "./breakHandler";
-import { serializeFlexibleEvent, parseFlexibleEvent } from "./FlexibleEventHandler";
-import { serializeRigidEvent, parseRigidEvent } from "./rigidEventHandler";
-import { serializeTimeBlock, parseTimeBlock } from "./timeBlockHandler";
-import FlexibleEvent from "../model/FlexibleEvent";
-import RigidEvent from "../model/RigidEvent";
+import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
+import { serializeBreak, parseBreak } from "./BreakHandler.js";
+import { serializeFlexibleEvent, parseFlexibleEvent } from "./FlexibleEventHandler.js";
+import { serializeRigidEvent, parseRigidEvent } from "./RigidEventHandler.js";
+import { serializeTimeBlock, parseTimeBlock } from "./TimeBlockHandler.js";
+import FlexibleEvent from "../model/FlexibleEvent.js";
+import RigidEvent from "../model/RigidEvent.js";
 
 export const serializeDaySchedule = (daySchedule) => {
     if (!daySchedule) return null;
@@ -43,25 +43,27 @@ export const serializeDaySchedule = (daySchedule) => {
 
 export const parseDaySchedule = (rawObj) => {
     if (!rawObj || rawObj.day == null || rawObj.date == null || rawObj.minGap == null || rawObj.workingHoursLimit == null || rawObj.events == null || rawObj.breaks == null || rawObj.timeBlocks == null) {
+        console.warn("DaySchedule missing required fields:", rawObj);
         return null;
     }
 
     let eventsList = [];
-    for (let i = 0; i < rawObj.events.length; i++) {
-        if (rawObj.events[i].deadline != null) {
-            eventsList.push(parseFlexibleEvent(rawObj.events[i]));
-        } else if (rawObj.events[i].date != null && rawObj.events[i].startTime != null && rawObj.events[i].endTime != null) {
-            eventsList.push(parseRigidEvent(rawObj.events[i]));
-        } else {
-            return null; // Invalid event type
+    for (const event of rawObj.events) {
+        let parsed = null;
+        if (event.deadline != null) {
+            parsed = parseFlexibleEvent(event);
+        } else if (event.date != null && event.startTime != null && event.endTime != null) {
+            parsed = parseRigidEvent(event);
         }
+    
+        eventsList.push(parsed);
     }
 
     let breaksList = [];
     for (let i = 0; i < rawObj.breaks.length; i++) {
         breaksList.push(parseBreak(rawObj.breaks[i]));
     }
-
+    
     let timeBlocksList = [];
     for (let i = 0; i < rawObj.timeBlocks.length; i++) {
         timeBlocksList.push(parseTimeBlock(rawObj.timeBlocks[i]));
