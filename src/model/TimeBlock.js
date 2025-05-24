@@ -97,7 +97,8 @@ class TimeBlock {
       this.type === other.getType() &&
       this.activityType === other.getActivityType() &&
       this.priority === other.getPriority() &&
-      this.deadline.equals(other.getDeadline())
+      this.deadline.equals(other.getDeadline()) && 
+      this.isCompleted === other.isCompleted()
     );
   }
 

@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { AppStateProvider } from './src/context/AppStateContext.js';
+import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';
@@ -14,6 +15,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
     return (
       <AppStateProvider>
+        <TaskCompletionChecker />
         <NavigationContainer>
           <Tab.Navigator
             screenOptions={{ headerShown: false }}
