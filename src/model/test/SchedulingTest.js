@@ -10,7 +10,7 @@ import CircularDependencyError from '../exceptions/CircularDependencyError.js';
 // import ICSHandler from '../../ics_handler/ICSHandler.js'; // Uncomment if implemented
 
 function schedulerTest1() {
-  const scheduler = new Scheduler(new ScheduleDate(6, 4, 2025), 'Sunday', 30, 6);
+  const scheduler = new Scheduler(7, new ScheduleDate(6, 4, 2025), 'Sunday', 30, 6);
 
   // --- Rigid Events ---
   const rigidEvents = [

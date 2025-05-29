@@ -131,7 +131,11 @@ class ScheduleDate {
         }
         return result;
     }
-  
+
+    /** @returns {String} the id of this ScheduleDate object */
+    getId() {
+      return `${this.date}-${this.month}-${this.year}`;
+    }
   
     /**
      * @param {any} other 

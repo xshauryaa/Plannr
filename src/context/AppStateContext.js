@@ -10,7 +10,7 @@ import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 // import useCurrentTime from '../utils/useCurrentTime';
-import { serializeWeekSchedule, parseWeekSchedule } from '../persistence/WeekScheduleHandler.js';
+import { serializeSchedule, parseSchedule } from '../persistence/WeekScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
 import NotificationService from '../notifications/NotificationService.js';
 import TimeBlock from '../model/TimeBlock.js';
@@ -112,8 +112,6 @@ export const AppStateProvider = ({ children }) => {
     }
 
     scheduleForTesting = schedulerTest1()
-
-    // console.log(scheduleForTesting.getScheduleForDay('Friday').getTimeBlocks())
     
     const [appState, setAppState] = useState({
         name: 'Shaurya',
@@ -179,9 +177,9 @@ const serializeAppState = (appState) => {
         userPreferences: appState.userPreferences,
         savedSchedules: appState.savedSchedules.map(schedule => ({
             name: schedule.name,
-            schedule: serializeWeekSchedule(schedule.schedule)
+            schedule: serializeSchedule(schedule.schedule)
         })),
-        activeSchedule: serializeWeekSchedule(appState.activeSchedule),
+        activeSchedule: serializeSchedule(appState.activeSchedule),
         onboarded: appState.onboarded
     };
 }
@@ -196,9 +194,9 @@ const parseAppState = (rawObj) => {
         userPreferences: rawObj.userPreferences,
         savedSchedules: rawObj.savedSchedules.map(sched => ({
             name: sched.name,
-            schedule: parseWeekSchedule(sched.schedule)
+            schedule: parseSchedule(sched.schedule)
         })),
-        activeSchedule: parseWeekSchedule(rawObj.activeSchedule),
+        activeSchedule: parseSchedule(rawObj.activeSchedule),
         onboarded: rawObj.onboarded
     };
 }

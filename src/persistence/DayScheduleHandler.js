@@ -1,4 +1,4 @@
-import DaySchedule from "../model/DaySchedule.js";
+import Day from "../model/Day.js";
 
 import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
 import { serializeBreak, parseBreak } from "./BreakHandler.js";
@@ -69,7 +69,7 @@ export const parseDaySchedule = (rawObj) => {
         timeBlocksList.push(parseTimeBlock(rawObj.timeBlocks[i]));
     }
 
-    return new DaySchedule(
+    return new Day(
         rawObj.day,
         parseScheduleDate(rawObj.date),
         rawObj.minGap,

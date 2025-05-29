@@ -8,7 +8,7 @@ import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js
 /**
  * Represents a schedule for a single day.
  */
-class DaySchedule {
+class Day {
   /**
    * @param {string} day - Day of the week (e.g. "Monday", "Tuesday", ...)
    * @param {ScheduleDate} date - The date for this day
@@ -93,7 +93,7 @@ class DaySchedule {
    * @throws {WorkingLimitExceededError} if adding the event exceeds the working hours limit
    */
   addFlexibleEvent(event, startTime, endTime) {
-    if (this._checkEventConflict(event, startTime, endTime)) {
+    if (this._checkEventConflict(startTime, endTime)) {
       throw new EventConflictError();
     } else if (event.getDuration() + (this.calculateWorkingHours() * 60) > (this.workingHoursLimit * 60)) {
       throw new WorkingLimitExceededError();
@@ -166,11 +166,7 @@ class DaySchedule {
   calculateWorkingHours() {
     let totalWorkingMinutes = 0;
     for (let event of this.events) {
-      if (
-        event.getType() === ActivityType.EDUCATION ||
-        event.getType() === ActivityType.MEETING ||
-        event.getType() === ActivityType.WORK
-      ) {
+      if (event.getType() !== ActivityType.BREAK) {
         totalWorkingMinutes += event.getDuration();
       }
     }
@@ -180,12 +176,11 @@ class DaySchedule {
   /**
    * Checks if the given flexible event conflicts with any existing event or break.
    * Returns true if the event overlaps with any time block.
-   * @param {FlexibleEvent} event 
    * @param {number} startTime - Start time in 24-hour format
    * @param {number} endTime - End time in 24-hour format
    * @returns {boolean} true if there is a conflict, false otherwise.
    */
-  _checkEventConflict(event, startTime, endTime) {
+  _checkEventConflict(startTime, endTime) {
     const newStart = new Time24(startTime);
     const newEnd = new Time24(endTime);
     
@@ -240,4 +235,4 @@ class DaySchedule {
   }
 }
 
-export default DaySchedule;
+export default Day;

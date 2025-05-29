@@ -1,26 +1,26 @@
-import WeekSchedule, { DAYS } from "../model/WeekSchedule.js";
+import Schedule, { DAYS } from "../model/Schedule.js";
 import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
 import { serializeDaySchedule, parseDaySchedule } from "./DayScheduleHandler.js";
 
 
-export const serializeWeekSchedule = (weekSchedule) => {
-    if (!weekSchedule) return null;
+export const serializeSchedule = (schedule) => {
+    if (!schedule) return null;
 
-    let daysList = [];
-    for (const day of DAYS) {
-        daysList.push([day, serializeDaySchedule(weekSchedule.getScheduleForDay(day))]);
+    let datesList = [];
+    for (const date of schedule.getAllDatesInOrder()) {
+        datesList.push([date, serializeDaySchedule(schedule.getScheduleForDate(date))]);
     }
 
     return {
-        day1Date: serializeScheduleDate(weekSchedule.day1Date),
-        day1Day: weekSchedule.day1Day,
-        minGap: weekSchedule.minGap,
-        workingHoursLimit: weekSchedule.workingHoursLimit,
-        weekSchedule: daysList
+        day1Date: serializeScheduleDate(schedule.day1Date),
+        day1Day: schedule.day1Day,
+        minGap: schedule.minGap,
+        workingHoursLimit: schedule.workingHoursLimit,
+        weekSchedule: datesList
     };
 }
 
-export const parseWeekSchedule = (rawObj) => {
+export const parseSchedule = (rawObj) => {
     if (!rawObj || rawObj.day1Date == null || rawObj.weekSchedule == null) {
         return null;
     }
@@ -38,8 +38,8 @@ export const parseWeekSchedule = (rawObj) => {
     const workingHoursLimit = rawObj.workingHoursLimit;
     let day1Day = rawObj.day1Day;
 
-    let weekSchedule = new WeekSchedule(minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, schedule);
+    let scheduleToReturn = new Schedule(minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, schedule);
 
 
-    return weekSchedule;
+    return scheduleToReturn;
 }

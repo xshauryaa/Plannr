@@ -16,15 +16,14 @@ const TodaysTasksScreen = () => {
 
     // Check if the user has an active schedule
     if (appState.activeSchedule !== null) {
-        const todaysDay = appState.activeSchedule.getDayFromDate(todaysDate);
-        const todaysSchedule = appState.activeSchedule.getScheduleForDay(todaysDay);
+        const todaysSchedule = appState.activeSchedule.getScheduleForDate(todaysDate);
         if (todaysSchedule !== undefined) {
             tasks = todaysSchedule.getTimeBlocks();
         }
     }
 
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    // tasks = appState.activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // tasks = appState.activeSchedule.getScheduleForDate('Monday').getTimeBlocks();
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
@@ -68,8 +67,7 @@ const TodaysTasksScreen = () => {
                                         setTaskData(updatedTasks);
                                       
                                         // 2. Update appState.activeSchedule.weekSchedule
-                                        const todayStr = appState.activeSchedule.getDayFromDate(todaysDate);
-                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDay(todayStr);
+                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDate(todaysDate);
                                       
                                         const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
                                         const updatedBlock = { ...updatedTimeBlocks[index] };

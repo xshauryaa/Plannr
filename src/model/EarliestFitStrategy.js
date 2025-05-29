@@ -1,5 +1,5 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
-import WeekSchedule from './WeekSchedule.js';
+import Schedule from './Schedule.js';
 import Time24 from './Time24.js';
 import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
@@ -21,7 +21,7 @@ class EarliestFitStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.earliestFitSchedule = new WeekSchedule(minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.earliestFitSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
   }
 
   /**
@@ -63,12 +63,12 @@ class EarliestFitStrategy extends SchedulingStrategy {
    */
   _scheduleEvents(earliestStartTime, latestEndTime) {
     const scheduled = new Set();
-    const minGap = this.earliestFitSchedule.getScheduleForDay('Monday').getMinGap();
+    const datesList = this.earliestFitSchedule.getAllDatesInOrder();
+    const minGap = this.earliestFitSchedule.getScheduleForDate(datesList[0]).getMinGap();
 
     // Schedule rigid events
     for (const rigidEvent of this.rigidEvents) {
-      const day = this.earliestFitSchedule.getDayFromDate(rigidEvent.getDate());
-      this.earliestFitSchedule.addEvent(day, rigidEvent);
+      this.earliestFitSchedule.addRigidEvent(rigidEvent.getDate(), rigidEvent);
       scheduled.add(rigidEvent);
     }
 

@@ -31,15 +31,14 @@ const HomeScreen = ({ navigation }) => {
 
     // Check if the user has an active schedule, and return progress if true
     // if (activeSchedule !== null) {
-    //     const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-    //     const todaysSchedule = activeSchedule.getScheduleForDay(todaysDay);
+    //     const todaysSchedule = activeSchedule.getScheduleForDate(todaysDate);
     //     if (todaysSchedule !== undefined) {
     //         todaysTasks = todaysSchedule.getTimeBlocks();
     //     }
     // }
     
     // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    // todaysTasks = activeSchedule.getScheduleForDay('Monday').getTimeBlocks();
+    // todaysTasks = activeSchedule.getScheduleForDate(new ScheduleDate(23, 5, 2025)).getTimeBlocks();
     
     return (
         <View style={styles.container}>

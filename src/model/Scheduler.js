@@ -1,4 +1,4 @@
-import WeekSchedule from './WeekSchedule.js';
+import WeekSchedule from './Schedule.js';
 import EarliestFitStrategy from './EarliestFitStrategy.js';
 import BalancedWorkStrategy from './BalancedWorkStrategy.js';
 import DeadlineOrientedStrategy from './DeadlineOrientedStrategy.js';
@@ -8,12 +8,14 @@ import DeadlineOrientedStrategy from './DeadlineOrientedStrategy.js';
  */
 class Scheduler {
   /**
-   * @param {ScheduleDate} date 
+   * @param {number} numDays - Number of days in the schedule
+   * @param {ScheduleDate} date - First date of the week
    * @param {string} day1 - First day of the week (e.g. "Monday")
    * @param {number} minGap - Minimum gap between events
    * @param {number} workingHoursLimit - Max hours per day
    */
-  constructor(date, day1, minGap, workingHoursLimit) {
+  constructor(numDays, date, day1, minGap, workingHoursLimit) {
+    this.numDays = numDays;
     this.firstDate = date;
     this.firstDay = day1;
     this.minGap = minGap;

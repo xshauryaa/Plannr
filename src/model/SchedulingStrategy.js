@@ -1,6 +1,6 @@
 import Time24 from './Time24.js';
 import ScheduleDate from './ScheduleDate.js';
-import WeekSchedule from './WeekSchedule.js';
+import WeekSchedule from './Schedule.js';
 import EventDependencies from './EventDependencies.js';
 import ActivityType from './ActivityType.js';
 

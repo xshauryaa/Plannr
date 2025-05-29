@@ -1,5 +1,5 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
-import WeekSchedule from './WeekSchedule.js';
+import WeekSchedule from './Schedule.js';
 import Time24 from './Time24.js';
 import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
@@ -23,7 +23,7 @@ class BalancedWorkStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.balancedWorkSchedule = new WeekSchedule(minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.balancedWorkSchedule = new WeekSchedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
   }
 
   /**
@@ -60,11 +60,11 @@ class BalancedWorkStrategy extends SchedulingStrategy {
    */
   _scheduleEvents(earliestStartTime, latestEndTime) {
     const scheduled = new Set();
-    const minGap = this.balancedWorkSchedule.getScheduleForDay('Monday').getMinGap();
+    const datesList = this.balancedWorkSchedule.getAllDatesInOrder();
+    const minGap = this.balancedWorkSchedule.getScheduleForDate(datesList[0]).getMinGap();
 
     for (const rigidEvent of this.rigidEvents) {
-      const day = this.balancedWorkSchedule.getDayFromDate(rigidEvent.getDate());
-      this.balancedWorkSchedule.addEvent(day, rigidEvent);
+      this.balancedWorkSchedule.addRigidEvent(rigidEvent.getDate(), rigidEvent);
       scheduled.add(rigidEvent);
     }
 
