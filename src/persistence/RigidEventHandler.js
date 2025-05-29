@@ -12,7 +12,8 @@ export const serializeRigidEvent = (eventObj) => {
         duration: eventObj.duration,
         date: serializeScheduleDate(eventObj.date),
         startTime: serializeTime24(eventObj.startTime),
-        endTime: serializeTime24(eventObj.endTime)
+        endTime: serializeTime24(eventObj.endTime),
+        id: eventObj.id
     }
 }
 
@@ -27,6 +28,7 @@ export const parseRigidEvent = (rawObj) => {
         rawObj.duration,
         parseScheduleDate(rawObj.date),
         parseTime24(rawObj.startTime),
-        parseTime24(rawObj.endTime)
+        parseTime24(rawObj.endTime),
+        rawObj.id
     );
 }

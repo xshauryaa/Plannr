@@ -5,7 +5,7 @@ import AddRigidEventsModal from '../components/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
-const RigidEventsView = ({ onNext, minDate }) => {
+const RigidEventsView = ({ onNext, minDate, onBack }) => {
     const [rigidEvents, setRigidEvents] = useState([])
     const [showModal, setShowModal] = useState(false)
 
@@ -54,12 +54,20 @@ const RigidEventsView = ({ onNext, minDate }) => {
                     />
                 </View>
             </View>
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => onNext(rigidEvents)}
-            >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
-            </TouchableOpacity>
+            <View style={styles.horizontalGrid}>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onBack()}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onNext(rigidEvents)}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                </TouchableOpacity>
+            </View>
             <AddRigidEventsModal
                 isVisible={showModal}
                 onClick={addRigidEvent}
@@ -104,16 +112,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         marginBottom: 12
     },
+    horizontalGrid: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginVertical: 16,
+    },
     button: {
-        width: '92%',
+        width: '100%',
         borderRadius: 12,
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        marginVertical: 16,
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
+        marginVertical: 16,
         gap: 12
     }
 })

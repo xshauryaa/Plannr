@@ -227,6 +227,7 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate }) => {
 
 const styles = StyleSheet.create({
     card: {
+        width: '75%',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
@@ -254,17 +255,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#F0F0F0',
         marginBottom: 16
     },
-    checkbox: {
-        width: 24,
-        height: 24,
-    },
     button: {
         width: '92%',
         borderRadius: 12,
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        marginBottom: 4,
+        marginBottom: 8,
         alignSelf: 'center'
     },
     warning: {

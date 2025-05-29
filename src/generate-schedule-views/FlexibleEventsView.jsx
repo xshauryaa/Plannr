@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity, Pressable } from 'react-native' 
+import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import FlexibleEvent from '../model/FlexibleEvent'
 import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
 
 const FlexibleEventsView = ({ onNext, minDate}) => {
-    const [flexibleEvents, setFlexibleEvents] = useState([])
-    const [showModal, setShowModal] = useState(false)
+    const [flexibleEvents, setFlexibleEvents] = useState([]);
+    const [showModal, setShowModal] = useState(false);
 
     const addFlexibleEvent = (name, type, duration, priority, deadline) => {
         const eventDeadline = convertDateToScheduleDate(deadline)
@@ -50,12 +50,20 @@ const FlexibleEventsView = ({ onNext, minDate}) => {
                     />
                 </View>
             </View>
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => onNext(flexibleEvents)}
-            >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
-            </TouchableOpacity>
+            <View style={styles.horizontalGrid}>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onBack()}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onNext(flexibleEvents)}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                </TouchableOpacity>
+            </View>
             <AddFlexibleEventsModal
                 isVisible={showModal}
                 onClick={addFlexibleEvent}
@@ -100,16 +108,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         marginBottom: 12
     },
+    horizontalGrid: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginVertical: 16,
+    },
     button: {
-        width: '92%',
+        width: '100%',
         borderRadius: 12,
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        marginVertical: 16,
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
+        marginVertical: 16,
         gap: 12
     }
 })

@@ -6,7 +6,7 @@ import Break from '../model/Break'
 
 import AddBreaksModal from '../components/AddBreaksModal'
 
-const BreaksView = ({ onNext, minDate }) => {
+const BreaksView = ({ onNext, minDate, onBack }) => {
     const [breaks, setBreaks] = useState([])
     const [repBreaks, setRepBreaks] = useState([])
     const [showModal, setShowModal] = useState(false)
@@ -81,12 +81,20 @@ const BreaksView = ({ onNext, minDate }) => {
                     />
                 </View>
             </View>
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => onNext(breaks, repBreaks)}
-            >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
-            </TouchableOpacity>
+            <View style={styles.horizontalGrid}>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onBack()}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
+                    onPress={() => onNext(breaks, repBreaks)}
+                >
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                </TouchableOpacity>
+            </View>
             <AddBreaksModal
                 isVisible={showModal}
                 onClick={addBreak}
@@ -131,16 +139,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         marginBottom: 12
     },
+    horizontalGrid: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginVertical: 16,
+    },
     button: {
-        width: '92%',
+        width: '100%',
         borderRadius: 12,
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        marginVertical: 16,
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
+        marginVertical: 16,
         gap: 12
     }
 })

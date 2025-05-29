@@ -9,7 +9,7 @@ import Priority from '../model/Priority';
 import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
-import useCurrentTime from '../utils/useCurrentTime';
+// import useCurrentTime from '../utils/useCurrentTime';
 import { serializeWeekSchedule, parseWeekSchedule } from '../persistence/WeekScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
 import NotificationService from '../notifications/NotificationService.js';
@@ -136,6 +136,7 @@ export const AppStateProvider = ({ children }) => {
 
     useEffect(() => {
         const loadAppState = async () => {
+            console.log("Loading state")
             try {
                 const raw = await AsyncStorage.getItem('appState');
                 const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
@@ -156,14 +157,12 @@ export const AppStateProvider = ({ children }) => {
         }
     }, [appState]);
 
-    if (appState.userPreferences.taskRemindersEnabled) {
-        useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences.userPreferences);
-    }
+    // useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences);
 
-    // NotificationService.requestPermissions();
-    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(25, 5, 2025), 400, 500);
+    NotificationService.requestPermissions();
+    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(26, 5, 2025), 440, 500);
     // const testTb = TimeBlock.fromRigidEvent(event, false);
-    // NotificationService.scheduleTaskReminder(testTb, 2);
+    // NotificationService.scheduleTaskReminder(testTb, 3);
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>

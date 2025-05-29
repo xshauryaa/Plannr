@@ -1,19 +1,26 @@
 import React, { useState } from 'react'
 import { Image, StyleSheet, TouchableOpacity } from 'react-native'
 
-const Checkbox = ({ checked, onChange }) => {
+const Checkbox = ({ checked, onChange, needAbsolute = true }) => {
     const [isChecked, setIsChecked] = useState(checked)
     
     const handlePress = () => {
         setIsChecked(!isChecked)
-        onChange(!isChecked)
+        onChange()
     }
     
     return (
-        <TouchableOpacity style={styles.checkbox} onPress={handlePress}>
+        (needAbsolute)
+        ? <TouchableOpacity style={styles.checkbox} onPress={handlePress}>
         { isChecked 
             ? <Image style={styles.checkbox} source={require('../../assets/images/Checked.png')}/> 
             : <Image style={styles.checkbox} source={require('../../assets/images/Unchecked.png')}/> 
+        }
+        </TouchableOpacity>
+        : <TouchableOpacity style={{ width: 24, height: 24 }} onPress={handlePress}>
+        { isChecked 
+            ? <Image style={{ width: 24, height: 24 }} source={require('../../assets/images/Checked.png')}/> 
+            : <Image style={{ width: 24, height: 24 }} source={require('../../assets/images/Unchecked.png')}/> 
         }
         </TouchableOpacity>
     )

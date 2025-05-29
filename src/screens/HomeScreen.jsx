@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import * as Font from 'expo-font';
 
@@ -10,6 +10,7 @@ import MenuButton from '../components/MenuButton';
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
+import NotificationService from '../notifications/NotificationService.js';
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();

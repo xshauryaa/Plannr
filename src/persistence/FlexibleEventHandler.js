@@ -11,7 +11,8 @@ export const serializeFlexibleEvent = (eventObj) => {
         type: serializeActivityType(eventObj.type),
         duration: eventObj.duration,
         priority: serializePriority(eventObj.priority),
-        deadline: serializeScheduleDate(eventObj.deadline)
+        deadline: serializeScheduleDate(eventObj.deadline),
+        id: eventObj.id
     }
 }
 
@@ -25,6 +26,7 @@ export const parseFlexibleEvent = (rawObj) => {
         parseActivityType(rawObj.type),
         rawObj.duration,
         parsePriority(rawObj.priority),
-        parseScheduleDate(rawObj.deadline)
+        parseScheduleDate(rawObj.deadline),
+        rawObj.id
     );
 }

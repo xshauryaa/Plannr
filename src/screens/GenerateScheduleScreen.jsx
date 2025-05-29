@@ -11,15 +11,11 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
 
 const GenerateScheduleScreen = () => {
-    const [genStage, setGenStage] = useState(0)
-    const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8))
-    const [breaks, setBreaks] = useState([])
-    const [repeatedBreaks, setRepeatedBreaks] = useState([])
-    const [rigidEvents, setRigidEvents] = useState([])
-    const [flexibleEvents, setFlexibleEvents] = useState([])
-    const [deps, setDeps] = useState(null)
-    const [schedule, setSchedule] = useState(null)
-    const [firstDate, setFirstDate] = useState(new Date())
+    const [genStage, setGenStage] = useState(0);
+    const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8));
+    const [events, setEvents] = useState([]);
+    const [schedule, setSchedule] = useState(null);
+    const [firstDate, setFirstDate] = useState(new Date());
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Final Information']
 
@@ -36,27 +32,24 @@ const GenerateScheduleScreen = () => {
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
-        // setBreaks(breakList)
-        // setRepeatedBreaks(repeatedBreakList)
         scheduler.setBreaks(breakList)
         scheduler.setRepeatedBreaks(repeatedBreakList)
         setGenStage(2)
     }
 
     const RigidEventsSetup = (eventsList) => {
-        // setRigidEvents(eventsList)
-        scheduler.setRigidEvents(eventsList)
-        setGenStage(3)
+        scheduler.setRigidEvents(eventsList);
+        setEvents([...events, ...eventsList]);
+        setGenStage(3);
     }
 
     const FlexibleEventsSetup = (eventsList) => {
-        // setFlexibleEvents(eventsList)
-        scheduler.setFlexibleEvents(eventsList)
-        setGenStage(4)
+        scheduler.setFlexibleEvents(eventsList);
+        setEvents([...events, ...eventsList]);
+        setGenStage(4);
     }
 
     const EventDepsSetup = (eventDeps) => {
-        // setDeps(eventDeps)
         scheduler.setEventDependencies(eventDeps)
         setGenStage(5)
     }
@@ -71,7 +64,7 @@ const GenerateScheduleScreen = () => {
         <BreaksView onNext={BreaksSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
         <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
         <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <EventDependenciesView onNext={EventDepsSetup} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <EventDependenciesView onNext={EventDepsSetup} events={events} onBack={() => {setGenStage(genStage - 1)}}/>,
         <FinalCheckView onNext={Generation} onBack={() => {setGenStage(genStage - 1)}}/>
     ]
     return (

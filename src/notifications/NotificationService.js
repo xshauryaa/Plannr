@@ -50,7 +50,10 @@ const NotificationService = {
                     sound: true,
                     priority: Notifications.AndroidNotificationPriority.HIGH,
                 },
-                trigger: notificationTime,
+                trigger: {
+                    type:'date', 
+                    date: notificationTime
+                },
             });
 
             console.log(`Notification scheduled for "${name}" → ID: ${notificationId}`);
@@ -105,7 +108,10 @@ const NotificationService = {
 
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content,
-                trigger: notificationTime,
+                trigger: {
+                    type:'date', 
+                    date: notificationTime
+                },
             });
 
             console.log(`[Daily Summary] Scheduled for 11 PM → allComplete=${allComplete}, ID=${notificationId}`);
@@ -126,6 +132,23 @@ const NotificationService = {
             console.error('❌ Failed to cancel all notifications:', error);
         }
     },
+
+    async sendDummyNotification() {
+        const notificationId = await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "😭😭😭 Test Notification",
+                body: "This is a test notification. Please ignore.",
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+                seconds: 5,
+            }
+        })
+
+        console.log("Dummy notification scheduled:", notificationId);
+        const check = await Notifications.getAllScheduledNotificationsAsync();
+        console.log(check);
+    }
 }
 
 export default NotificationService
