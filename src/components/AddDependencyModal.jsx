@@ -9,6 +9,13 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
     const [prerequisiteEvents, setPrerequisiteEvents] = useState([]);
     const [showSelectedEventPicker, setShowSelectedEventPicker] = useState(false);
 
+
+    const setToDefaults = () => {
+        setSelectedEvent(null);
+        setPrerequisiteEvents([]);
+        setShowSelectedEventPicker(false);
+    }
+
     return (
         <Modal 
             isVisible={isVisible}
@@ -29,7 +36,6 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                             selectedValue={selectedEvent?.id}
                             onValueChange={(itemId) => {
                                 const eventObj = events.find(e => e.id === itemId);
-                                console.log(eventObj);
                                 setSelectedEvent(eventObj);
                               }}
                         >
@@ -49,6 +55,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                 <MultiSelect 
                     currentSelected={selectedEvent}
                     items={events}
+                    selectedItems={prerequisiteEvents}
                     onSelect={(events) => { setPrerequisiteEvents(events) }}
                 />
                 <View style={{ height: 56, justifyContent: 'center' }}>
@@ -59,7 +66,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                         renderItem={({ item }) => (
                             <View style={styles.chip}>
                                 <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
-                                <TouchableOpacity onPress={() => setPrerequisiteEvents(prerequisiteEvents.filter(e => e.id !== item.id))}>
+                                <TouchableOpacity onPress={() => setPrerequisiteEvents(prev => prev.filter(e => e.id !== item.id))}>
                                     <Image source={require('../../assets/images/CrossIcon.png')} style={{ height: 24, width: 24 }} />
                                 </TouchableOpacity>
                             </View>
@@ -68,7 +75,10 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                 </View>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => { onClick(selectedEvent, prerequisiteEvents)}}
+                    onPress={() => { 
+                        onClick(selectedEvent, prerequisiteEvents);
+                        setToDefaults();
+                    }}
                 >
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Dependency Set</Text>
                 </TouchableOpacity>

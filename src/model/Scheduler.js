@@ -1,4 +1,9 @@
-import WeekSchedule from './Schedule.js';
+import Schedule from './Schedule.js';
+import ScheduleDate from './ScheduleDate.js';
+import RigidEvent from './RigidEvent.js';
+import FlexibleEvent from './FlexibleEvent.js';
+import Break from './Break.js';
+import EventDependencies from './EventDependencies.js';
 import EarliestFitStrategy from './EarliestFitStrategy.js';
 import BalancedWorkStrategy from './BalancedWorkStrategy.js';
 import DeadlineOrientedStrategy from './DeadlineOrientedStrategy.js';
@@ -99,7 +104,7 @@ class Scheduler {
    * @param {string} strategy - 'Earliest Fit', 'Balanced Work', or 'Deadline Oriented'
    * @param {number} earliestStartTime - e.g. 900
    * @param {number} latestEndTime - e.g. 1800
-   * @returns {WeekSchedule}
+   * @returns {Schedule}
    */
   createSchedules(strategy, earliestStartTime, latestEndTime) {
     switch (strategy) {

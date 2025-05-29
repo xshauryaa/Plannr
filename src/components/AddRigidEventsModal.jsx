@@ -7,7 +7,7 @@ import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
-const AddRigidEventsModal = ({ isVisible, onClick, minDate }) => {
+const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
     const [startTime, setStartTime] = useState(new Date())
@@ -21,7 +21,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate }) => {
     const [showWarning, setShowWarning] = useState(false)
 
     const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + 6)
+    maxDate.setDate(minDate.getDate() + (numDays - 1))
 
     const getActivityLabel = (activityType) => {
         const labelMap = {
@@ -98,6 +98,20 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate }) => {
                 </View>
             </View>
         )
+    }
+
+    const setToDefaults = () => {
+        setName('')
+        setType(ActivityType.PERSONAL)
+        setStartTime(new Date())
+        setEndTime(new Date())
+        setDateOfEvent(new Date())
+        setShowStartPicker(false)
+        setShowEndPicker(false)
+        setShowDatePicker(false)
+        setShowTypePicker(false)
+        setWarning('')
+        setShowWarning(false)
     }
 
     return (
@@ -226,6 +240,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate }) => {
                         } else {
                             setShowWarning(false)
                             onClick(name, type, dateOfEvent, startTime, endTime)
+                            setToDefaults();
                         }
                     }}
                 >

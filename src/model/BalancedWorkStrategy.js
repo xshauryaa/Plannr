@@ -1,5 +1,5 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
-import WeekSchedule from './Schedule.js';
+import Schedule from './Schedule.js';
 import Time24 from './Time24.js';
 import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
@@ -23,14 +23,14 @@ class BalancedWorkStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.balancedWorkSchedule = new WeekSchedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.balancedWorkSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
   }
 
   /**
    * Generates a balanced schedule for the week.
    * @param {number} earliestStartTime 
    * @param {number} latestEndTime 
-   * @returns {WeekSchedule}
+   * @returns {Schedule} the balanced work schedule
    */
   generateSchedule(earliestStartTime, latestEndTime) {
     const startTime = new Time24(earliestStartTime);

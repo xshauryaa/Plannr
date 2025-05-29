@@ -25,8 +25,7 @@ const TaskCompletionChecker = () => {
         if (!activeSchedule) return;
 
         const todaysDate = convertDateToScheduleDate(currentTime);
-        const todaysDay = activeSchedule.getDayFromDate(todaysDate);
-        const todaysTasks = activeSchedule.getScheduleForDay(todaysDay).getTimeBlocks();
+        const todaysTasks = activeSchedule.getScheduleForDate(todaysDate).getTimeBlocks();
         if (todaysTasks.length === 0) return;
 
         const currTime = convertTimeToTime24(currentTime);

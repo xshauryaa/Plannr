@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import Checkbox from './Checkbox';
 
-const MultiSelect = ({ currentSelected, items, onSelect }) => {
-    let checkedItems = [];
+const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
+    const [checkedItems, setCheckedItems] = useState([]);
     const [showOptions, setShowOptions] = useState(false);
 
     return (
@@ -20,24 +20,25 @@ const MultiSelect = ({ currentSelected, items, onSelect }) => {
                 <FlatList
                     data={items.filter(item => item.id !== currentSelected?.id)}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <View 
-                            style={{ padding: 8, borderBottomWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                        >
-                            <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
-                            <Checkbox 
-                                onChange={() => { 
-                                    if (checkedItems.includes(item)) {
-                                        checkedItems = checkedItems.filter(i => i.id !== item.id);
-                                    } else {
-                                        checkedItems = [ ...checkedItems, item ];
-                                    }
-                                    onSelect(checkedItems); }} 
-                                checked={checkedItems.includes(item)} 
-                                needAbsolute={false} 
-                            />
-                        </View>
-                    )}
+                    renderItem={({ item }) => {
+                        const isChecked = selectedItems.some(i => i.id === item.id);
+                        return (
+                            <View 
+                                style={{ padding: 8, borderBottomWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                            >
+                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
+                                <Checkbox 
+                                    onChange={() => {
+                                        const updated = isChecked
+                                          ? selectedItems.filter(i => i.id !== item.id)
+                                          : [...selectedItems, item];
+                                        onSelect(updated);
+                                    }} 
+                                    checked={checkedItems.includes(item)} 
+                                    needAbsolute={false} 
+                                />
+                            </View>
+                    )}}
                     style={{ maxHeight: 200, backgroundColor: '#FFF', borderRadius: 12, marginTop: 8 }}
                 />) 
             }

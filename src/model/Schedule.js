@@ -26,7 +26,7 @@ class Schedule {
     this.schedule = schedule; // ordered map of day → DaySchedule
     if (this.schedule == null) {
         this.schedule = new Map();
-        this._initiateWeekSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit);
+        this._initiateSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit);
     }
   }
 
@@ -164,7 +164,7 @@ class Schedule {
    * @param {string} day1Day 
    * @param {number} workingHoursLimit 
    */
-  _initiateWeekSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit) {
+  _initiateSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit) {
     let index = DAYS.indexOf(day1Day);
     let currDate = day1Date;
 

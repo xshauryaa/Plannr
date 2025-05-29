@@ -66,7 +66,7 @@ const TodaysTasksScreen = () => {
                                         updatedTasks[index] = updatedTask;
                                         setTaskData(updatedTasks);
                                       
-                                        // 2. Update appState.activeSchedule.weekSchedule
+                                        // 2. Update appState.activeSchedule.schedule
                                         const currentDaySchedule = appState.activeSchedule.getScheduleForDate(todaysDate);
                                       
                                         const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
@@ -84,15 +84,15 @@ const TodaysTasksScreen = () => {
                                           updatedTimeBlocks
                                         );
                                       
-                                        const updatedWeekSchedule = new Map(appState.activeSchedule.weekSchedule);
-                                        updatedWeekSchedule.set(todayStr, updatedDaySchedule);
+                                        const updatedScheduleMap = new Map(appState.activeSchedule.schedule);
+                                        updatedScheduleMap.set(todayStr, updatedDaySchedule);
                                       
                                         const updatedSchedule = new appState.activeSchedule.constructor(
                                           appState.activeSchedule.minGap,
                                           appState.activeSchedule.day1Date,
                                           appState.activeSchedule.day1Day,
                                           appState.activeSchedule.workingHoursLimit,
-                                          updatedWeekSchedule
+                                          updatedScheduleMap
                                         );
                                       
                                         setAppState(prev => ({

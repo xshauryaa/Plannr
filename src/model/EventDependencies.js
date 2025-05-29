@@ -4,9 +4,14 @@ import CircularDependencyError from './exceptions/CircularDependencyError.js';
  * Represents a collection of events mapped to their dependencies.
  */
 class EventDependencies {
-  constructor() {
-    // Map from Event instances to arrays of dependent Event instances
-    this.dependencies = new Map(); // preserves insertion order like LinkedHashMap
+  constructor(depMap=null) {
+    if (depMap === null) {
+        this.dependencies = new Map();
+    } else if (depMap instanceof Map) {
+        this.dependencies = new Map(depMap);
+    } else {
+        throw new TypeError('Expected depMap to be a Map or null');
+    }
   }
 
   /**
@@ -43,6 +48,9 @@ class EventDependencies {
     const deps = this.dependencies.get(event);
     if (deps) {
       this.dependencies.set(event, deps.filter(d => !d.equals(dependency)));
+    }
+    if (this.dependencies.get(event).length == 0) {
+        this.dependencies.delete(event);
     }
   }
 

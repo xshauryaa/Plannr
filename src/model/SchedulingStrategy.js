@@ -1,6 +1,6 @@
 import Time24 from './Time24.js';
 import ScheduleDate from './ScheduleDate.js';
-import WeekSchedule from './Schedule.js';
+import Schedule from './Schedule.js';
 import EventDependencies from './EventDependencies.js';
 import ActivityType from './ActivityType.js';
 
@@ -13,7 +13,7 @@ class SchedulingStrategy {
    * Abstract method to be implemented by subclasses.
    * @param {number} earliestStartTime - in 24-hour format (e.g. 900)
    * @param {number} latestEndTime - in 24-hour format (e.g. 1700)
-   * @returns {WeekSchedule}
+   * @returns {Schedule}
    */
   generateSchedule(earliestStartTime, latestEndTime) {
     throw new Error('generateSchedule() must be implemented by subclass');
@@ -68,7 +68,7 @@ class SchedulingStrategy {
 
   /**
    * Finds the latest allowable date and time for an event based on dependency constraints.
-   * @param {WeekSchedule} schedule 
+   * @param {Schedule} schedule 
    * @param {EventDependencies} eventDependencies 
    * @param {Event} event 
    * @param {Time24} latestEndTime 

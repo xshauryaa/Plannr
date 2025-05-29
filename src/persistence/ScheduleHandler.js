@@ -17,17 +17,17 @@ export const serializeSchedule = (schedule) => {
         day1Day: schedule.day1Day,
         minGap: schedule.minGap,
         workingHoursLimit: schedule.workingHoursLimit,
-        weekSchedule: datesList
+        schedule: datesList
     };
 }
 
 export const parseSchedule = (rawObj) => {
-    if (!rawObj || rawObj.day1Date == null || rawObj.weekSchedule == null) {
+    if (!rawObj || rawObj.day1Date == null || rawObj.schedule == null) {
         return null;
     }
 
     let schedule = new Map();
-    for (const [day, rawDaySchedule] of rawObj.weekSchedule) {
+    for (const [day, rawDaySchedule] of rawObj.schedule) {
         const parsedDay = parseDaySchedule(rawDaySchedule);
         if (!parsedDay) {
             continue;

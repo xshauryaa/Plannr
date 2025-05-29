@@ -1,5 +1,5 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
-import WeekSchedule from './Schedule.js';
+import Schedule from './Schedule.js';
 import Time24 from './Time24.js';
 import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
@@ -16,14 +16,14 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.deadlineOrientedSchedule = new WeekSchedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.deadlineOrientedSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
   }
 
   /**
    * Generates a deadline-oriented schedule.
    * @param {number} earliestStartTime 
    * @param {number} latestEndTime 
-   * @returns {WeekSchedule}
+   * @returns {Schedule} the deadline-oriented schedule
    */
   generateSchedule(earliestStartTime, latestEndTime) {
     const startTime = new Time24(earliestStartTime);

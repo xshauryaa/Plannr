@@ -5,7 +5,7 @@ import Modal from 'react-native-modal'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
-const AddBreaksModal = ({ isVisible, onClick, minDate, }) => {
+const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
     const [dateOfBreak, setDateOfBreak] = useState(new Date())
@@ -16,9 +16,20 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, }) => {
     const [showWarning, setShowWarning] = useState(false)
 
     const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + 6)
+    maxDate.setDate(minDate.getDate() + (numDays - 1))
 
     const warning = "End time must be after start time"
+
+    const setToDefaults = () => {
+        setStartTime(new Date())
+        setEndTime(new Date())
+        setDateOfBreak(new Date())
+        setRepeated(false)
+        setShowStartPicker(false)
+        setShowEndPicker(false)
+        setShowDatePicker(false)
+        setShowWarning(false)
+    }
 
     return (
         <Modal
@@ -137,6 +148,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, }) => {
                     <Text style={{ ...styles.subHeading, marginBottom: 0 }}>Check this box to add this break on all days</Text>
                 </View>
 
+                {/* Warning message */}
                 {showWarning && <Text style={styles.warning}>{warning}</Text>}
 
                 { /* Add Break Button */ }
@@ -150,6 +162,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, }) => {
                         } else {
                             setShowWarning(false)
                             onClick(startTime, endTime, repeated, dateOfBreak)
+                            setToDefaults();
                         }
                     }}
                 >

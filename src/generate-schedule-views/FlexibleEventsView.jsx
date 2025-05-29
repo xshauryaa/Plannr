@@ -4,7 +4,7 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import FlexibleEvent from '../model/FlexibleEvent'
 import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
 
-const FlexibleEventsView = ({ onNext, minDate}) => {
+const FlexibleEventsView = ({ onNext, minDate, numDays, onBack }) => {
     const [flexibleEvents, setFlexibleEvents] = useState([]);
     const [showModal, setShowModal] = useState(false);
 
@@ -68,6 +68,7 @@ const FlexibleEventsView = ({ onNext, minDate}) => {
                 isVisible={showModal}
                 onClick={addFlexibleEvent}
                 minDate={minDate}
+                numDays={numDays}
             />
         </View>
     )

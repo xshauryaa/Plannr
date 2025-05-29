@@ -5,30 +5,46 @@ import AddDependencyModal from '../components/AddDependencyModal';
 
 
 const EventDependenciesView = ({ onNext, events, onBack }) => {
-    let dummyDependencies = new EventDependencies();
-    const [eventDependencies, setEventDependencies] = useState(dummyDependencies);
+    const [eventDependencies, setEventDependencies] = useState(new EventDependencies());
     const [showModal, setShowModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
 
     const addEventDependency = (event, prerequisiteEvents) => {
-        console.log(event);
+        let prereq = null
         try {
-            for (const prereq of prerequisiteEvents) {
-                dummyDependencies.addDependency(event, prereq);
+            for (prereq of prerequisiteEvents) {
+                eventDependencies.addDependency(event, prereq);
             }
         } catch (CircularDependencyError) {
             console.warn("Circular dependency detected:", event, prereq);
             setShowErrorModal(true);
-            for (const prereq of prerequisiteEvents) {
-                dummyDependencies.removeDependency(event, prereq);
+            for (prereq of prerequisiteEvents) {
+                eventDependencies.removeDependency(event, prereq);
             }
         }
-        setEventDependencies(dummyDependencies);
+        setEventDependencies(new EventDependencies(eventDependencies.getDependencies()));
         setShowModal(false);
     }
 
     const renderDependencySet = (dependentEvent) => {
-        return (<View></View>);
+        const dependencies = eventDependencies.getDependenciesForEvent(dependentEvent);
+        const listOfDeps = dependencies.map(dep => dep.name).join(', ');
+
+        return (
+            <View style={styles.depCard}>
+                <Text style={{ ...styles.subHeading, fontSize: 12 }}>{dependentEvent.name}  </Text>
+                <Text style={{ ...styles.subHeading, fontSize: 12 }}>{listOfDeps}</Text>
+                <TouchableOpacity onPress={() => { 
+                    const deps = eventDependencies.getDependenciesForEvent(dependentEvent);
+                    for (const dep of deps) {
+                        dummyDependencies.removeDependency(dependentEvent, dep);
+                    }
+                    setEventDependencies(dummyDependencies) 
+                }}>
+                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     return (
@@ -46,7 +62,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     <FlatList
                         data={Array.from(eventDependencies.getDependencies().keys())}
                         showsVerticalScrollIndicator={false}
-                        keyExtractor={({ item }) => item.id }
+                        keyExtractor={( item ) => item.id }
                         renderItem={({ item }) => renderDependencySet(item)}
                     />
                 </View>
@@ -117,7 +133,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginVertical: 16,
         gap: 12
-    }
+    },
+    depCard: {
+        height: 40, 
+        backgroundColor: "#F0F0F0",
+        borderRadius: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        marginBottom: 12
+    },
 })
 
 export default EventDependenciesView

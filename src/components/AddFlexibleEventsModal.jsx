@@ -7,10 +7,10 @@ import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import Priority from '../model/Priority.js'
 
-const AddFlexibleEventsModal = ({ isVisible, onClick, minDate }) => {
+const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + 6)
-
+    maxDate.setDate(minDate.getDate() + (numDays - 1))
+    
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
     const [duration, setDuration] = useState('0')
@@ -108,6 +108,19 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate }) => {
                 </View>
             </View>
         )
+    }
+
+    const setToDefaults = () => {
+        setName('')
+        setType(ActivityType.PERSONAL)
+        setDuration('0')
+        setPriority(Priority.MEDIUM)
+        setDeadline(maxDate)
+        setShowDatePicker(false)
+        setShowTypePicker(false)
+        setShowPriorityPicker(false)
+        setWarning('')
+        setShowWarning(false)
     }
 
     return (
@@ -212,9 +225,13 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate }) => {
                         if (name.length == 0) {
                             setWarning("Name of event cannot be empty")
                             setShowWarning(true)
+                        } else if (parseInt(duration) == 0) {
+                            setWarning("Duration of event cannot be 0")
+                            setShowWarning(true)
                         } else {
                             setShowWarning(false)
                             onClick(name, type, duration, priority, deadline)
+                            setToDefaults();
                         }
                     }}
                 >

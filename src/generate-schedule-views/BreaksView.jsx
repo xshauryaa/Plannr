@@ -6,7 +6,7 @@ import Break from '../model/Break'
 
 import AddBreaksModal from '../components/AddBreaksModal'
 
-const BreaksView = ({ onNext, minDate, onBack }) => {
+const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
     const [breaks, setBreaks] = useState([])
     const [repBreaks, setRepBreaks] = useState([])
     const [showModal, setShowModal] = useState(false)
@@ -99,6 +99,7 @@ const BreaksView = ({ onNext, minDate, onBack }) => {
                 isVisible={showModal}
                 onClick={addBreak}
                 minDate={minDate}
+                numDays={numDays}
             />
         </View>
     )

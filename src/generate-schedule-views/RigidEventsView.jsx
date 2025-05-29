@@ -5,7 +5,7 @@ import AddRigidEventsModal from '../components/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
-const RigidEventsView = ({ onNext, minDate, onBack }) => {
+const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
     const [rigidEvents, setRigidEvents] = useState([])
     const [showModal, setShowModal] = useState(false)
 
@@ -72,6 +72,7 @@ const RigidEventsView = ({ onNext, minDate, onBack }) => {
                 isVisible={showModal}
                 onClick={addRigidEvent}
                 minDate={minDate}
+                numDays={numDays}
             />
         </View>
     )

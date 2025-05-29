@@ -10,9 +10,9 @@ export default function useScheduleNotificationSync(activeSchedule, userPreferen
             await NotificationService.cancelAllNotifications();
 
             // Step 2: Loop through all days & timeBlocks
-            const allDays = Object.keys(activeSchedule.weekSchedule);
-            for (const day of allDays) {
-                const tasks = activeSchedule.getScheduleForDay(day).getTimeBlocks();
+            const allDates = activeSchedule.getAllDatesInOrder();
+            for (const date of allDates) {
+                const tasks = activeSchedule.getScheduleForDate(date).getTimeBlocks();
 
                 for (const task of tasks) {
                     if (task.type === 'break' || task.isCompleted) continue;
