@@ -1,6 +1,6 @@
-import Schedule, { DAYS } from "../model/Schedule.js";
+import Schedule from "../model/Schedule.js";
 import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
-import { serializeDaySchedule, parseDaySchedule } from "./DayScheduleHandler.js";
+import { serializeDaySchedule, parseDaySchedule } from "./DayHandler.js";
 
 
 export const serializeSchedule = (schedule) => {
@@ -12,6 +12,7 @@ export const serializeSchedule = (schedule) => {
     }
 
     return {
+        numDays: schedule.numDays,
         day1Date: serializeScheduleDate(schedule.day1Date),
         day1Day: schedule.day1Day,
         minGap: schedule.minGap,
@@ -34,11 +35,12 @@ export const parseSchedule = (rawObj) => {
         schedule.set(day, parsedDay);
     }
 
+    const numDays = rawObj.numDays;
     const minGap = rawObj.minGap;
     const workingHoursLimit = rawObj.workingHoursLimit;
     let day1Day = rawObj.day1Day;
 
-    let scheduleToReturn = new Schedule(minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, schedule);
+    let scheduleToReturn = new Schedule(numDays, minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, schedule);
 
 
     return scheduleToReturn;

@@ -46,20 +46,6 @@ class Schedule {
   }
 
   /**
-   * @param {ScheduleDate} date 
-   * @returns {string|null} the day of the week corresponding to the given date
-   */
-  getDayFromDate(date) {
-    for (const day of DAYS) {
-      const schedule = this.getScheduleForDate(day);
-      if (schedule && schedule.getDate().equals(date)) {
-        return day;
-      }
-    }
-    return null;
-  }
-
-  /**
    * @param {string} date 
    * @returns {Day} the schedule for the specified day
    */
@@ -186,7 +172,6 @@ class Schedule {
       const dayName = DAYS[index % 7];
       const schedule = new Day(dayName, currDate, minGap, workingHoursLimit, [], [], []);
       this.schedule.set(currDate.getId(), schedule);
-      console.log(`Initialized schedule for ${dayName} on ${currDate.getDateString()}`);
       currDate = currDate.getNextDate();
       index++;
     }
@@ -194,4 +179,3 @@ class Schedule {
 }
 
 export default Schedule;
-export { DAYS };

@@ -10,7 +10,7 @@ import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 // import useCurrentTime from '../utils/useCurrentTime';
-import { serializeSchedule, parseSchedule } from '../persistence/WeekScheduleHandler.js';
+import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
 import NotificationService from '../notifications/NotificationService.js';
 import TimeBlock from '../model/TimeBlock.js';
@@ -21,7 +21,7 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
     function schedulerTest1() {
-        const scheduler = new Scheduler(new ScheduleDate(23, 5, 2025), 'Friday', 30, 6);
+        const scheduler = new Scheduler(7,new ScheduleDate(23, 5, 2025), 'Friday', 30, 6);
         
         // --- Rigid Events ---
         const rigidEvents = [

@@ -5,10 +5,11 @@ import { AppStateContext } from '../context/AppStateContext'
 
 const InfoView = ({ onNext }) => {
     const { appState } = useContext(AppStateContext)
-    const [showPicker, setShowPicker] = useState(false)
-    const [startDate, setStartDate] = useState(new Date())
-    const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap)
-    const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours)
+    const [showPicker, setShowPicker] = useState(false);
+    const [startDate, setStartDate] = useState(new Date());
+    const [numDays, setNumDays] = useState('1');
+    const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap);
+    const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours);
 
     return (
         <View style={styles.subContainer}>
@@ -45,6 +46,18 @@ const InfoView = ({ onNext }) => {
                         </View>
                     )}
                 </View>
+                <Text style={styles.subHeading}>How many days would you like to schedule for?</Text>
+                <View style={styles.card}>
+                    <TextInput
+                        style={styles.input}
+                        value={numDays}
+                        autoCorrect={false}
+                        autoCapitalize='words'
+                        onChange={ ({ nativeEvent }) => { 
+                            setNumDays(nativeEvent.text)
+                        } }
+                    />
+                </View>
                 <Text style={styles.subHeading}>Minimum gap between scheduled events (in mins)</Text>
                 <View style={styles.card}>
                     <TextInput
@@ -72,7 +85,7 @@ const InfoView = ({ onNext }) => {
             </View>
             <TouchableOpacity 
                 style={styles.button}
-                onPress={() => onNext(startDate, minGap, maxHours)}
+                onPress={() => onNext(numDays, startDate, minGap, maxHours)}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>

@@ -19,13 +19,14 @@ const GenerateScheduleScreen = () => {
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Final Information']
 
-    const SchedulerInitialization = (date, gap, workingLimit) => {
+    const SchedulerInitialization = (numDays, date, gap, workingLimit) => {
         const startDate = convertDateToScheduleDate(date)
         const dayString = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const numDaysInt = parseInt(numDays)
         const minGap = parseInt(gap)
         const maxHours = parseInt(workingLimit)
 
-        setScheduler(new Scheduler(startDate, dayString, minGap, maxHours))
+        setScheduler(new Scheduler(numDays, startDate, dayString, minGap, maxHours))
         setGenStage(1)
 
         setFirstDate(date)
