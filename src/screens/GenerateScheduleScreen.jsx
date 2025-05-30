@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
-import InfoView from '../generate-schedule-views/InfoView'
-import BreaksView from '../generate-schedule-views/BreaksView'
-import RigidEventsView from '../generate-schedule-views/RigidEventsView'
-import FlexibleEventsView from '../generate-schedule-views/FlexibleEventsView'
-import EventDependenciesView from '../generate-schedule-views/EventDependenciesView'
-import FinalCheckView from '../generate-schedule-views/FinalCheckView'
+import InfoView from '../generate-schedule-views/InfoView.jsx'
+import BreaksView from '../generate-schedule-views/BreaksView.jsx'
+import RigidEventsView from '../generate-schedule-views/RigidEventsView.jsx'
+import FlexibleEventsView from '../generate-schedule-views/FlexibleEventsView.jsx'
+import EventDependenciesView from '../generate-schedule-views/EventDependenciesView.jsx'
+import FinalCheckView from '../generate-schedule-views/FinalCheckView.jsx'
+import GenerationView from '../generate-schedule-views/GenerationView.jsx'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
 
@@ -16,6 +17,7 @@ const GenerateScheduleScreen = () => {
     const [events, setEvents] = useState([]);
     const [schedule, setSchedule] = useState(null);
     const [firstDate, setFirstDate] = useState(new Date());
+    const [showLoadingScreen, setShowLoadingScreen] = useState(false);
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
 
@@ -64,8 +66,8 @@ const GenerateScheduleScreen = () => {
                     ? strategy = "Deadline Oriented"
                     : null
         setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
-        console.log(scheduler.createSchedules(strategy, startTime, endTime))
-        setGenStage(6)
+        setGenStage(6);
+        setShowLoadingScreen(true);
     }
 
     const views = [
@@ -74,7 +76,8 @@ const GenerateScheduleScreen = () => {
         <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
         <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
         <EventDependenciesView onNext={EventDepsSetup} events={events} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <FinalCheckView onNext={Generation}/>
+        <FinalCheckView onNext={Generation}/>,
+        <GenerationView playAnim={showLoadingScreen}/>
     ]
 
     return (
