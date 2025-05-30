@@ -27,12 +27,12 @@ export const parseSchedule = (rawObj) => {
     }
 
     let schedule = new Map();
-    for (const [day, rawDaySchedule] of rawObj.schedule) {
+    for (const [date, rawDaySchedule] of rawObj.schedule) {
         const parsedDay = parseDaySchedule(rawDaySchedule);
         if (!parsedDay) {
             continue;
         }
-        schedule.set(day, parsedDay);
+        schedule.set(date, parsedDay);
     }
 
     const numDays = rawObj.numDays;

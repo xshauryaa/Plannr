@@ -1,6 +1,7 @@
-import React, { useContext } from 'react'
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Switch } from 'react-native'
+import React, { useState } from 'react'
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Switch, Pressable } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
@@ -89,32 +90,6 @@ const PreferencesScreen = () => {
                 </View>
                 <Text style={styles.subHeading}>Time Constraints</Text>
                 <View style={{ ...styles.card, gap: 16}}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Start Time</Text>
-                            <TextInput
-                                style={{ ...styles.input, width: '90%' }}
-                                value={appState.userPreferences.defaultStartTime}
-                                autoCorrect={false}
-                                autoCapitalize='words'
-                                onChange={ ({ nativeEvent }) => { 
-                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStartTime: nativeEvent.text }})
-                                } }
-                            />
-                        </View>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>End Time</Text>
-                            <TextInput
-                                style={{ ...styles.input, width: '90%' }}
-                                value={appState.userPreferences.defaultEndTime}
-                                autoCorrect={false}
-                                autoCapitalize='words'
-                                onChange={ ({ nativeEvent }) => { 
-                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultEndTime: nativeEvent.text }})
-                                } }
-                            />
-                        </View>
-                    </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <View style={{ width: '50%' }}>
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8 }}>Min. Gap (mins)</Text>
@@ -263,6 +238,15 @@ const styles = StyleSheet.create({
         backgroundColor: '#F0F0F0' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
+    },
+    button: {
+        width: '92%',
+        borderRadius: 12,
+        backgroundColor: '#000' ,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginBottom: 8,
+        alignSelf: 'center'
     }
 })
 

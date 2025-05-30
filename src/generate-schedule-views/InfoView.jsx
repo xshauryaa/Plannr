@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { AppStateContext } from '../context/AppStateContext'
+import { useAppState } from '../context/AppStateContext'
 
 const InfoView = ({ onNext }) => {
-    const { appState } = useContext(AppStateContext)
+    const { appState } = useAppState();
     const [showPicker, setShowPicker] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
     const [numDays, setNumDays] = useState('1');

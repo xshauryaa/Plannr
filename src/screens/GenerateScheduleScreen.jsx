@@ -17,7 +17,7 @@ const GenerateScheduleScreen = () => {
     const [schedule, setSchedule] = useState(null);
     const [firstDate, setFirstDate] = useState(new Date());
 
-    const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Final Information']
+    const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
 
     const SchedulerInitialization = (numDays, date, gap, workingLimit) => {
         const startDate = convertDateToScheduleDate(date)
@@ -56,7 +56,15 @@ const GenerateScheduleScreen = () => {
     }
 
     const Generation = (startTime, endTime, strategy) => {
+        (strategy == 'earliest-fit')
+            ? strategy = "Earliest Fit" 
+            : (strategy == 'balanced-work')
+                ? strategy = "Balanced Work"
+                : (strategy == 'deadline-oriented')
+                    ? strategy = "Deadline Oriented"
+                    : null
         setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
+        console.log(scheduler.createSchedules(strategy, startTime, endTime))
         setGenStage(6)
     }
 
@@ -66,7 +74,7 @@ const GenerateScheduleScreen = () => {
         <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
         <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
         <EventDependenciesView onNext={EventDepsSetup} events={events} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <FinalCheckView onNext={Generation} onBack={() => {setGenStage(genStage - 1)}}/>
+        <FinalCheckView onNext={Generation}/>
     ]
 
     return (

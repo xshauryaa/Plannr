@@ -16,7 +16,7 @@ const TodaysTasksScreen = () => {
 
     // Check if the user has an active schedule
     if (appState.activeSchedule !== null) {
-        const todaysSchedule = appState.activeSchedule.getScheduleForDate(todaysDate);
+        const todaysSchedule = appState.activeSchedule.getScheduleForDate(todaysDate.getId());
         if (todaysSchedule !== undefined) {
             tasks = todaysSchedule.getTimeBlocks();
         }
@@ -32,6 +32,15 @@ const TodaysTasksScreen = () => {
         const check = taskData.every(task => task.isCompleted)
         setAllComplete(check)
     }, [taskData])
+
+    const NoTasksView = () => {
+        return (
+            <View style={styles.completion}>
+                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/NoTasks.png")}/>
+                <Text style={styles.subHeading}>You have no tasks due for today.</Text>
+            </View>
+        )
+    }
 
     const TasksCompletedView = () => {
         return (
@@ -116,7 +125,9 @@ const TodaysTasksScreen = () => {
             <Text style={styles.title}>Today's Tasks</Text>
             <View style={styles.subContainer}>
                 <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
-                { (allCompleted)
+                { (taskData.length == 0)
+                    ? NoTasksView()
+                    : (allCompleted)
                         ? TasksCompletedView()
                         : TaskListView()
                 }
