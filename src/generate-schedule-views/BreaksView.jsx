@@ -59,11 +59,11 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Break</Text>
                 </TouchableOpacity>
                 <Text style={styles.subHeading}>Everyday Breaks</Text>
-                <View style={{ ...styles.card, height: 200 }}>
+                <View style={{ ...styles.card, height: 180 }}>
                     <FlatList
                         data={repBreaks}
                         showsVerticalScrollIndicator={false}
@@ -72,7 +72,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     />
                 </View>
                 <Text style={styles.subHeading}>Single Breaks</Text>
-                <View style={{ ...styles.card, height: 200 }}>
+                <View style={{ ...styles.card, height: 180 }}>
                     <FlatList
                         data={breaks}
                         showsVerticalScrollIndicator={false}
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     subContainer: {
-        height: '90%',
+        height: '87.5%',
         justifyContent: 'space-between'
     },
     subHeading: {

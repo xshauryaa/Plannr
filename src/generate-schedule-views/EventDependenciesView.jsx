@@ -37,9 +37,9 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                 <TouchableOpacity onPress={() => { 
                     const deps = eventDependencies.getDependenciesForEvent(dependentEvent);
                     for (const dep of deps) {
-                        dummyDependencies.removeDependency(dependentEvent, dep);
+                        eventDependencies.removeDependency(dependentEvent, dep);
                     }
-                    setEventDependencies(dummyDependencies) 
+                    setEventDependencies(new EventDependencies(eventDependencies.getDependencies())); 
                 }}>
                     <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
                 </TouchableOpacity>
@@ -55,7 +55,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add New Dependency</Text>
                 </TouchableOpacity>
                 <View style={styles.card}>
@@ -92,7 +92,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
 
 const styles = StyleSheet.create({
     subContainer: {
-        height: '90%',
+        height: '87.5%',
         justifyContent: 'space-between'
     },
     subHeading: {

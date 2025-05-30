@@ -41,7 +41,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/nav-icons/GenerateIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
                 </TouchableOpacity>
                 <Text style={styles.subHeading}>Events</Text>
@@ -80,7 +80,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
 
 const styles = StyleSheet.create({
     subContainer: {
-        height: '90%',
+        height: '87.5%',
         justifyContent: 'space-between'
     },
     subHeading: {

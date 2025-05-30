@@ -1,0 +1,12 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="22.5" y="26.249" width="135" height="135" rx="37.5" stroke="currentColor" stroke-width="11.25"/>
+  <path d="M22.5 63.749H157.5" stroke="currentColor" stroke-width="11.25" stroke-linejoin="round"/>
+  <path d="M123.75 14.999L123.75 37.499" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M56.2495 14.999L56.2495 37.499" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48.749 93.7495H56.249" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M86.2495 93.7495H93.7495" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M123.749 93.7495H131.249" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48.749 123.749H56.249" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M86.2495 123.749H93.7495" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M123.749 123.749H131.249" stroke="currentColor" stroke-width="11.25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -95,7 +95,7 @@ const InfoView = ({ onNext }) => {
 
 const styles = StyleSheet.create({
     subContainer: {
-        height: '90%',
+        height: '87.5%',
         justifyContent: 'space-between',
     },
     subHeading: {

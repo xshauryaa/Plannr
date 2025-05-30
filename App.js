@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import NavigationBar from './src/components/NavigationBar.jsx';
 
 import { AppStateProvider } from './src/context/AppStateContext.js';
 import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
@@ -19,6 +20,7 @@ export default function App() {
         <NavigationContainer>
           <Tab.Navigator
             screenOptions={{ headerShown: false }}
+            tabBar={(props) => <NavigationBar {...props} />}
           >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
