@@ -47,7 +47,6 @@ const GenerationView = ({ playAnim }) => {
 
 const styles = StyleSheet.create({
     subContainer: {
-        flex: 0.8,
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
