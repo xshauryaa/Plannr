@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native' 
 import EventDependencies from '../model/EventDependencies';
 import AddDependencyModal from '../components/AddDependencyModal';
+import AddIcon from '../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 
 const EventDependenciesView = ({ onNext, events, onBack }) => {
@@ -41,7 +43,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     }
                     setEventDependencies(new EventDependencies(eventDependencies.getDependencies())); 
                 }}>
-                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                    <CrossIcon width={24} height={24} />
                 </TouchableOpacity>
             </View>
         );
@@ -55,7 +57,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add New Dependency</Text>
                 </TouchableOpacity>
                 <View style={styles.card}>

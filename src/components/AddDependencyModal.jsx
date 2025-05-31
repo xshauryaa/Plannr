@@ -3,6 +3,7 @@ import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList, Pressable } 
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import MultiSelect from './MultiSelect.jsx';
+import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 const AddDependencyModal = ({ isVisible, onClick, events }) => {
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -67,7 +68,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                             <View style={styles.chip}>
                                 <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
                                 <TouchableOpacity onPress={() => setPrerequisiteEvents(prev => prev.filter(e => e.id !== item.id))}>
-                                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ height: 24, width: 24 }} />
+                                    <CrossIcon width={24} height={24} />
                                 </TouchableOpacity>
                             </View>
                         )}

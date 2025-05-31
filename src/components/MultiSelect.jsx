@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Checkbox from './Checkbox';
+import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg';
 
 const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
     const [checkedItems, setCheckedItems] = useState([]);
@@ -13,7 +14,7 @@ const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
                     Select prerequisites
                 </Text>
                 <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
-                    <Image source={require('../../assets/images/DropDownIcon.png')} style={{ height: 24, width: 24 }} />
+                    <DropDownIcon width={24} height={24}/>
                 </TouchableOpacity>
             </View>
             { showOptions && (

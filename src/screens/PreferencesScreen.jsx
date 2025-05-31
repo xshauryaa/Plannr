@@ -1,7 +1,12 @@
-import React, { useState } from 'react'
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Switch, Pressable } from 'react-native'
+import React from 'react'
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg'
+import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg'
+import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg'
+import LightMode from '../../assets/system-icons/LightMode.svg'
+import DarkMode from '../../assets/system-icons/DarkMode.svg'
+import CheckIcon from '../../assets/system-icons/CheckIcon.svg'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
@@ -29,10 +34,7 @@ const PreferencesScreen = () => {
                             onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'light' }})}
                         >
                             <View>
-                                <Image 
-                                    source={(appState.userPreferences.theme == 'light') ? require('../../assets/images/LightMode-Selected.png') : require('../../assets/images/LightMode.png')} 
-                                    style={{ width: 32, height: 32, marginBottom: 4 }}
-                                    />
+                                <LightMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'light') ? '#E3CD00' : '#000000'}/>
                                 <Text style={{ fontFamily: 'AlbertSans' }}>Light</Text>
                             </View>
                         </TouchableOpacity>
@@ -41,10 +43,7 @@ const PreferencesScreen = () => {
                             onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'dark' }})}
                         >
                             <View>
-                                <Image 
-                                    source={(appState.userPreferences.theme == 'dark') ? require('../../assets/images/DarkMode-Selected.png') : require('../../assets/images/DarkMode.png')} 
-                                    style={{ width: 32, height: 32, marginBottom: 4 }}
-                                    />
+                                <DarkMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'dark') ? '#8C84E5' : '#000000' }/>
                                 <Text style={{ fontFamily: 'AlbertSans' }}>Dark</Text>
                             </View>
                         </TouchableOpacity>
@@ -52,10 +51,7 @@ const PreferencesScreen = () => {
                 <Text style={styles.subHeading}>Scheduling Strategy</Text>
                 <View style={{ ...styles.card, gap: 12 }}>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/EarliestFitIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <EarliestFitIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? '#000' : '#F0F0F0'  }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'earliest-fit' }})}}
@@ -64,10 +60,7 @@ const PreferencesScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/BalancedWorkIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <BalancedWorkIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'balanced-work') ? '#000' : '#F0F0F0'  }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'balanced-work' }})}}
@@ -76,10 +69,7 @@ const PreferencesScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/DeadlineOrientedIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <DeadlineOrientedIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? '#000' : '#F0F0F0'  }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' }})}}
@@ -138,8 +128,8 @@ const PreferencesScreen = () => {
                     >
                         <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.incompleteTaskNotification == 0) ? '#FFFFFF' : '#000'}}>Notify 15 minutes after task's end time</Text>
                         {(appState.userPreferences.incompleteTaskNotification == 0) 
-                            ? <Image source={require('../../assets/images/CheckIcon.png')} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
-                            : <Image/>}
+                            ? <CheckIcon width={18} height={18} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
+                            : null}
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={{ ...styles.choiceButton, width: '100%', backgroundColor: (appState.userPreferences.incompleteTaskNotification == 1) ? '#000' : '#F0F0F0', flexDirection: 'row' }}
@@ -147,8 +137,8 @@ const PreferencesScreen = () => {
                     >
                         <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.incompleteTaskNotification == 1) ? '#FFFFFF' : '#000'}}>Notify at the end of the day of the task</Text>
                         {(appState.userPreferences.incompleteTaskNotification == 1) 
-                            ? <Image source={require('../../assets/images/CheckIcon.png')} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
-                            : <Image/>}
+                            ? <CheckIcon width={18} height={18} style={{ width: 18, height: 18, position: 'absolute', right: 16, alignSelf: 'center' }}/>
+                            : null}
                     </TouchableOpacity>
                 </View>
             </ScrollView>

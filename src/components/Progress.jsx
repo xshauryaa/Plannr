@@ -1,7 +1,7 @@
 import React from 'react' 
-import { Text, View, StyleSheet, Image } from 'react-native'
-import * as Font from 'expo-font';
+import { Text, View, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
+import GoIcon from '../../assets/system-icons/GoIcon.svg';
 
 const Progress = ({ progress }) => {
     const NoScheduleView = () => {
@@ -26,10 +26,7 @@ const Progress = ({ progress }) => {
                 </View>
                 <View style={styles.horizontalGrid}>
                     <Text style={styles.bottomText}>View your current week's schedule</Text>
-                    <Image 
-                        style={styles.icon}
-                        source={require('../../assets/images/GoIcon.png')} 
-                    />
+                    <GoIcon style={styles.icon} width={18} height={18} />
                 </View>
             </View>
         )

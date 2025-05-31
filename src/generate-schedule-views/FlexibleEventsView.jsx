@@ -3,6 +3,8 @@ import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import FlexibleEvent from '../model/FlexibleEvent'
 import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
+import AddIcon from '../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 const FlexibleEventsView = ({ onNext, minDate, numDays, onBack }) => {
     const [flexibleEvents, setFlexibleEvents] = useState([]);
@@ -23,7 +25,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     <Text style={{ ...styles.subHeading, fontSize: 12 }}>{eventObj.name}  |  {eventObj.duration} mins  |  Before {eventObj.deadline.getDateString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setFlexibleEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                    <CrossIcon width={24} height={24} />
                 </TouchableOpacity>
             </View>
         )
@@ -37,7 +39,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
                 </TouchableOpacity>
                 <Text style={styles.subHeading}>Events</Text>

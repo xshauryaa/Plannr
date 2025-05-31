@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
 import { useAppState } from '../context/AppStateContext'
+import EditIcon from '../../assets/system-icons/EditIcon.svg'
 
 const SavedSchedulesScreen = () => {
     const { appState } = useAppState();
@@ -29,12 +30,12 @@ const SavedSchedulesScreen = () => {
                                         <View>
                                             <Text style={styles.heading}>{item.name}</Text>
                                             <Text style={{ ...styles.subHeading, color: '#000', opacity: 0.5 }}>
-                                                {item.schedule.getFirstDate().getDateString()} - {item.schedule.getFirstDate().getDateAfter(6).getDateString()}
+                                                {item.schedule.getFirstDate().getDateString()} onwards
                                             </Text>
                                         </View>
                                         <View style={{ flexDirection: 'row', gap: 12 }}>
                                             <TouchableOpacity onPress={() => {}}> 
-                                                <Image source={require('../../assets/images/EditIcon.png')} style={{ width: 24, height: 24 }} />
+                                                <EditIcon width={24} height={24} />
                                             </TouchableOpacity> 
                                         </View>
                                     </View>

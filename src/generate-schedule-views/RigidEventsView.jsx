@@ -4,6 +4,8 @@ import RigidEvent from '../model/RigidEvent'
 import AddRigidEventsModal from '../components/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
+import AddIcon from '../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
     const [rigidEvents, setRigidEvents] = useState([])
@@ -27,7 +29,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     <Text style={{ ...styles.subHeading, fontSize: 12 }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRigidEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                    <CrossIcon width={24} height={24} />
                 </TouchableOpacity>
             </View>
         )
@@ -41,7 +43,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
                 </TouchableOpacity>
                 <Text style={styles.subHeading}>Events</Text>

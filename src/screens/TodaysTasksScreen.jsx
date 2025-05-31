@@ -5,6 +5,7 @@ import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
+import Other from '../../assets/type-icons/Other.svg'
 
 const TodaysTasksScreen = () => {
     
@@ -58,9 +59,10 @@ const TodaysTasksScreen = () => {
                 data={taskData}
                 keyExtractor={(item, index) => index}
                 renderItem={({ item, index }) => {
+                        const ICON = ActivityTypeIcons[item.activityType] || Other;
                         return (
                             <View style={styles.card}>
-                                <Image source={ActivityTypeIcons[item.activityType]} style={{ height: 40, width: 40 }} />
+                                <ICON width={40} height={40} />
                                 <View>
                                     <Text style={styles.taskName}>{item.name}</Text>
                                     <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>

@@ -2,15 +2,14 @@ import React, { useContext, useEffect } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import * as Font from 'expo-font';
 
-import LoadingScreen from './LoadingScreen';
-import UpcomingTasks from '../components/UpcomingTasks';
-import Progress from '../components/Progress';
-import MenuButton from '../components/MenuButton';
+import LoadingScreen from './LoadingScreen.jsx';
+import UpcomingTasks from '../components/UpcomingTasks.jsx';
+import Progress from '../components/Progress.jsx';
+import MenuButton from '../components/MenuButton.jsx';
 
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
-import NotificationService from '../notifications/NotificationService.js';
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
@@ -52,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
                     <MenuButton
                         broad={true}
                         title="View Your Saved Schedules"
-                        icon={require('../../assets/images/CalendarIcon.png')}
+                        icon="Saved"
                         navTo={() => { navigation.navigate("Saved") }}
                     />
                 </View>
@@ -60,12 +59,12 @@ const HomeScreen = ({ navigation }) => {
                 <View style={styles.horizontalGrid}> 
                     <MenuButton
                         title="Generate New Schedule"
-                        icon={require('../../assets/images/PlusIcon.png')}
+                        icon="Generate"
                         navTo={() => { navigation.navigate("Generate") }}
                     />
                     <MenuButton
                         title="Change Preferences"
-                        icon={require('../../assets/images/PreferencesIcon.png')}
+                        icon="Preferences"
                         navTo={() => { navigation.navigate("Preferences") }}
                     />
                 </View>

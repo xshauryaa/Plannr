@@ -5,6 +5,9 @@ import Modal from 'react-native-modal'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
+import Checked from '../../assets/system-icons/Checked.svg'
+import Unchecked from '../../assets/system-icons/Unchecked.svg'
+
 const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
@@ -141,8 +144,8 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
                     <TouchableOpacity style={styles.checkbox} onPress={() => setRepeated(!repeated)}>
                         { repeated 
-                            ? <Image style={styles.checkbox} source={require('../../assets/images/Checked.png')}/> 
-                            : <Image style={styles.checkbox} source={require('../../assets/images/Unchecked.png')}/> 
+                            ? <Checked width={24} height={24}/> 
+                            : <Unchecked width={24} height={24}/>
                         }
                     </TouchableOpacity>
                     <Text style={{ ...styles.subHeading, marginBottom: 0 }}>Check this box to add this break on all days</Text>
@@ -201,10 +204,6 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         backgroundColor: '#F0F0F0',
         marginBottom: 16
-    },
-    checkbox: {
-        width: 24,
-        height: 24,
     },
     button: {
         width: '92%',

@@ -3,6 +3,8 @@ import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList }
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Break from '../model/Break'
+import AddIcon from '../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 import AddBreaksModal from '../components/AddBreaksModal'
 
@@ -32,7 +34,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     <Text style={{ ...styles.subHeading, fontSize: 12 }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                    <CrossIcon width={24} height={24} />
                 </TouchableOpacity>
             </View>
         )
@@ -45,7 +47,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     <Text style={{ ...styles.subHeading, fontSize: 12 }}>Break  |  Everyday |  {breakObj.startTime.to12HourString()} - {breakObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRepBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <Image source={require('../../assets/images/CrossIcon.png')} style={{ width: 24, height: 24 }}/>
+                    <CrossIcon width={24} height={24} />
                 </TouchableOpacity>
             </View>
         )
@@ -59,7 +61,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     style={styles.button}
                     onPress={() => setShowModal(true)}
                 >
-                    <Image source={require('../../assets/images/AddIcon.png')} style={{ width: 18, height: 18 }}/>
+                    <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Break</Text>
                 </TouchableOpacity>
                 <Text style={styles.subHeading}>Everyday Breaks</Text>

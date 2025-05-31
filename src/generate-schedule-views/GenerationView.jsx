@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import LottieView from 'lottie-react-native';
+import GoToIcon from '../../assets/system-icons/GoToIcon.svg';
 
 const GenerationView = ({ playAnim }) => {
     const [showAnim, setShowAnim] = useState(playAnim);
@@ -36,7 +37,7 @@ const GenerationView = ({ playAnim }) => {
                     >
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12, alignSelf: 'center' }}>
                             <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>View Schedule</Text>
-                            <Image source={require('../../assets/images/GoToIcon.png')} style={{ width: 18, height: 18 }}/>
+                            <GoToIcon width={20} height={20} />
                         </View>
                     </TouchableOpacity>
                 </View>

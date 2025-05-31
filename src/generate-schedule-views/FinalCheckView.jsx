@@ -4,6 +4,10 @@ import { useAppState } from '../context/AppStateContext';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion';
 
+import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
+import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
+import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
+
 const FinalCheckView = ({ onNext }) => {
     const { appState } = useAppState();
     const [startTime, setStartTime] = useState(new Date());
@@ -85,10 +89,7 @@ const FinalCheckView = ({ onNext }) => {
                 <Text style={styles.subHeading}>Scheduling Strategy</Text>
                 <View style={{ ...styles.card, gap: 12 }}>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/EarliestFitIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <EarliestFitIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? '#000' : '#F0F0F0'  }}
                             onPress={() => { setStrategy('earliest-fit') }}
@@ -97,10 +98,7 @@ const FinalCheckView = ({ onNext }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/BalancedWorkIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <BalancedWorkIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? '#000' : '#F0F0F0'  }}
                             onPress={() => { setStrategy('balanced-work') }}
@@ -109,10 +107,7 @@ const FinalCheckView = ({ onNext }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <Image
-                            source={require('../../assets/images/DeadlineOrientedIcon.png')}
-                            style={{ width: 20, height: 20 }}
-                        />
+                        <DeadlineOrientedIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? '#000' : '#F0F0F0'  }}
                             onPress={() => { setStrategy('deadline-oriented') }}
