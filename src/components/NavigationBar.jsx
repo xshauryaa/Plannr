@@ -24,7 +24,6 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     };
 
     const indicatorX = useRef(new Animated.Value(0)).current;
-    const tabWidth = 64;
 
     useEffect(() => {
         const index = state.index;
@@ -50,12 +49,14 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
                 const Icon = ICONS[route.name];
 
                 return (
-                <TouchableOpacity
-                    key={route.key}
-                    onPress={() => navigation.navigate(route.name)}
-                >
-                    <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
-                </TouchableOpacity>
+                    <View>
+                        <TouchableOpacity
+                            key={route.key}
+                            onPress={() => navigation.navigate(route.name)}
+                        >
+                            <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
+                        </TouchableOpacity>
+                    </View>
                 );
             })}
         </View>

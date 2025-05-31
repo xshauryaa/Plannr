@@ -15,21 +15,21 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
     return (
-      <AppStateProvider>
-        <TaskCompletionChecker />
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={{ headerShown: false }}
-            tabBar={(props) => <NavigationBar {...props} />}
-          >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
-            <Tab.Screen name="Generate" component={GenerateScheduleScreen}/>
-            <Tab.Screen name="Saved" component={SavedSchedulesScreen} />
-            <Tab.Screen name="Preferences" component={PreferencesScreen} />
-          </Tab.Navigator>
-        </NavigationContainer>
-      </AppStateProvider>
+        <AppStateProvider>
+            <TaskCompletionChecker />
+            <NavigationContainer>
+            <Tab.Navigator
+                screenOptions={{ headerShown: false }}
+                tabBar={(props) => <NavigationBar {...props} />}
+            >
+                <Tab.Screen name="Home" component={HomeScreen} />
+                <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
+                <Tab.Screen name="Generate" component={GenerateScheduleScreen}/>
+                <Tab.Screen name="Saved" component={SavedSchedulesScreen} />
+                <Tab.Screen name="Preferences" component={PreferencesScreen} />
+            </Tab.Navigator>
+            </NavigationContainer>
+        </AppStateProvider>
     );
   }
   
