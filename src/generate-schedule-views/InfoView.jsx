@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
+import { lightColor, darkColor } from '../design/colors.js'
 
 const InfoView = ({ onNext }) => {
     const { appState } = useAppState();
@@ -11,15 +12,17 @@ const InfoView = ({ onNext }) => {
     const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap);
     const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours);
 
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={styles.subHeading}>First, enter some information about what you'd like from the schedule.</Text>
-                <Text style={styles.subHeading}>What date would you like to schedule from?</Text>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, enter some information about what you'd like from the schedule.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What date would you like to schedule from?</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <Pressable onPress={() => setShowPicker(true)}>
                         <TextInput
-                            style={styles.input}
+                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={startDate.toLocaleDateString()}
                             editable={false}
@@ -36,6 +39,7 @@ const InfoView = ({ onNext }) => {
                                     if (date) setStartDate(date);
                                 }}
                                 minimumDate={new Date()}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -46,10 +50,10 @@ const InfoView = ({ onNext }) => {
                         </View>
                     )}
                 </View>
-                <Text style={styles.subHeading}>How many days would you like to schedule for?</Text>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>How many days would you like to schedule for?</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
-                        style={styles.input}
+                        style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={numDays}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -58,10 +62,10 @@ const InfoView = ({ onNext }) => {
                         } }
                     />
                 </View>
-                <Text style={styles.subHeading}>Minimum gap between scheduled events (in mins)</Text>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Minimum gap between scheduled events (in mins)</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
-                        style={styles.input}
+                        style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={minGap}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -70,10 +74,10 @@ const InfoView = ({ onNext }) => {
                         } }
                     />
                 </View>
-                <Text style={styles.subHeading}>Maximum working hours per day</Text>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Maximum working hours per day</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
-                        style={styles.input}
+                        style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={maxHours}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -104,9 +108,8 @@ const styles = StyleSheet.create({
         marginVertical: 8
     },
     card: {
-        width: '97%',
+        width: '99%',
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -128,7 +131,6 @@ const styles = StyleSheet.create({
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: '#F0F0F0',
     },
     button: {
         width: '100%',

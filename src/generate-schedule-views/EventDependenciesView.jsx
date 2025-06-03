@@ -5,8 +5,14 @@ import AddDependencyModal from '../components/AddDependencyModal';
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
+import { useAppState } from '../context/AppStateContext';
+import { lightColor, darkColor } from '../design/colors';
+
 
 const EventDependenciesView = ({ onNext, events, onBack }) => {
+    const { appState } = useAppState();
+    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [eventDependencies, setEventDependencies] = useState(new EventDependencies());
     const [showModal, setShowModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
@@ -33,9 +39,9 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
         const listOfDeps = dependencies.map(dep => dep.name).join(', ');
 
         return (
-            <View style={styles.depCard}>
-                <Text style={{ ...styles.subHeading, fontSize: 12 }}>{dependentEvent.name}  </Text>
-                <Text style={{ ...styles.subHeading, fontSize: 12 }}>{listOfDeps}</Text>
+            <View style={{  ...styles.depCard, backgroundColor: theme.INPUT }}>
+                <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{dependentEvent.name}  </Text>
+                <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{listOfDeps}</Text>
                 <TouchableOpacity onPress={() => { 
                     const deps = eventDependencies.getDependenciesForEvent(dependentEvent);
                     for (const dep of deps) {
@@ -43,7 +49,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     }
                     setEventDependencies(new EventDependencies(eventDependencies.getDependencies())); 
                 }}>
-                    <CrossIcon width={24} height={24} />
+                    <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
         );
@@ -52,7 +58,7 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={styles.subHeading}>Please add if you'd like certain events done before others, such as A must be done before B.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Please add if you'd like certain events done before others, such as A must be done before B.</Text>
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => setShowModal(true)}
@@ -60,7 +66,8 @@ const EventDependenciesView = ({ onNext, events, onBack }) => {
                     <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add New Dependency</Text>
                 </TouchableOpacity>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Events & Prerequisites</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={Array.from(eventDependencies.getDependencies().keys())}
                         showsVerticalScrollIndicator={false}
@@ -104,9 +111,8 @@ const styles = StyleSheet.create({
     },
     card: {
         height: '60%',
-        width: '95%',
+        width: '99%',
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -137,8 +143,7 @@ const styles = StyleSheet.create({
         gap: 12
     },
     depCard: {
-        height: 40, 
-        backgroundColor: "#F0F0F0",
+        height: 40,
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',

@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native' 
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
+
 import Break from '../model/Break'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
@@ -9,6 +12,9 @@ import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import AddBreaksModal from '../components/AddBreaksModal'
 
 const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    
     const [breaks, setBreaks] = useState([])
     const [repBreaks, setRepBreaks] = useState([])
     const [showModal, setShowModal] = useState(false)
@@ -29,12 +35,12 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
 
     const breakCardRender = (breakObj, indexToRemove) => {
         return (
-            <View style={styles.breakCard}>
+            <View style={{ ...styles.breakCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12 }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <CrossIcon width={24} height={24} />
+                    <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
         )
@@ -42,12 +48,12 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
 
     const repBreakCardRender = (breakObj, indexToRemove) => {
         return (
-            <View style={styles.breakCard}>
+            <View style={{ ...styles.breakCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12 }}>Break  |  Everyday |  {breakObj.startTime.to12HourString()} - {breakObj.endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>Break  |  Everyday |  {breakObj.startTime.to12HourString()} - {breakObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRepBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <CrossIcon width={24} height={24} />
+                    <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
         )
@@ -56,7 +62,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={styles.subHeading}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => setShowModal(true)}
@@ -64,8 +70,8 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                     <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Break</Text>
                 </TouchableOpacity>
-                <Text style={styles.subHeading}>Everyday Breaks</Text>
-                <View style={{ ...styles.card, height: 180 }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Everyday Breaks</Text>
+                <View style={{ ...styles.card, height: 180, backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={repBreaks}
                         showsVerticalScrollIndicator={false}
@@ -73,8 +79,8 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
                         renderItem={({ item, index }) => repBreakCardRender(item, index)}
                     />
                 </View>
-                <Text style={styles.subHeading}>Single Breaks</Text>
-                <View style={{ ...styles.card, height: 180 }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Single Breaks</Text>
+                <View style={{ ...styles.card, height: 180, backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={breaks}
                         showsVerticalScrollIndicator={false}
@@ -109,13 +115,13 @@ const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
 
 const styles = StyleSheet.create({
     card: {
-        width: '95%',
+        width: '99%',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
-        width: 0,
-        height: 0,
+            width: 0,
+            height: 0,
         },
         shadowOpacity: 0.1,
         shadowRadius: 24,
@@ -133,8 +139,7 @@ const styles = StyleSheet.create({
         marginVertical: 8
     },
     breakCard: {
-        height: 40, 
-        backgroundColor: "#F0F0F0",
+        height: 40,
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',

@@ -5,10 +5,16 @@ import Modal from 'react-native-modal'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
+
 import Checked from '../../assets/system-icons/Checked.svg'
 import Unchecked from '../../assets/system-icons/Unchecked.svg'
 
 const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
     const [dateOfBreak, setDateOfBreak] = useState(new Date())
@@ -41,14 +47,14 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
                 {/* Start Time & End Time inputs + their respective time pickers */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View style={{ width: '50%' }}>
-                        <Text style={styles.subHeading}>Start Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
                         <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); setShowDatePicker(false); }}>
                             <TextInput
-                                style={{ ...styles.input, width: '90%' }}
+                                style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                 pointerEvents="none"
                                 value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 editable={false}
@@ -56,10 +62,10 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                         </Pressable>
                     </View>
                     <View style={{ width: '50%' }}>
-                        <Text style={styles.subHeading}>End Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
                         <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); setShowDatePicker(false); }}>
                             <TextInput
-                                style={{ ...styles.input, width: '90%' }}
+                                style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                 pointerEvents="none"
                                 value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 editable={false}
@@ -76,6 +82,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                             onChange={(event, time) => {
                                 if (time) setStartTime(time);
                             }}
+                            themeVariant={appState.userPreferences.theme}
                         />
                         <TouchableOpacity 
                             style={styles.button}
@@ -94,6 +101,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                             onChange={(event, time) => {
                                 if (time) setEndTime(time);
                             }}
+                            themeVariant={appState.userPreferences.theme}
                         />
                         <TouchableOpacity 
                             style={styles.button}
@@ -107,10 +115,10 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                 {/* Day input + day picker */}
                 {(!repeated)  
                 ? <View>
-                        <Text style={styles.subHeading}>Date</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
                         <Pressable onPress={() => { setShowStartPicker(false); setShowEndPicker(false); setShowDatePicker(true) }}>
                             <TextInput
-                                style={styles.input}
+                                style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
                                 pointerEvents="none"
                                 value={dateOfBreak.toLocaleDateString()}
                                 editable={false}
@@ -127,6 +135,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                                     }}
                                     minimumDate={minDate}
                                     maximumDate={maxDate}
+                                    themeVariant={appState.userPreferences.theme}
                                 />
                                 <TouchableOpacity 
                                     style={styles.button}
@@ -144,11 +153,11 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
                     <TouchableOpacity style={styles.checkbox} onPress={() => setRepeated(!repeated)}>
                         { repeated 
-                            ? <Checked width={24} height={24}/> 
-                            : <Unchecked width={24} height={24}/>
+                            ? <Checked width={24} height={24} color={theme.FOREGROUND} /> 
+                            : <Unchecked width={24} height={24}color={theme.FOREGROUND} />
                         }
                     </TouchableOpacity>
-                    <Text style={{ ...styles.subHeading, marginBottom: 0 }}>Check this box to add this break on all days</Text>
+                    <Text style={{ ...styles.subHeading, marginBottom: 0, color: theme.FOREGROUND }}>Check this box to add this break on all days</Text>
                 </View>
 
                 {/* Warning message */}

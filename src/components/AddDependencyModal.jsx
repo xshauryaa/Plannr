@@ -4,8 +4,13 @@ import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import MultiSelect from './MultiSelect.jsx';
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
+import { useAppState } from '../context/AppStateContext.js';
+import { lightColor, darkColor } from '../design/colors.js';
 
 const AddDependencyModal = ({ isVisible, onClick, events }) => {
+    const { appState } = useAppState();
+    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [prerequisiteEvents, setPrerequisiteEvents] = useState([]);
     const [showSelectedEventPicker, setShowSelectedEventPicker] = useState(false);
@@ -24,10 +29,10 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={styles.card}>
-                <Text style={styles.subHeading}>Select an event</Text>
-                <Pressable style={styles.input} onPress={() => setShowSelectedEventPicker(true)}>
-                    <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: '#000' }}>
+            <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Select an event</Text>
+                <Pressable style={{ ...styles.input, backgroundColor: theme.INPUT }} onPress={() => setShowSelectedEventPicker(true)}>
+                    <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>
                         {selectedEvent ? selectedEvent.name : 'Choose an event'}
                     </Text>
                 </Pressable>
@@ -38,7 +43,8 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                             onValueChange={(itemId) => {
                                 const eventObj = events.find(e => e.id === itemId);
                                 setSelectedEvent(eventObj);
-                              }}
+                            }}
+                            themeVariant={appState.userPreferences.theme}
                         >
                             {events.map((event) => (
                                 <Picker.Item key={event.name} label={event.name} value={event.id} />
@@ -52,7 +58,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                         </TouchableOpacity>
                     </View>
                 )}
-                <Text style={styles.subHeading}>Select all prerequisites for it</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Select all prerequisites for it</Text>
                 <MultiSelect 
                     currentSelected={selectedEvent}
                     items={events}
@@ -65,10 +71,10 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                         data={prerequisiteEvents}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
-                            <View style={styles.chip}>
-                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
+                            <View style={{ ...styles.chip, backgroundColor: theme.INPUT }}>
+                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>{item.name}</Text>
                                 <TouchableOpacity onPress={() => setPrerequisiteEvents(prev => prev.filter(e => e.id !== item.id))}>
-                                    <CrossIcon width={24} height={24} />
+                                    <CrossIcon width={24} height={24} color={theme.FOREGROUND}/>
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -91,7 +97,6 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -138,7 +143,6 @@ const styles = StyleSheet.create({
         height: 36,
         padding: 8,
         borderRadius: 4,
-        backgroundColor: '#F0F0F0',
         marginRight: 8,
         flexDirection: 'row',
         alignItems: 'center',

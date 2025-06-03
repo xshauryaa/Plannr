@@ -27,6 +27,12 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "bdcd6096-e4fd-427d-a455-9026fac3dfb2"
+      }
+    },
+    "owner": "sthareja19"
   }
 }

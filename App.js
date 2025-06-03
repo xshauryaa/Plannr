@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NavigationBar from './src/components/NavigationBar.jsx';
 
 import { AppStateProvider } from './src/context/AppStateContext.js';
@@ -17,18 +18,20 @@ export default function App() {
     return (
         <AppStateProvider>
             <TaskCompletionChecker />
-            <NavigationContainer>
-            <Tab.Navigator
-                screenOptions={{ headerShown: false }}
-                tabBar={(props) => <NavigationBar {...props} />}
-            >
-                <Tab.Screen name="Home" component={HomeScreen} />
-                <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
-                <Tab.Screen name="Generate" component={GenerateScheduleScreen}/>
-                <Tab.Screen name="Saved" component={SavedSchedulesScreen} />
-                <Tab.Screen name="Preferences" component={PreferencesScreen} />
-            </Tab.Navigator>
-            </NavigationContainer>
+            <SafeAreaProvider>
+                <NavigationContainer>
+                    <Tab.Navigator
+                        screenOptions={{ headerShown: false }}
+                        tabBar={(props) => <NavigationBar {...props} />}
+                    >
+                        <Tab.Screen name="Home" component={HomeScreen} />
+                        <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
+                        <Tab.Screen name="Generate" component={GenerateScheduleScreen}/>
+                        <Tab.Screen name="Saved" component={SavedSchedulesScreen} />
+                        <Tab.Screen name="Preferences" component={PreferencesScreen} />
+                    </Tab.Navigator>
+                </NavigationContainer>
+            </SafeAreaProvider>
         </AppStateProvider>
     );
   }

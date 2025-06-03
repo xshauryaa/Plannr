@@ -1,0 +1,15 @@
+export default spacing = {
+    SPACING_0: 0,
+    SPACING_1: 4,
+    SPACING_2: 8,
+    SPACING_3: 12,
+    SPACING_4: 16,
+    SPACING_5: 20,
+    SPACING_6: 24,
+    SPACING_7: 28,
+    SPACING_8: 32,
+    SPACING_9: 36,
+    SPACING_10: 40,
+    SPACING_11: 44,
+    SPACING_12: 48,
+}

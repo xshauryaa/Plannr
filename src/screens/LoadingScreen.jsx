@@ -1,10 +1,15 @@
 import React from 'react'
 import {View, Text, StyleSheet} from 'react-native'
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
 
 const LoadingScreen = () => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Loading...</Text>
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND}}>
+            <Text style={{ ...styles.text, color: theme.FOREGROUND}}>Loading...</Text>
         </View>
     )
 }
@@ -12,7 +17,6 @@ const LoadingScreen = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
         height: '100%',
     },
     title: {

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import NotificationService from '../notifications/NotificationService';
+import NotificationService from './NotificationService';
 
 export default function useScheduleNotificationSync(activeSchedule, userPreferences) {
     useEffect(() => {

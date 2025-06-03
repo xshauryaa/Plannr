@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import * as Font from 'expo-font';
 
@@ -11,11 +11,24 @@ import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
 
+import { lightColor, darkColor } from '../design/colors.js'
+
+
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
     const currentTime = useCurrentTime();
 
     if (!storageLoaded) { return (<LoadingScreen/>) }
+
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+        }, 1000);
+    
+        return () => clearInterval(timer);
+    }, []);
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -25,29 +38,16 @@ const HomeScreen = ({ navigation }) => {
     if (!fontsLoaded) return null;
 
     const todaysDate = convertDateToScheduleDate(currentTime);
-
-    let progress = null
-
-    // Check if the user has an active schedule, and return progress if true
-    // if (activeSchedule !== null) {
-    //     const todaysSchedule = activeSchedule.getScheduleForDate(todaysDate);
-    //     if (todaysSchedule !== undefined) {
-    //         todaysTasks = todaysSchedule.getTimeBlocks();
-    //     }
-    // }
-    
-    // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    // todaysTasks = activeSchedule.getScheduleForDate(new ScheduleDate(23, 5, 2025)).getTimeBlocks();
     
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Hello {appState.name}</Text>
-            <View style={styles.subContainer}>
-                <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
+            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hello {appState.name}</Text>
+            <View style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
                 <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
-                <Progress progress={progress} />
-                <Text style={styles.subHeading}>For Your Existing Schedule</Text>
-                <View style={styles.horizontalGrid}>
+                <Progress/>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For Your Existing Schedule</Text>
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
                         title="View Your Saved Schedules"
@@ -55,8 +55,8 @@ const HomeScreen = ({ navigation }) => {
                         navTo={() => { navigation.navigate("Saved") }}
                     />
                 </View>
-                <Text style={styles.subHeading}>For New Schedules & Preferences</Text>
-                <View style={styles.horizontalGrid}> 
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For New Schedules & Preferences</Text>
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}> 
                     <MenuButton
                         title="Generate New Schedule"
                         icon="Generate"
@@ -76,7 +76,6 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
         height: '100%',
     },
     subContainer: {
@@ -86,12 +85,12 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontFamily: 'PinkSunset',
         marginTop: 64,
-        marginBottom: 8
+        marginBottom: 8,
     },
     subHeading: {
         fontSize: 16,
         fontFamily: 'AlbertSans',
-        marginBottom: 16
+        marginBottom: 16,
     },
     horizontalGrid: {
         width: '100%',

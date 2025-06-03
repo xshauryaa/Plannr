@@ -2,19 +2,24 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Checkbox from './Checkbox';
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg';
+import { useAppState } from '../context/AppStateContext.js';
+import { lightColor, darkColor } from '../design/colors.js';
 
 const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
+    const { appState } = useAppState();
+    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [checkedItems, setCheckedItems] = useState([]);
     const [showOptions, setShowOptions] = useState(false);
 
     return (
         <View>
-            <View style={styles.input}>
-                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: '#C0C0C0' }}>
+            <View style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}>
+                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>
                     Select prerequisites
                 </Text>
                 <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
-                    <DropDownIcon width={24} height={24}/>
+                    <DropDownIcon width={24} height={24} color={theme.FOREGROUND}/>
                 </TouchableOpacity>
             </View>
             { showOptions && (
@@ -25,9 +30,9 @@ const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
                         const isChecked = selectedItems.some(i => i.id === item.id);
                         return (
                             <View 
-                                style={{ padding: 8, borderBottomWidth: 1, borderColor: '#E0E0E0', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                                style={{ padding: 8, borderBottomWidth: 1, borderColor: (theme.FOREGROUND + '1A'), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             >
-                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16 }}>{item.name}</Text>
+                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>{item.name}</Text>
                                 <Checkbox 
                                     onChange={() => {
                                         const updated = isChecked
@@ -40,7 +45,7 @@ const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
                                 />
                             </View>
                     )}}
-                    style={{ maxHeight: 200, backgroundColor: '#FFF', borderRadius: 12, marginTop: 8 }}
+                    style={{ maxHeight: 200, borderRadius: 12, marginTop: 8 }}
                 />) 
             }
         </View>
@@ -56,7 +61,6 @@ const styles = StyleSheet.create({
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: '#F0F0F0',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',

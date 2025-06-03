@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
@@ -6,6 +6,7 @@ import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
 import Other from '../../assets/type-icons/Other.svg'
+import { lightColor, darkColor } from '../design/colors.js';
 
 const TodaysTasksScreen = () => {
     
@@ -23,11 +24,10 @@ const TodaysTasksScreen = () => {
         }
     }
 
-    // For testing purposes, we are using a hardcoded schedule - TODO: remove this
-    // tasks = appState.activeSchedule.getScheduleForDate('Monday').getTimeBlocks();
-
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
+
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     useEffect( () => {
         const check = taskData.every(task => task.isCompleted)
@@ -36,19 +36,19 @@ const TodaysTasksScreen = () => {
 
     const NoTasksView = () => {
         return (
-            <View style={styles.completion}>
+            <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
                 <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/NoTasks.png")}/>
-                <Text style={styles.subHeading}>You have no tasks due for today.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You have no tasks due for today.</Text>
             </View>
         )
     }
 
     const TasksCompletedView = () => {
         return (
-            <View style={styles.completion}>
+        <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
                 <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/Celebration.png")}/>
-                <Text style={styles.subHeading}>You crushed it today!</Text>
-                <Text style={styles.subHeading}>You have completed all your tasks for the day.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You crushed it today!</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You have completed all your tasks for the day.</Text>
             </View>
         )
     }
@@ -61,14 +61,14 @@ const TodaysTasksScreen = () => {
                 renderItem={({ item, index }) => {
                         const ICON = ActivityTypeIcons[item.activityType] || Other;
                         return (
-                            <View style={styles.card}>
-                                <ICON width={40} height={40} />
+                            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                                <ICON width={40} height={40} color={theme.FOREGROUND} />
                                 <View>
-                                    <Text style={styles.taskName}>{item.name}</Text>
-                                    <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
+                                    <Text style={{ ...styles.taskName, color: theme.FOREGROUND }}>{item.name}</Text>
+                                    <Text style={{ ...styles.time, color: theme.FOREGROUND }}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                 </View>
                                 <Checkbox 
-                                    checked={item.isCompleted} 
+                                    checked={item.isCompleted}
                                     onChange={() => {
                                         // 1. Update local UI
                                         const updatedTasks = [...taskData];
@@ -78,7 +78,7 @@ const TodaysTasksScreen = () => {
                                         setTaskData(updatedTasks);
                                       
                                         // 2. Update appState.activeSchedule.schedule
-                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDate(todaysDate);
+                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDate(todaysDate.getId());
                                       
                                         const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
                                         const updatedBlock = { ...updatedTimeBlocks[index] };
@@ -96,9 +96,10 @@ const TodaysTasksScreen = () => {
                                         );
                                       
                                         const updatedScheduleMap = new Map(appState.activeSchedule.schedule);
-                                        updatedScheduleMap.set(todayStr, updatedDaySchedule);
+                                        updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
                                       
                                         const updatedSchedule = new appState.activeSchedule.constructor(
+                                          appState.activeSchedule.numDays,
                                           appState.activeSchedule.minGap,
                                           appState.activeSchedule.day1Date,
                                           appState.activeSchedule.day1Day,
@@ -123,10 +124,10 @@ const TodaysTasksScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Today's Tasks</Text>
-            <View style={styles.subContainer}>
-                <Text style={styles.subHeading}>Here's your day for {todaysDate.getDateString()}</Text>
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND}}>
+            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Today's Tasks</Text>
+            <View style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
                 { (taskData.length == 0)
                     ? NoTasksView()
                     : (allCompleted)
@@ -141,7 +142,6 @@ const TodaysTasksScreen = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
         height: '100%',
     },
     subContainer: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     },
     card: {
         height: 72,
-        width: '97%',
+        width: '99%',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12
+        gap: 12,
     },
     title: {
         fontSize: 32,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     time: {
         fontSize: 12,
         fontFamily: 'AlbertSans',
-        color: 'rgba(0, 0, 0, 0.5)',
+        opacity: 0.5
     },
 })
 

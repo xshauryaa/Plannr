@@ -3,25 +3,31 @@ import { Text, StyleSheet, TouchableOpacity } from 'react-native'
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg'
 import GenerateIcon from '../../assets/nav-icons/GenerateIcon.svg'
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg'
+import { useAppState } from '../context/AppStateContext.js'
 
-const ICONS = {
-    Saved: <SavedIcon width={24} height={24} style={{position: 'absolute', top: 16, right: 16 }} />,
-    Generate: <GenerateIcon width={24} height={24} style={{position: 'absolute', top: 16, right: 16 }} />,
-    Preferences: <PreferencesIcon width={24} height={24} style={{position: 'absolute', top: 16, right: 16 }} />,
-}
+import { lightColor, darkColor } from '../design/colors.js'
 
 const MenuButton = ({ broad, title, icon, navTo }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    const ICONS = {
+        Saved: <SavedIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Generate: <GenerateIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Preferences: <PreferencesIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+    }
+
     if (broad) {
         return (
-            <TouchableOpacity style={{ ...styles.card, width: '100%'}} onPress={navTo}>
-                <Text style={{ ...styles.text, width: '100%'}}>{title}</Text>
+            <TouchableOpacity style={{ ...styles.card, width: '100%', backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
+                <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 { ICONS[icon] || null }
             </TouchableOpacity>
         )
     }
     return (
-        <TouchableOpacity style={styles.card} onPress={navTo}>
-            <Text style={styles.text}>{title}</Text>
+        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
+            <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
             { ICONS[icon] || null }
         </TouchableOpacity>
     )
@@ -32,7 +38,6 @@ const styles = StyleSheet.create({
         height: 88,
         width: '48.5%',
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,

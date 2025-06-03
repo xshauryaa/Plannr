@@ -1,3 +1,3 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M37.5 67.5L84.1429 107.48C87.5133 110.369 92.4867 110.369 95.8571 107.48L142.5 67.5" stroke="black" stroke-width="11.25" stroke-linecap="round"/>
+    <path d="M37.5 67.5L84.1429 107.48C87.5133 110.369 92.4867 110.369 95.8571 107.48L142.5 67.5" stroke="currentColor" stroke-width="11.25" stroke-linecap="round"/>
 </svg>

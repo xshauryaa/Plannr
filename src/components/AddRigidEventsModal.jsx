@@ -6,8 +6,13 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
 
 const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
     const [startTime, setStartTime] = useState(new Date())
@@ -44,9 +49,9 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Name</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Name</Text>
                     <TextInput
-                        style={{ ...styles.input, width: '90%' }}
+                        style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={name}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -56,10 +61,10 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     />
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Type</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Type</Text>
                     <Pressable onPress={() => setShowTypePicker(true)}>
                         <TextInput
-                            style={{ ...styles.input, width: '90%' }}
+                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={getActivityLabel(type)}
                             editable={false}
@@ -75,10 +80,10 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Start Time</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
                     <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); setShowDatePicker(false); }}>
                         <TextInput
-                            style={{ ...styles.input, width: '90%' }}
+                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             editable={false}
@@ -86,10 +91,10 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     </Pressable>
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>End Time</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
                     <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); setShowDatePicker(false); }}>
                         <TextInput
-                            style={{ ...styles.input, width: '90%' }}
+                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             editable={false}
@@ -121,7 +126,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, width: '90%' }}>
                 {/* Panel 1 - Name + Activity Type */}
                 {Panel1()}
 
@@ -136,6 +141,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                             onChange={(event, time) => {
                                 if (time) setStartTime(time);
                             }}
+                            themeVariant={appState.userPreferences.theme}
                         />
                         <TouchableOpacity 
                             style={styles.button}
@@ -154,6 +160,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                             onChange={(event, time) => {
                                 if (time) setEndTime(time);
                             }}
+                            themeVariant={appState.userPreferences.theme}
                         />
                         <TouchableOpacity 
                             style={styles.button}
@@ -166,10 +173,10 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 
                 {/* Panel 3 - Date Picker */}
                 <View>
-                    <Text style={styles.subHeading}>Date</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
                     <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(false); setShowDatePicker(true); }}>
                         <TextInput
-                            style={styles.input}
+                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={dateOfEvent.toLocaleDateString()}
                             editable={false}
@@ -186,6 +193,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                                 }}
                                 minimumDate={minDate}
                                 maximumDate={maxDate}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -203,6 +211,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                         <Picker
                             selectedValue={type}
                             onValueChange={(itemValue) => setType(itemValue)}
+                            themeVariant={appState.userPreferences.theme}
                         >
                             <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
                             <Picker.Item label="Meeting" value={ActivityType.MEETING} />
@@ -254,7 +263,6 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,

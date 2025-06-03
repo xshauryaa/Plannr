@@ -1,5 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
 
 import InfoView from '../generate-schedule-views/InfoView.jsx'
 import BreaksView from '../generate-schedule-views/BreaksView.jsx'
@@ -12,6 +14,9 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
 
 const GenerateScheduleScreen = () => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [genStage, setGenStage] = useState(0);
     const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8));
     const [events, setEvents] = useState([]);
@@ -81,8 +86,8 @@ const GenerateScheduleScreen = () => {
     ]
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{titles[genStage]}</Text>
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
+            <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
             {views[genStage]}
         </View>
     )
@@ -91,7 +96,6 @@ const GenerateScheduleScreen = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
         height: '100%',
     },
     title: {

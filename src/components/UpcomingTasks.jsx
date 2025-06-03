@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react' 
-import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity, BackHandler } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
@@ -7,10 +7,13 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
 import Expand from '../../assets/system-icons/Expand.svg'
 import Other from '../../assets/type-icons/Other.svg'
+import { lightColor, darkColor } from '../design/colors.js'
 
 const UpcomingTasks = ({ onClick }) => {
     const { appState } = useAppState();
     const currentTime = useCurrentTime();
+
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const todaysDate = convertDateToScheduleDate(currentTime);
     let todaysTasks = []
@@ -50,25 +53,25 @@ const UpcomingTasks = ({ onClick }) => {
 
     const NoUpcomingTasksView = () => {
         return (
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
                 <Image source={require('../../assets/images/NoUpcomingTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have no upcoming tasks for today!</Text>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no upcoming tasks for today!</Text>
             </View>
         )
     }
 
     const NoTasksView = () => {
         return (
-            <View style={{ ...styles.card, justifyContent: 'center' }}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
                 <Image source={require('../../assets/images/NoTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have no tasks due for today!</Text>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no tasks due for today!</Text>
             </View>
         )
     }
 
     const TasksView = () => {
         return (
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR}}>
                 <FlatList
                     data={upcomingTasks.slice(0, 3)}
                     keyExtractor={(item, index) => index.toString()}
@@ -76,22 +79,22 @@ const UpcomingTasks = ({ onClick }) => {
                         const ICON = ActivityTypeIcons[item.activityType] || Other; 
                         return (
                             <View style={ { height: 64, marginBottom: 4 } }>
-                                <View style={styles.taskCard}>
-                                    <ICON width={36} height={36} />
+                                <View style={{ ...styles.taskCard, backgroundColor: theme.COMP_COLOR }}>
+                                    <ICON width={36} height={36} color={theme.FOREGROUND} />
                                     <View>
-                                        <Text style={styles.taskName}>{item.name}</Text>
-                                        <Text style={styles.time}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
+                                        <Text style={{ ...styles.taskName, color: theme.FOREGROUND }}>{item.name}</Text>
+                                        <Text style={{ ...styles.time, color: theme.FOREGROUND }}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                     </View>
                                 </View>
-                                <View style={styles.divider}></View>
+                                <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }}></View>
                             </View>
                         )
                     }}
                 />
-                <View style={styles.horizontalGrid}>
-                    <Text style={{ fontSize: 12, fontFamily: 'AlbertSans'}}>Expand to view all of today's tasks</Text>
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR}}>
+                    <Text style={{ fontSize: 12, fontFamily: 'AlbertSans', color: theme.FOREGROUND }}>Expand to view all of today's tasks</Text>
                     <TouchableOpacity onPress={onClick}>
-                        <Expand width={18} height={18} />
+                        <Expand width={18} height={18} color={theme.FOREGROUND} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -100,9 +103,9 @@ const UpcomingTasks = ({ onClick }) => {
 
     const CompletedTasksView = () => {
         return (
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
                 <Image source={require('../../assets/images/Celebration.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center' }}>You have completed all your tasks for today!</Text>
+                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have completed all your tasks for today!</Text>
             </View>
         )
     }
@@ -122,7 +125,6 @@ const styles = StyleSheet.create({
     card: {
         height: 262,
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
     time: {
         fontSize: 12,
         fontFamily: 'AlbertSans',
-        color: 'rgba(0, 0, 0, 0.5)',
+        opacity: 0.5
     },
     horizontalGrid: {
         flexDirection: 'row',
@@ -154,7 +156,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.15)',
+        opacity: 0.15,
         marginVertical: 8,
     },
     centralText: {

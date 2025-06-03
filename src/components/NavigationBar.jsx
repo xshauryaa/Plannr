@@ -1,11 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from '../../assets/nav-icons/HomeIcon.svg';
 import TasksIcon from '../../assets/nav-icons/TasksIcon.svg';
 import GenerateIcon from '../../assets/nav-icons/GenerateIcon.svg';
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg';
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg';
 import Indicator from '../../assets/nav-icons/Indicator.svg';
+import { useAppState } from '../context/AppStateContext.js';
+import { lightColor, darkColor } from '../design/colors.js';
 
 const BAR_HEIGHT = 64;
 const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
@@ -15,6 +18,10 @@ const OFFSET = (BAR_HEIGHT - INDICATOR_DIM) / 2;
 const DIST = ICON_DIM * 2.5;
 
 const NavigationBar = ({ state, descriptors, navigation }) => {
+    const insets = useSafeAreaInsets();
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const ICONS = {
         Home: HomeIcon,
         Tasks: TasksIcon,
@@ -35,30 +42,39 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     }, [state.index]);
 
     return (
-        <View style={styles.bar}>
-            <Animated.View
-                style={[
-                    styles.indicator,
-                    { transform: [{ translateX: indicatorX }], },
-                ]}
-            >
-                <Indicator width={INDICATOR_DIM} height={INDICATOR_DIM} />
-            </Animated.View>
-            {state.routes.map((route, index) => {
-                const isActive = state.index === index;
-                const Icon = ICONS[route.name];
+        <View
+            style={{
+                backgroundColor: theme.BACKGROUND,
+                paddingBottom: insets.bottom,
+                paddingTop: 40,
+                height: BAR_HEIGHT + insets.bottom,
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}
+        >
+            <View style={{ ...styles.bar, backgroundColor: theme.NAVBAR }}>
+                <Animated.View
+                    style={[
+                        styles.indicator,
+                        { transform: [{ translateX: indicatorX }], },
+                    ]}
+                >
+                    <Indicator width={INDICATOR_DIM} height={INDICATOR_DIM} color={'white'} />
+                </Animated.View>
+                {state.routes.map((route, index) => {
+                    const isActive = state.index === index;
+                    const Icon = ICONS[route.name];
 
-                return (
-                    <View>
+                    return (
                         <TouchableOpacity
                             key={route.key}
                             onPress={() => navigation.navigate(route.name)}
                         >
                             <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
                         </TouchableOpacity>
-                    </View>
-                );
-            })}
+                    );
+                })}
+            </View>
         </View>
     )
 }

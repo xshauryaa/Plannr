@@ -3,6 +3,7 @@ import { View, Image, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, 
 import { useAppState } from '../context/AppStateContext';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion';
+import { lightColor, darkColor } from '../design/colors';
 
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
@@ -18,18 +19,20 @@ const FinalCheckView = ({ onNext }) => {
     const [showWarning, setShowWarning] = useState(false);
     const warning = "End time must be after start time";
 
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={styles.subHeading}>One more thing - what are the daily time periods and the scheduling strategy you'd like?</Text>
-                <Text style={styles.subHeading}>Daily Start & End Time</Text>
-                <View style={styles.card}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - what are the daily time periods and the scheduling strategy you'd like?</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start & End Time</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                         <View style={{ width: '50%' }}>
-                            <Text style={styles.subHeading}>Start Time</Text>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
                             <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); }}>
                                 <TextInput
-                                    style={{ ...styles.input, width: '90%' }}
+                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                     pointerEvents="none"
                                     value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     editable={false}
@@ -37,10 +40,10 @@ const FinalCheckView = ({ onNext }) => {
                             </Pressable>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={styles.subHeading}>End Time</Text>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
                             <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); }}>
                                 <TextInput
-                                    style={{ ...styles.input, width: '90%' }}
+                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                     pointerEvents="none"
                                     value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     editable={false}
@@ -57,6 +60,7 @@ const FinalCheckView = ({ onNext }) => {
                                 onChange={(event, time) => {
                                     if (time) setStartTime(time);
                                 }}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -75,6 +79,7 @@ const FinalCheckView = ({ onNext }) => {
                                 onChange={(event, time) => {
                                     if (time) setEndTime(time);
                                 }}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -86,33 +91,33 @@ const FinalCheckView = ({ onNext }) => {
                     )}
                     {showWarning && <Text style={styles.warning}>{warning}</Text>}
                 </View>
-                <Text style={styles.subHeading}>Scheduling Strategy</Text>
-                <View style={{ ...styles.card, gap: 12 }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Scheduling Strategy</Text>
+                <View style={{ ...styles.card, gap: 12, backgroundColor: theme.COMP_COLOR }}>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
                         <EarliestFitIcon width={20} height={20}/>
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? '#000' : '#F0F0F0'  }}
+                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('earliest-fit') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? '#FFFFFF' : '#000'}}>Earliest Fit</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
                         <BalancedWorkIcon width={20} height={20}/>
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? '#000' : '#F0F0F0'  }}
+                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('balanced-work') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? '#FFFFFF' : '#000'}}>Balanced Work</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
                         <DeadlineOrientedIcon width={20} height={20}/>
                         <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? '#000' : '#F0F0F0'  }}
+                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('deadline-oriented') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? '#FFFFFF' : '#000'}}>Deadline Oriented</Text>
+                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -147,9 +152,8 @@ const styles = StyleSheet.create({
         marginVertical: 8
     },
     card: {
-        width: '97%',
+        width: '99%',
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,

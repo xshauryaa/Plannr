@@ -1,19 +1,21 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
 import { useAppState } from '../context/AppStateContext'
 import EditIcon from '../../assets/system-icons/EditIcon.svg'
+import { lightColor, darkColor } from '../design/colors'
 
 const SavedSchedulesScreen = () => {
     const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const SavedSchedules = () => {
-        return (
+    return (
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <View>
-                <Text style={{ ...styles.title, marginTop: 64, }}>Saved Schedules</Text>
+                <Text style={{ ...styles.title, marginTop: 64, color: theme.FOREGROUND }}>Saved Schedules</Text>
                 {
                     appState.savedSchedules.length === 0 
                     ? <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', marginVertical: 16 }}>You have no saved schedules.</Text>
+                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', marginVertical: 16, color: theme.FOREGROUND }}>You have no saved schedules.</Text>
                     </View> 
                     : null
                 }
@@ -24,37 +26,28 @@ const SavedSchedulesScreen = () => {
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => {
                             return (
-                                <View style={styles.card}>
+                                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                                    {/* Background Image */}
                                     <Image source={require('../../assets/images/BG-Gradient.png')} style={styles.bgImage} />
-                                    <View style={styles.bottomCover}> 
+                                    <View style={{ ...styles.bottomCover, backgroundColor: theme.COMP_COLOR }}> 
                                         <View>
-                                            <Text style={styles.heading}>{item.name}</Text>
-                                            <Text style={{ ...styles.subHeading, color: '#000', opacity: 0.5 }}>
+                                            <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
+                                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
                                                 {item.schedule.getFirstDate().getDateString()} onwards
                                             </Text>
                                         </View>
                                         <View style={{ flexDirection: 'row', gap: 12 }}>
                                             <TouchableOpacity onPress={() => {}}> 
-                                                <EditIcon width={24} height={24} />
+                                                <EditIcon width={24} height={24} color={theme.FOREGROUND} />
                                             </TouchableOpacity> 
                                         </View>
                                     </View>
-                                    <View style={styles.divider}></View>
                                 </View>
                             )
                         }
                     }
                 />
             </View>
-        )
-    }
-
-    
-
-    return (
-        <View style={styles.container}>
-            { SavedSchedules() }
-            { /* UserPreferences() */ }
         </View>
     )
 }
@@ -62,7 +55,6 @@ const SavedSchedulesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        backgroundColor: '#FFFFFF',
         height: '100%',
     },
     subContainer: {
@@ -75,10 +67,9 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     card: {
-        width: '97%',
+        width: '99%',
         height: 202,
         borderRadius: 12,
-        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -87,7 +78,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 12,
         marginVertical: 12,
-        margin: 8,
+        margin: 20,
         alignSelf: 'center',
     },
     bgImage: {
@@ -116,11 +107,6 @@ const styles = StyleSheet.create({
         fontSize: 16, 
         fontFamily: 'AlbertSans',
         marginBottom: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.15)',
-        marginVertical: 12,
     },
 })
 

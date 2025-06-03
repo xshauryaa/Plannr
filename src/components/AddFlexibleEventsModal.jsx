@@ -7,7 +7,13 @@ import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import Priority from '../model/Priority.js'
 
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
+
 const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const maxDate = new Date()
     maxDate.setDate(minDate.getDate() + (numDays - 1))
     
@@ -53,9 +59,9 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Name</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Name</Text>
                     <TextInput
-                        style={{ ...styles.input, width: '90%' }}
+                        style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={name}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -65,10 +71,10 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     />
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Type</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Type</Text>
                     <Pressable onPress={() => { setShowTypePicker(true); setShowPriorityPicker(false); setShowDatePicker(false); }}>
                         <TextInput
-                            style={{ ...styles.input, width: '90%' }}
+                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={getActivityLabel(type)}
                             editable={false}
@@ -84,9 +90,9 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Duration (est.)</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est.)</Text>
                     <TextInput
-                        style={{ ...styles.input, width: '90%' }}
+                        style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={duration}
                         autoCorrect={false}
                         autoCapitalize='words'
@@ -96,10 +102,10 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     />
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={styles.subHeading}>Priority</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Priority</Text>
                     <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(true); setShowDatePicker(false); }}>
                         <TextInput
-                            style={{ ...styles.input, width: '90%' }}
+                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={getPriorityLabel(priority)}
                             editable={false}
@@ -130,19 +136,19 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={styles.card}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                 {/* Panel 1 - Name + Activity Type */}
                 {Panel1()}
 
-                {/* Panel 2 - Start Time + End Time */}
+                {/* Panel 2 - Duration + Priority */}
                 {Panel2()}
 
                 {/* Panel 3 - Date Picker */}
                 <View>
-                    <Text style={styles.subHeading}>Date</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
                     <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(false); setShowDatePicker(true); }}>
                         <TextInput
-                            style={styles.input}
+                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
                             value={deadline.toLocaleDateString()}
                             editable={false}
@@ -159,6 +165,7 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                                 }}
                                 minimumDate={minDate}
                                 maximumDate={maxDate}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -176,6 +183,7 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                         <Picker
                             selectedValue={type}
                             onValueChange={(itemValue) => setType(itemValue)}
+                            themeVariant={appState.userPreferences.theme}
                         >
                             <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
                             <Picker.Item label="Meeting" value={ActivityType.MEETING} />
@@ -202,6 +210,7 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                         <Picker
                             selectedValue={priority}
                             onValueChange={(itemValue) => setPriority(itemValue)}
+                            themeVariant={appState.userPreferences.theme}
                         >
                             <Picker.Item label="High" value={Priority.HIGH} />
                             <Picker.Item label="Medium" value={Priority.MEDIUM} />
@@ -244,7 +253,6 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 
 const styles = StyleSheet.create({
     card: {
-        width: '75%',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',

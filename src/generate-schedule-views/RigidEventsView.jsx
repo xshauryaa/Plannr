@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
+import { useAppState } from '../context/AppStateContext.js'
+import { lightColor, darkColor } from '../design/colors.js'
+
 import RigidEvent from '../model/RigidEvent'
 import AddRigidEventsModal from '../components/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
@@ -8,6 +11,9 @@ import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
+    const { appState } = useAppState();
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
     const [rigidEvents, setRigidEvents] = useState([])
     const [showModal, setShowModal] = useState(false)
 
@@ -24,12 +30,12 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
 
     const eventRender = (eventObj, indexToRemove) => {
         return (
-            <View style={styles.eventCard}>
+            <View style={{ ...styles.eventCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12 }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRigidEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
-                    <CrossIcon width={24} height={24} />
+                    <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
         )
@@ -38,7 +44,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={styles.subHeading}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => setShowModal(true)}
@@ -46,8 +52,8 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
                     <AddIcon width={18} height={18} />
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Event</Text>
                 </TouchableOpacity>
-                <Text style={styles.subHeading}>Events</Text>
-                <View style={{ ...styles.card, height: '60%' }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Events</Text>
+                <View style={{ ...styles.card, height: '60%', backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={rigidEvents}
                         showsVerticalScrollIndicator={false}
@@ -91,7 +97,7 @@ const styles = StyleSheet.create({
         marginVertical: 8
     },
     card: {
-        width: '95%',
+        width: '99%',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
@@ -107,7 +113,6 @@ const styles = StyleSheet.create({
     },
     eventCard: {
         height: 40, 
-        backgroundColor: "#F0F0F0",
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',

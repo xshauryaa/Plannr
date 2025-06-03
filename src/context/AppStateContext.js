@@ -119,11 +119,10 @@ export const AppStateProvider = ({ children }) => {
             defaultStrategy: 'earliest-fit',
             defaultMinGap: '15',
             defaultMaxWorkingHours: '8',
-            incompleteTaskNotification: 0,
             taskRemindersEnabled: true,
             leadMinutes: 30,
         },
-        savedSchedules: [],
+        savedSchedules: [{name: 'Schedule 1', schedule: scheduleForTesting}],
         activeSchedule: scheduleForTesting,
         onboarded: false
     });
@@ -155,7 +154,7 @@ export const AppStateProvider = ({ children }) => {
     // useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences);
 
     // NotificationService.requestPermissions();
-    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(26, 5, 2025), 440, 500);
+    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(26, 5, 2025), 545, 600);
     // const testTb = TimeBlock.fromRigidEvent(event, false);
     // NotificationService.scheduleTaskReminder(testTb, 3);
 
