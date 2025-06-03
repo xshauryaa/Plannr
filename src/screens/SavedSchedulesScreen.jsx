@@ -25,10 +25,14 @@ const SavedSchedulesScreen = () => {
                     data={appState.savedSchedules}
                     keyExtractor={(item) => item.name}
                     renderItem={({ item }) => {
+                        const imageMap = {
+                            light: require('../../assets/images/light/BG-Gradient.png'),
+                            dark: require('../../assets/images/dark/BG-Gradient.png'),
+                        };
                             return (
                                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                                     {/* Background Image */}
-                                    <Image source={require('../../assets/images/BG-Gradient.png')} style={styles.bgImage} />
+                                    <Image source={imageMap[appState.userPreferences.theme]} style={styles.bgImage} />
                                     <View style={{ ...styles.bottomCover, backgroundColor: theme.COMP_COLOR }}> 
                                         <View>
                                             <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>

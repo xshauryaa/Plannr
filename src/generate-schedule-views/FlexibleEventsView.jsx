@@ -8,11 +8,11 @@ import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
-const FlexibleEventsView = ({ onNext, minDate, numDays, onBack }) => {
+const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const [flexibleEvents, setFlexibleEvents] = useState([]);
+    const [flexibleEvents, setFlexibleEvents] = useState(eventsInput);
     const [showModal, setShowModal] = useState(false);
 
     const addFlexibleEvent = (name, type, duration, priority, deadline) => {

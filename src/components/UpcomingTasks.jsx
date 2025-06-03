@@ -52,18 +52,28 @@ const UpcomingTasks = ({ onClick }) => {
         }, [todaysTasks])
 
     const NoUpcomingTasksView = () => {
+        const imageMap = {
+            light: require('../../assets/images/light/NoUpcomingTasks.png'),
+            dark: require('../../assets/images/dark/NoUpcomingTasks.png'),
+        };
+
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
-                <Image source={require('../../assets/images/NoUpcomingTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
+                <Image source={imageMap[appState.userPreferences.theme]} style={{ width: 192, height: 192, alignSelf: 'center' }} />
                 <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no upcoming tasks for today!</Text>
             </View>
         )
     }
 
     const NoTasksView = () => {
+        const imageMap = {
+            light: require('../../assets/images/light/NoTasks.png'),
+            dark: require('../../assets/images/dark/NoTasks.png'),
+        };
+
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
-                <Image source={require('../../assets/images/NoTasks.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
+                <Image source={imageMap[appState.userPreferences.theme]} style={{ width: 192, height: 192, alignSelf: 'center' }} />
                 <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no tasks due for today!</Text>
             </View>
         )
@@ -102,9 +112,14 @@ const UpcomingTasks = ({ onClick }) => {
     }
 
     const CompletedTasksView = () => {
+        const imageMap = {
+            light: require('../../assets/images/light/Celebration.png'),
+            dark: require('../../assets/images/dark/Celebration.png'),
+        };
+
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
-                <Image source={require('../../assets/images/Celebration.png')} style={{ width: 192, height: 192, alignSelf: 'center' }} />
+                <Image source={imageMap[appState.userPreferences.theme]} style={{ width: 192, height: 192, alignSelf: 'center' }} />
                 <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have completed all your tasks for today!</Text>
             </View>
         )

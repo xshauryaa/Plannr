@@ -12,6 +12,8 @@ import FinalCheckView from '../generate-schedule-views/FinalCheckView.jsx'
 import GenerationView from '../generate-schedule-views/GenerationView.jsx'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
+import EventDependencies from '../model/EventDependencies.js'
+import SchedulingErrorModal from '../components/SchedulingErrorModal.jsx'
 
 const GenerateScheduleScreen = () => {
     const { appState } = useAppState();
@@ -19,10 +21,16 @@ const GenerateScheduleScreen = () => {
 
     const [genStage, setGenStage] = useState(0);
     const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8));
+    const [breaks, setBreaks] = useState([]);
+    const [repeatedBreaks, setRepeatedBreaks] = useState([]);
+    const [rigidEvents, setRigidEvents] = useState([]);
+    const [flexibleEvents, setFlexibleEvents] = useState([]);
     const [events, setEvents] = useState([]);
+    const [deps, setDeps] = useState(new EventDependencies());
     const [schedule, setSchedule] = useState(null);
     const [firstDate, setFirstDate] = useState(new Date());
     const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
 
@@ -40,24 +48,29 @@ const GenerateScheduleScreen = () => {
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
+        setBreaks([...breaks, ...breakList])
+        setRepeatedBreaks([...repeatedBreaks, ...repeatedBreakList])
         scheduler.setBreaks(breakList)
         scheduler.setRepeatedBreaks(repeatedBreakList)
         setGenStage(2)
     }
 
     const RigidEventsSetup = (eventsList) => {
+        setRigidEvents([...rigidEvents, ...eventsList])
         scheduler.setRigidEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(3);
     }
 
     const FlexibleEventsSetup = (eventsList) => {
+        setFlexibleEvents([...flexibleEvents, ...eventsList])
         scheduler.setFlexibleEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(4);
     }
 
     const EventDepsSetup = (eventDeps) => {
+        setDeps(eventDeps)
         scheduler.setEventDependencies(eventDeps)
         setGenStage(5)
     }
@@ -70,17 +83,25 @@ const GenerateScheduleScreen = () => {
                 : (strategy == 'deadline-oriented')
                     ? strategy = "Deadline Oriented"
                     : null
-        setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
-        setGenStage(6);
-        setShowLoadingScreen(true);
+        try {
+            throw new Error("This is a test error to check the error handling in schedule generation.");
+            setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
+            setGenStage(6);
+            setShowLoadingScreen(true);
+        } catch {
+            setShowErrorModal(true);
+            console.error("Error in schedule generation. Please check your inputs.");
+            setShowLoadingScreen(false);
+            return;
+        }
     }
 
     const views = [
         <InfoView onNext={SchedulerInitialization}/>,
-        <BreaksView onNext={BreaksSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}}/>,
-        <EventDependenciesView onNext={EventDepsSetup} events={events} onBack={() => {setGenStage(genStage - 1)}}/>,
+        <BreaksView onNext={BreaksSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} breaksInput={breaks} repeatedBreaksInput={repeatedBreaks}/>,
+        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={rigidEvents}/>,
+        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={flexibleEvents}/>,
+        <EventDependenciesView onNext={EventDepsSetup} events={events} depsInput={deps}/>,
         <FinalCheckView onNext={Generation}/>,
         <GenerationView playAnim={showLoadingScreen}/>
     ]
@@ -89,6 +110,11 @@ const GenerateScheduleScreen = () => {
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
             {views[genStage]}
+            <SchedulingErrorModal 
+                isVisible={showErrorModal} 
+                action1={() => { setShowErrorModal(false) }} 
+                action2={() => { setShowErrorModal(false); setGenStage(1) }}
+            />
         </View>
     )
 }

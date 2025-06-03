@@ -35,18 +35,28 @@ const TodaysTasksScreen = () => {
     }, [taskData])
 
     const NoTasksView = () => {
+        const imageMap = {
+            light: require('../../assets/images/light/NoTasks.png'),
+            dark: require('../../assets/images/dark/NoTasks.png'),
+        };
+
         return (
             <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
-                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/NoTasks.png")}/>
+                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={imageMap[appState.userPreferences.theme]}/>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You have no tasks due for today.</Text>
             </View>
         )
     }
 
     const TasksCompletedView = () => {
+        const imageMap = {
+            light: require('../../assets/images/light/Celebration.png'),
+            dark: require('../../assets/images/dark/Celebration.png'),
+        };
+
         return (
-        <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
-                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={require("../../assets/images/Celebration.png")}/>
+            <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
+                <Image style={{ height: 448, width: 448, marginTop: 48 }} source={imageMap[appState.userPreferences.theme]}/>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You crushed it today!</Text>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>You have completed all your tasks for the day.</Text>
             </View>

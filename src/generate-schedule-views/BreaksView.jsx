@@ -11,12 +11,12 @@ import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 import AddBreaksModal from '../components/AddBreaksModal'
 
-const BreaksView = ({ onNext, minDate, numDays, onBack }) => {
+const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBreaksInput }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     
-    const [breaks, setBreaks] = useState([])
-    const [repBreaks, setRepBreaks] = useState([])
+    const [breaks, setBreaks] = useState(breaksInput)
+    const [repBreaks, setRepBreaks] = useState(repeatedBreaksInput)
     const [showModal, setShowModal] = useState(false)
 
     const addBreak = (startTime, endTime, repeated, date) => {

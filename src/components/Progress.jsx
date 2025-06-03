@@ -44,7 +44,7 @@ const Progress = () => {
                 <Text style={{ ...styles.topText, color: theme.FOREGROUND }}>You've completed {Math.round(progress)}% of this week's tasks!</Text>
                 <View style={styles.progressBarBack}>
                     <LinearGradient
-                        colors={['#3A47E4', '#4166FB']}
+                        colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
                         start={[0, 0]}
                         end={[1, 0]}
                         style={{ ...styles.progressBarFront, width: `${progress}%` }}

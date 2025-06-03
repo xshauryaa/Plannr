@@ -10,8 +10,8 @@ export const lightColor = {
     SELECTION: '#000000',
     BUTTON: '#000000',
     SELECTED_TEXT: '#FFFFFF',
-    GRADIENT_START: '#3A47E4',
-    GRADIENT_END: '#4166FB',
+    GRADIENT_START: '#0091FF',
+    GRADIENT_END: '#78C7FF',
 }
 
 export const darkColor = {

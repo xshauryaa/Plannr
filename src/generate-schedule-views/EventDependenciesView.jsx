@@ -9,11 +9,11 @@ import { useAppState } from '../context/AppStateContext';
 import { lightColor, darkColor } from '../design/colors';
 
 
-const EventDependenciesView = ({ onNext, events, onBack }) => {
+const EventDependenciesView = ({ onNext, events, onBack, depsInput }) => {
     const { appState } = useAppState();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const [eventDependencies, setEventDependencies] = useState(new EventDependencies());
+    const [eventDependencies, setEventDependencies] = useState(depsInput);
     const [showModal, setShowModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
 

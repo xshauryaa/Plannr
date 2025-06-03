@@ -10,11 +10,11 @@ import convertTimeToTime24 from '../utils/timeConversion.js'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
-const RigidEventsView = ({ onNext, minDate, numDays, onBack }) => {
+const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const [rigidEvents, setRigidEvents] = useState([])
+    const [rigidEvents, setRigidEvents] = useState(eventsInput)
     const [showModal, setShowModal] = useState(false)
 
     const addRigidEvent = (name, type, date, startTime, endTime) => {
