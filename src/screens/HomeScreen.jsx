@@ -13,6 +13,12 @@ import useCurrentTime from '../utils/useCurrentTime.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 
+import { spacing, padding } from '../design/spacing.js'
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
+
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
@@ -21,14 +27,6 @@ const HomeScreen = ({ navigation }) => {
     if (!storageLoaded) { return (<LoadingScreen/>) }
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-        }, 1000);
-    
-        return () => clearInterval(timer);
-    }, []);
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -75,7 +73,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
+        padding: padding.SCREEN_PADDING,
         height: '100%',
     },
     subContainer: {
@@ -84,19 +82,18 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontFamily: 'PinkSunset',
-        marginTop: 64,
-        marginBottom: 8,
+        marginTop: spacing.SPACING_16,
+        marginBottom: SPACE,
     },
     subHeading: {
         fontSize: 16,
         fontFamily: 'AlbertSans',
-        marginBottom: 16,
+        marginBottom: SPACE,
     },
     horizontalGrid: {
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 16,
     }
 })
 

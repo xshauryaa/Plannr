@@ -8,6 +8,12 @@ import useCurrentTime from '../utils/useCurrentTime.js'
 import Other from '../../assets/type-icons/Other.svg'
 import { lightColor, darkColor } from '../design/colors.js';
 
+import { spacing, padding } from '../design/spacing.js'
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
+
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+
 const TodaysTasksScreen = () => {
     
     const { appState, setAppState } = useAppState();
@@ -151,15 +157,15 @@ const TodaysTasksScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
+        padding: padding.SCREEN_PADDING,
         height: '100%',
     },
     subContainer: {
         height: '85%',
     },
     card: {
-        height: 72,
-        width: '99%',
+        width: '98%',
+        aspectRatio: 398/72,
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',

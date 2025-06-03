@@ -10,6 +10,9 @@ import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 import AddBreaksModal from '../components/AddBreaksModal'
+import { Dimensions} from 'react-native';
+const { width, height } = Dimensions.get('window');
+const CARDHEIGHT = (height > 900) ? 180 : (height > 800) ? 150 : 120;
 
 const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBreaksInput }) => {
     const { appState } = useAppState();
@@ -71,7 +74,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Break</Text>
                 </TouchableOpacity>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Everyday Breaks</Text>
-                <View style={{ ...styles.card, height: 180, backgroundColor: theme.COMP_COLOR }}>
+                <View style={{ ...styles.card, height: CARDHEIGHT, backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={repBreaks}
                         showsVerticalScrollIndicator={false}
@@ -80,7 +83,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
                     />
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Single Breaks</Text>
-                <View style={{ ...styles.card, height: 180, backgroundColor: theme.COMP_COLOR }}>
+                <View style={{ ...styles.card, height: CARDHEIGHT, backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
                         data={breaks}
                         showsVerticalScrollIndicator={false}

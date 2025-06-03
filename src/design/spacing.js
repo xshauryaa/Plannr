@@ -1,4 +1,4 @@
-export default spacing = {
+export const spacing = {
     SPACING_0: 0,
     SPACING_1: 4,
     SPACING_2: 8,
@@ -12,4 +12,25 @@ export default spacing = {
     SPACING_10: 40,
     SPACING_11: 44,
     SPACING_12: 48,
+    SPACING_13: 52,
+    SPACING_14: 56,
+    SPACING_15: 60,
+    SPACING_16: 64,
+}
+
+export const padding = {
+    SCREEN_PADDING: 16,
+    PADDING_0: 0,
+    PADDING_1: 4,
+    PADDING_2: 8,
+    PADDING_3: 12,
+    PADDING_4: 16,
+    PADDING_5: 20,
+    PADDING_6: 24,
+    PADDING_7: 28,
+    PADDING_8: 32,
+    PADDING_9: 36,
+    PADDING_10: 40,
+    PADDING_11: 44,
+    PADDING_12: 48,
 }

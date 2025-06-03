@@ -16,7 +16,7 @@ export default function useScheduleNotificationSync(activeSchedule, userPreferen
 
                 for (const task of tasks) {
                     if (task.type === 'break' || task.isCompleted) continue;
-                    const leadMinutes = userPreferences.leadMinutes || 10;
+                    const leadMinutes = parseInt(userPreferences.leadMinutes) || 10;
                     await NotificationService.scheduleTaskReminder(task, leadMinutes);
                 }
             }

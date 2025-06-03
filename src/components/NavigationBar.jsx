@@ -9,8 +9,12 @@ import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg';
 import Indicator from '../../assets/nav-icons/Indicator.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
+import { spacing, padding } from '../design/spacing.js';
+import { Dimensions } from 'react-native';
 
-const BAR_HEIGHT = 64;
+const { width, height } = Dimensions.get('window');
+
+const BAR_HEIGHT = 64; // 64px for 430px width screen
 const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
 const ICON_DIM = INDICATOR_DIM / 2;
 const PADDING_HORIZONTAL = 5/6 * ICON_DIM;

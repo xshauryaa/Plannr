@@ -9,7 +9,7 @@ import { useAppState } from '../context/AppStateContext';
 import { lightColor, darkColor } from '../design/colors';
 
 
-const EventDependenciesView = ({ onNext, events, onBack, depsInput }) => {
+const EventDependenciesView = ({ onNext, events, depsInput }) => {
     const { appState } = useAppState();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -77,12 +77,6 @@ const EventDependenciesView = ({ onNext, events, onBack, depsInput }) => {
                 </View>
             </View>
             <View style={styles.horizontalGrid}>
-                <TouchableOpacity 
-                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
-                    onPress={() => onBack()}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Back</Text>
-                </TouchableOpacity>
                 <TouchableOpacity 
                     style={{ ...styles.button, marginVertical: 0, width: '48%' }}
                     onPress={() => onNext(eventDependencies)}

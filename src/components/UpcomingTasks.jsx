@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react' 
-import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity, BackHandler } from 'react-native'
+import { Text, View, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native'
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
@@ -8,6 +8,13 @@ import useCurrentTime from '../utils/useCurrentTime.js'
 import Expand from '../../assets/system-icons/Expand.svg'
 import Other from '../../assets/type-icons/Other.svg'
 import { lightColor, darkColor } from '../design/colors.js'
+
+import { spacing, padding } from '../design/spacing.js'
+import { Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+const WIDTH = width - (padding.SCREEN_PADDING * 2);
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 const UpcomingTasks = ({ onClick }) => {
     const { appState } = useAppState();
@@ -138,17 +145,18 @@ const UpcomingTasks = ({ onClick }) => {
 
 const styles = StyleSheet.create({
     card: {
-        height: 262,
+        width: WIDTH,
+        aspectRatio: 398/262,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
-        width: 0,
-        height: 0,
+            width: 0,
+            height: 0,
         },
         shadowOpacity: 0.1,
         shadowRadius: 24,
-        marginVertical: 16,
         padding: 16,
+        marginBottom: SPACE
     },
     taskCard: {
         flexDirection: 'row',

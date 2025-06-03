@@ -5,30 +5,33 @@ import GoIcon from '../../assets/system-icons/GoIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
+import { spacing, padding } from '../design/spacing.js'
+import { Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+const WIDTH = width - (padding.SCREEN_PADDING * 2);
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+
 const Progress = () => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            let totalTasks = 0;
-            let completedTasks = 0;
-            if (appState.activeSchedule) {
-                const datesList = appState.activeSchedule.getAllDatesInOrder();
-                
-                for (const date of datesList) {
-                    const schedule = appState.activeSchedule.getScheduleForDate(date);
-                    totalTasks += schedule.timeBlocks.length;
-                    completedTasks += schedule.timeBlocks.filter(tb => tb.isCompleted).length;
-                }
+        let totalTasks = 0;
+        let completedTasks = 0;
+        if (appState.activeSchedule) {
+            const datesList = appState.activeSchedule.getAllDatesInOrder();
+            
+            for (const date of datesList) {
+                const schedule = appState.activeSchedule.getScheduleForDate(date);
+                totalTasks += schedule.timeBlocks.length;
+                completedTasks += schedule.timeBlocks.filter(tb => tb.isCompleted).length;
             }
-            const newProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-            setProgress(newProgress);
-        }, 1000);
-    
-        return () => clearInterval(timer);
-    }, []);
+        }
+        const newProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+        setProgress(newProgress);
+    }, [appState]);
 
     const NoScheduleView = () => {
         return (
@@ -67,7 +70,7 @@ const Progress = () => {
 
 const styles = StyleSheet.create({
     card: {
-        height: 89,
+        width: WIDTH,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -76,8 +79,8 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 24,
-        marginBottom: 16,
-        padding: 16
+        padding: 16,
+        marginBottom: SPACE
     },
     topText: {
         fontSize: 12,

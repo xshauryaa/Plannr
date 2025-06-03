@@ -120,7 +120,7 @@ export const AppStateProvider = ({ children }) => {
             defaultMinGap: '15',
             defaultMaxWorkingHours: '8',
             taskRemindersEnabled: true,
-            leadMinutes: 30,
+            leadMinutes: '30',
         },
         savedSchedules: [{name: 'Schedule 1', schedule: scheduleForTesting}],
         activeSchedule: scheduleForTesting,
@@ -153,10 +153,29 @@ export const AppStateProvider = ({ children }) => {
 
     // useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences);
 
-    // NotificationService.requestPermissions();
-    // const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 60, new ScheduleDate(26, 5, 2025), 545, 600);
-    // const testTb = TimeBlock.fromRigidEvent(event, false);
-    // NotificationService.scheduleTaskReminder(testTb, 3);
+    const runTest = async () => {
+        await NotificationService.requestPermissions();
+      
+        const now = new Date();
+        const date = new ScheduleDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
+      
+        const start = new Date(now.getTime() + 5 * 60000); // 5 minutes from now
+        const startHHMM = start.getHours() * 100 + start.getMinutes();
+        const endHHMM = startHHMM + 30;
+      
+        const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 30, date, startHHMM, endHHMM);
+        const testTb = TimeBlock.fromRigidEvent(event, false);
+
+        console.log("Scheduling test notification for:", testTb);
+      
+        const id = await NotificationService.scheduleTaskReminder(testTb, 2);
+
+        console.log(id);
+    };
+
+    // useEffect(() => {
+    //     runTest();
+    // }, []);      
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>

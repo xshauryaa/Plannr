@@ -7,6 +7,13 @@ import { useAppState } from '../context/AppStateContext.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 
+import { spacing, padding } from '../design/spacing.js'
+import { Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+const WIDTH = width - (padding.SCREEN_PADDING * 2);
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_2 : spacing.SPACING_1
+
 const MenuButton = ({ broad, title, icon, navTo }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
@@ -19,7 +26,7 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 
     if (broad) {
         return (
-            <TouchableOpacity style={{ ...styles.card, width: '100%', backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
+            <TouchableOpacity style={{ ...styles.card, width: WIDTH, aspectRatio: WIDTH/90, backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
                 <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 { ICONS[icon] || null }
             </TouchableOpacity>
@@ -35,8 +42,8 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 
 const styles = StyleSheet.create({
     card: {
-        height: 88,
-        width: '48.5%',
+        width: (WIDTH - padding.SCREEN_PADDING) / 2,
+        aspectRatio: 191/90,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -46,6 +53,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 12,
         padding: 16,
+        marginBottom: SPACE
     },
     text: { 
         width: 120,
