@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity } from 'react-native' 
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -7,6 +7,7 @@ import { lightColor, darkColor } from '../design/colors.js'
 const InfoView = ({ onNext }) => {
     const { appState } = useAppState();
     const [showPicker, setShowPicker] = useState(false);
+    const [name, setName] = useState('');
     const [startDate, setStartDate] = useState(new Date());
     const [numDays, setNumDays] = useState('1');
     const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap);
@@ -16,8 +17,20 @@ const InfoView = ({ onNext }) => {
 
     return (
         <View style={styles.subContainer}>
-            <View>
+            <ScrollView>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, enter some information about what you'd like from the schedule.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What's the name of this schedule</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                    <TextInput
+                        style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                        value={name}
+                        autoCorrect={false}
+                        autoCapitalize='words'
+                        onChange={ ({ nativeEvent }) => { 
+                            setName(nativeEvent.text)
+                        } }
+                    />
+                </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What date would you like to schedule from?</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <Pressable onPress={() => setShowPicker(true)}>
@@ -86,10 +99,10 @@ const InfoView = ({ onNext }) => {
                         } }
                     />
                 </View>
-            </View>
+            </ScrollView>
             <TouchableOpacity 
                 style={styles.button}
-                onPress={() => onNext(numDays, startDate, minGap, maxHours)}
+                onPress={() => onNext(name, numDays, startDate, minGap, maxHours)}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>

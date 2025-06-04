@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
@@ -16,11 +16,12 @@ import EventDependencies from '../model/EventDependencies.js'
 import SchedulingErrorModal from '../components/SchedulingErrorModal.jsx'
 
 const GenerateScheduleScreen = () => {
-    const { appState } = useAppState();
+    const { appState, setAppState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [genStage, setGenStage] = useState(0);
     const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8));
+    const [name, setName] = useState('');
     const [breaks, setBreaks] = useState([]);
     const [repeatedBreaks, setRepeatedBreaks] = useState([]);
     const [rigidEvents, setRigidEvents] = useState([]);
@@ -34,13 +35,14 @@ const GenerateScheduleScreen = () => {
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
 
-    const SchedulerInitialization = (numDays, date, gap, workingLimit) => {
+    const SchedulerInitialization = (name, numDays, date, gap, workingLimit) => {
         const startDate = convertDateToScheduleDate(date)
         const dayString = date.toLocaleDateString('en-US', { weekday: 'long' });
         const numDaysInt = parseInt(numDays)
         const minGap = parseInt(gap)
         const maxHours = parseInt(workingLimit)
 
+        setName(name);
         setScheduler(new Scheduler(numDays, startDate, dayString, minGap, maxHours))
         setGenStage(1)
 
@@ -48,22 +50,22 @@ const GenerateScheduleScreen = () => {
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
-        setBreaks([...breaks, ...breakList])
-        setRepeatedBreaks([...repeatedBreaks, ...repeatedBreakList])
+        setBreaks([...breakList])
+        setRepeatedBreaks([...repeatedBreakList])
         scheduler.setBreaks(breakList)
         scheduler.setRepeatedBreaks(repeatedBreakList)
         setGenStage(2)
     }
 
     const RigidEventsSetup = (eventsList) => {
-        setRigidEvents([...rigidEvents, ...eventsList])
+        setRigidEvents([...eventsList])
         scheduler.setRigidEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(3);
     }
 
     const FlexibleEventsSetup = (eventsList) => {
-        setFlexibleEvents([...flexibleEvents, ...eventsList])
+        setFlexibleEvents([...eventsList])
         scheduler.setFlexibleEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(4);
@@ -84,10 +86,10 @@ const GenerateScheduleScreen = () => {
                     ? strategy = "Deadline Oriented"
                     : null
         try {
-            throw new Error("This is a test error to check the error handling in schedule generation.");
             setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
             setGenStage(6);
             setShowLoadingScreen(true);
+            setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule}]});
         } catch {
             setShowErrorModal(true);
             console.error("Error in schedule generation. Please check your inputs.");
@@ -107,15 +109,17 @@ const GenerateScheduleScreen = () => {
     ]
 
     return (
-        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
-            {views[genStage]}
-            <SchedulingErrorModal 
-                isVisible={showErrorModal} 
-                action1={() => { setShowErrorModal(false) }} 
-                action2={() => { setShowErrorModal(false); setGenStage(1) }}
-            />
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
+                {views[genStage]}
+                <SchedulingErrorModal 
+                    isVisible={showErrorModal} 
+                    action1={() => { setShowErrorModal(false) }} 
+                    action2={() => { setShowErrorModal(false); setGenStage(1) }}
+                />
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 

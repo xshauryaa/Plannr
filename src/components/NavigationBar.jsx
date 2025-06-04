@@ -19,7 +19,7 @@ const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
 const ICON_DIM = INDICATOR_DIM / 2;
 const PADDING_HORIZONTAL = 5/6 * ICON_DIM;
 const OFFSET = (BAR_HEIGHT - INDICATOR_DIM) / 2;
-const DIST = ICON_DIM * 2.5;
+const WIDTH = width - padding.SCREEN_PADDING * 2;
 
 const NavigationBar = ({ state, descriptors, navigation }) => {
     const insets = useSafeAreaInsets();
@@ -38,7 +38,8 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
 
     useEffect(() => {
         const index = state.index;
-        const xPosition = index * (DIST + ICON_DIM) + OFFSET;
+        const GAP = (WIDTH - (2 * PADDING_HORIZONTAL) - (5 * ICON_DIM)) / 4;
+        const xPosition = index * (GAP + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
             useNativeDriver: true,
@@ -85,6 +86,7 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
 
 const styles = StyleSheet.create({
     bar: {
+        width: WIDTH,
         height: BAR_HEIGHT,
         borderRadius: 32,
         backgroundColor: '#000000',
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         padding: PADDING_HORIZONTAL,
-        gap: DIST
     },
     indicator: {
         position: 'absolute',
