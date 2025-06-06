@@ -19,6 +19,8 @@ class Rescheduler {
         this.firstDay = schedule.day1Day;
         this.minGap = schedule.minGap;
         this.workingHoursLimit = schedule.workingHoursLimit;
+        this.startTime = schedule.startTime.toInt();
+        this.endTime = schedule.endTime.toInt();
     }
 
     /**

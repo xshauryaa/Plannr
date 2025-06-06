@@ -1,4 +1,5 @@
 import Schedule from "../model/Schedule.js";
+import { serializeTime24, parseTime24 } from "./TimeHandler.js";
 import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
 import { serializeDaySchedule, parseDaySchedule } from "./DayHandler.js";
 import { serializeEventDependencies, parseEventDependencies } from "./EventDependenciesHandler.js";
@@ -20,7 +21,9 @@ export const serializeSchedule = (schedule) => {
         workingHoursLimit: schedule.workingHoursLimit,
         eventDependencies: serializeEventDependencies(schedule.eventDependencies),
         schedule: datesList,
-        strategy: schedule.strategy
+        strategy: schedule.strategy,
+        startTime: serializeTime24(schedule.startTime),
+        endTime: serializeTime24(schedule.endTime)
     };
 }
 
@@ -45,7 +48,7 @@ export const parseSchedule = (rawObj) => {
     const strategy = rawObj.strategy;
     
 
-    let scheduleToReturn = new Schedule(numDays, minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, parseEventDependencies(rawObj.eventDependencies), schedule, strategy);
+    let scheduleToReturn = new Schedule(numDays, minGap, parseScheduleDate(rawObj.day1Date), day1Day, workingHoursLimit, parseEventDependencies(rawObj.eventDependencies), schedule, strategy, parseTime24(rawObj.startTime), parseTime24(rawObj.endTime));
 
 
     return scheduleToReturn;

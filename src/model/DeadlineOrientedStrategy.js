@@ -28,6 +28,10 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
   generateSchedule(earliestStartTime, latestEndTime) {
     const startTime = new Time24(earliestStartTime);
     const endTime = new Time24(latestEndTime);
+
+    this.deadlineOrientedSchedule.setStartTime(startTime);
+    this.deadlineOrientedSchedule.setEndTime(endTime);
+
     this._scheduleBreaks();
     this._scheduleEvents(startTime, endTime);
     return this.deadlineOrientedSchedule;

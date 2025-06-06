@@ -20,7 +20,7 @@ class Schedule {
    * @param {Map<string, Day>} schedule - Optional initial schedule map
    * @param {string} strategy - The scheduling strategy to use (e.g., EarliestFit, BalancedWork, DeadlineOriented)
    */
-  constructor(numDays, minGap, day1Date, day1Day, workingHoursLimit, eventDependencies, schedule, strategy) {
+  constructor(numDays, minGap, day1Date, day1Day, workingHoursLimit, eventDependencies, schedule, strategy, startTime, endTime) {
     this.numDays = numDays; // number of days in the schedule
     this.day1Date = day1Date; // the first date of the week
     this.day1Day = day1Day; // the first day of the week
@@ -29,6 +29,8 @@ class Schedule {
     this.eventDependencies = eventDependencies; // dependencies between events
     this.schedule = schedule; // ordered map of day → DaySchedule
     this.strategy = strategy; // scheduling strategy (e.g., EarliestFit, BalancedWork, DeadlineOriented)
+    this.startTime = startTime; // start time of the schedule in HHMM format
+    this.endTime = endTime; // end time of the schedule in HHMM format
     if (this.schedule == null) {
         this.schedule = new Map();
         this._initiateSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit);
@@ -56,6 +58,14 @@ class Schedule {
    */
   getScheduleForDate(date) {
     return this.schedule.get(date);
+  }
+
+  setStartTime(startTime) {
+    this.startTime = startTime;
+  }
+
+  setEndTime(endTime) {
+    this.endTime = endTime;
   }
 
   /**
