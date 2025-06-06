@@ -1,4 +1,4 @@
-import ScheduleDate from '../model/ScheduleDate';
+import ScheduleDate from '../model/ScheduleDate.js';
 
 const convertDateToScheduleDate = (dateObj) => {
   const day = dateObj.getDate();

@@ -2,6 +2,8 @@ import ActivityType from './ActivityType.js';
 import ScheduleDate from './ScheduleDate.js';
 import TimeBlock from './TimeBlock.js';
 import Time24 from './Time24.js';
+import RigidEvent from './RigidEvent.js';
+import FlexibleEvent from './FlexibleEvent.js';
 import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
 
@@ -38,6 +40,22 @@ class Day {
   /** @returns {Array} the list of events */
   getEvents() {
     return this.events;
+  }
+  
+    /**
+   * Returns all rigid events for the day.
+   * @returns {RigidEvent[]}
+   */
+    getRigidEvents() {
+        return this.events.filter(e => e instanceof RigidEvent);
+    }
+    
+    /**
+     * Returns all flexible events for the day.
+     * @returns {FlexibleEvent[]}
+     */
+  getFlexibleEvents() {
+    return this.events.filter(e => e instanceof FlexibleEvent);
   }
 
   /** @returns {Array} the list of breaks */

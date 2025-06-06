@@ -175,6 +175,73 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
 
     return null;
   }
+
+  /**
+   * Reschedules events as late as possible starting from the given date/time.
+   * @param {Schedule} schedule
+   * @param {FlexibleEvent[]} events
+   * @param {ScheduleDate} currentDate
+   * @param {Time24} currentTime
+   * @returns {Schedule}
+   */
+  reschedule(schedule, events, currentDate, currentTime) {
+    this.deadlineOrientedSchedule = schedule;
+    this.flexibleEvents = events;
+
+    const earliestStart = schedule.startTime;
+    const latestEnd = schedule.endTime;
+    const minGap = schedule.getScheduleForDate(schedule.getAllDatesInOrder()[0]).getMinGap();
+
+    const scheduled = new Set();
+    let sorted = this.topologicalSortOfEvents(this.eventDependencies, events);
+    sorted = sorted.filter(e => events.includes(e));
+    sorted.reverse();
+
+    for (const event of sorted) {
+      if (scheduled.has(event)) continue;
+
+      if (this._isNotADependency(event)) {
+        this._rescheduleEventLatest(event, event.getDeadline(), latestEnd, scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+      } else {
+        const [lastDate, lastTime] = this.getLatestDateAndTimeForDependency(
+          this.deadlineOrientedSchedule,
+          this.eventDependencies,
+          event,
+          latestEnd
+        );
+
+        this._rescheduleEventLatest(event, lastDate, lastTime, scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+      }
+    }
+
+    return this.deadlineOrientedSchedule;
+  }
+
+  _rescheduleEventLatest(event, beforeDate, lastTimeOnDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime) {
+    if (scheduled.has(event)) return;
+
+    const reversedDays = [...this.deadlineOrientedSchedule].reverse();
+
+    for (const daySchedule of reversedDays) {
+      const date = daySchedule.getDate();
+      if (date.isAfter(beforeDate) || date.isBefore(currentDate)) continue;
+
+      const dayEndTime = date.equals(beforeDate) ? lastTimeOnDate : latestEndTime;
+      const earliest = date.equals(currentDate) && currentTime.isAfter(earliestStartTime) ? currentTime : earliestStartTime;
+
+      const slot = this.findAvailableSlot(daySchedule, event.getDuration(), earliest, dayEndTime, minGap);
+
+      if (slot) {
+        try {
+          daySchedule.addFlexibleEvent(event, slot[0], slot[1]);
+          scheduled.add(event);
+          return;
+        } catch (e) {
+          if (!(e instanceof WorkingLimitExceededError)) throw e;
+        }
+      }
+    }
+  }
 }
 
 export default DeadlineOrientedStrategy;

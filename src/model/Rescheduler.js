@@ -1,4 +1,10 @@
-import Schedule from "./Schedule";
+import Schedule from "./Schedule.js";
+import EarliestFitStrategy from "./EarliestFitStrategy.js";
+import BalancedWorkStrategy from "./BalancedWorkStrategy.js";
+import DeadlineOrientedStrategy from "./DeadlineOrientedStrategy.js";
+import convertDateToScheduleDate from "../utils/dateConversion.js";
+import Time24 from "./Time24.js";
+import Break from "./Break.js";
 
 /**
  * Manages the rescheduling of tasks on user request.
@@ -84,7 +90,7 @@ class Rescheduler {
             const day = schedule.getScheduleForDate(date);
             if (day) {
                 day.getTimeBlocks().forEach(block => {
-                    if (!block.isCompleted()) return;
+                    if (!block.isCompleted) return;
                     this.completedTimeBlocks.push(block);
                 });
             }
@@ -96,10 +102,52 @@ class Rescheduler {
      * @return {Schedule} the rescheduled schedule with all missing tasks replaced into an upcoming time block
      */
     missedTasksReplacement(schedule) {
-        // This method should implement the logic to replace missed tasks
-        // based on the current schedule and the rescheduling strategy.
-        // For now, it returns a placeholder message.
-        return "Missed tasks replacement logic not implemented yet.";
+        const now = new Date();
+        const currentDate = convertDateToScheduleDate(now);
+        const currentTime = new Time24(now.getHours() * 100 + now.getMinutes());
+
+        const toReschedule = [];
+
+        schedule.getAllDatesInOrder().forEach(date => {
+            const day = schedule.getScheduleForDate(date);
+            if (!day) return;
+
+            day.getFlexibleEvents().forEach(event => {
+                const tb = schedule.locateTimeBlockForEvent(event);
+                if (!tb || tb.isCompleted) return;
+
+                const dateOfDay = day.getDate();
+                if (dateOfDay.isBefore(currentDate) ||
+                    (dateOfDay.equals(currentDate) && tb.getEndTime().isBefore(currentTime)) ||
+                    dateOfDay.isAfter(currentDate) ||
+                    (dateOfDay.equals(currentDate) && tb.getStartTime().isAfter(currentTime))) {
+                        toReschedule.push(event);
+                        day.removeEvent(event);
+                }
+            });
+        });
+
+        if (toReschedule.length === 0) return schedule;
+
+        let strat;
+        switch (this.strategy) {
+            case 'earliest-fit':
+                strat = new EarliestFitStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                break;
+            case 'balanced-work':
+                strat = new BalancedWorkStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                break;
+            case 'deadline-oriented':
+                strat = new DeadlineOrientedStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                break;
+            default:
+                throw new Error(`Unknown strategy: ${this.strategy}`);
+        }
+
+        return schedule;
     }
 
     /**
@@ -127,3 +175,5 @@ class Rescheduler {
         return `Switching strategy to ${newStrategy} is not implemented yet.`;
     }
 }
+
+export default Rescheduler;

@@ -166,6 +166,116 @@ class EarliestFitStrategy extends SchedulingStrategy {
       }
     }
   }
+
+  /**
+   * Reschedules the given events into the existing schedule starting from the
+   * provided date and time.
+   * @param {Schedule} schedule
+   * @param {FlexibleEvent[]} events
+   * @param {ScheduleDate} currentDate
+   * @param {Time24} currentTime
+   * @returns {Schedule}
+   */
+  reschedule(schedule, events, currentDate, currentTime) {
+    this.earliestFitSchedule = schedule;
+    this.flexibleEvents = events;
+
+    const earliestStart = schedule.startTime;
+    const latestEnd = schedule.endTime;
+    const minGap = schedule.getScheduleForDate(schedule.getAllDatesInOrder()[0]).getMinGap();
+
+    const scheduled = new Set();
+    let sorted = this.topologicalSortOfEvents(this.eventDependencies, events);
+    sorted = sorted.filter(e => events.includes(e));
+    for (const event of sorted) {
+      if (!scheduled.has(event)) {
+        const deps = this.eventDependencies.getDependenciesForEvent(event);
+        if (!deps || deps.length === 0) {
+          this._rescheduleDependency(event, event.getDeadline(), latestEnd, scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+        } else {
+          this._rescheduleAfterDependencies(event, event.getDeadline(), scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+        }
+      }
+    }
+
+    return this.earliestFitSchedule;
+  }
+
+  _rescheduleDependency(dependency, beforeDate, lastTimeOnDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime) {
+    if (scheduled.has(dependency)) return;
+
+    const dependencies = this.eventDependencies.getDependenciesForEvent(dependency);
+    if (dependencies) {
+      for (const dep of dependencies) {
+        if (!scheduled.has(dep)) {
+          this._rescheduleDependency(dep, beforeDate, lastTimeOnDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime);
+        }
+      }
+    }
+
+    for (const daySchedule of this.earliestFitSchedule) {
+      const date = daySchedule.getDate();
+      if (date.isBefore(currentDate) || date.isAfter(beforeDate)) continue;
+
+      let start = earliestStartTime;
+      if (date.equals(currentDate) && currentTime.isAfter(start)) {
+        start = currentTime;
+      }
+      const end = date.equals(beforeDate) ? lastTimeOnDate : latestEndTime;
+
+      const slot = this.findAvailableSlot(daySchedule, dependency.getDuration(), start, end, minGap);
+
+      if (slot) {
+        try {
+          daySchedule.addFlexibleEvent(dependency, slot[0], slot[1]);
+          scheduled.add(dependency);
+          return;
+        } catch (e) {
+          if (!(e instanceof WorkingLimitExceededError)) {
+            throw e;
+          }
+        }
+      }
+    }
+  }
+
+  _rescheduleAfterDependencies(event, beforeDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime) {
+    const dependencies = this.eventDependencies.getDependenciesForEvent(event);
+    let afterDate = null;
+    let earliestTimeOnDate = null;
+
+    for (const dep of dependencies) {
+      const block = this.earliestFitSchedule.locateTimeBlockForEvent(dep);
+      if (!afterDate || block.getDate().isAfter(afterDate)) {
+        afterDate = block.getDate();
+        earliestTimeOnDate = block.getEndTime();
+      }
+    }
+
+    for (const daySchedule of this.earliestFitSchedule) {
+      const date = daySchedule.getDate();
+      if (date.isBefore(afterDate) || date.isBefore(currentDate) || date.isAfter(beforeDate)) continue;
+
+      let start = date.equals(afterDate) ? earliestTimeOnDate : earliestStartTime;
+      if (date.equals(currentDate) && currentTime.isAfter(start)) {
+        start = currentTime;
+      }
+
+      const slot = this.findAvailableSlot(daySchedule, event.getDuration(), start, latestEndTime, minGap);
+
+      if (slot) {
+        try {
+          daySchedule.addFlexibleEvent(event, slot[0], slot[1]);
+          scheduled.add(event);
+          return;
+        } catch (e) {
+          if (!(e instanceof WorkingLimitExceededError)) {
+            throw e;
+          }
+        }
+      }
+    }
+  }
 }
 
 export default EarliestFitStrategy;

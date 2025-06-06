@@ -166,6 +166,115 @@ class BalancedWorkStrategy extends SchedulingStrategy {
   }
 
   /**
+   * Reschedules the given events into the current schedule from the specified
+   * date and time.
+   * @param {Schedule} schedule
+   * @param {FlexibleEvent[]} events
+   * @param {ScheduleDate} currentDate
+   * @param {Time24} currentTime
+   * @returns {Schedule}
+   */
+  reschedule(schedule, events, currentDate, currentTime) {
+    this.balancedWorkSchedule = schedule;
+    this.flexibleEvents = events;
+
+    const earliestStart = schedule.startTime;
+    const latestEnd = schedule.endTime;
+    const minGap = schedule.getScheduleForDate(schedule.getAllDatesInOrder()[0]).getMinGap();
+
+    const scheduled = new Set();
+    let sortedEvents = this.topologicalSortOfEvents(this.eventDependencies, events);
+    sortedEvents = sortedEvents.filter(e => events.includes(e));
+
+    for (const event of sortedEvents) {
+      if (!scheduled.has(event)) {
+        const deps = this.eventDependencies.getDependenciesForEvent(event);
+        if (!deps || deps.length === 0) {
+          this._rescheduleDependency(event, event.getDeadline(), latestEnd, scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+        } else {
+          this._rescheduleAfterDependencies(event, event.getDeadline(), scheduled, minGap, earliestStart, latestEnd, currentDate, currentTime);
+        }
+      }
+    }
+
+    return this.balancedWorkSchedule;
+  }
+
+  _rescheduleDependency(dependency, beforeDate, lastTimeOnDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime) {
+    if (scheduled.has(dependency)) return;
+
+    const deps = this.eventDependencies.getDependenciesForEvent(dependency);
+    if (deps) {
+      for (const dep of deps) {
+        if (!scheduled.has(dep)) {
+          this._rescheduleDependency(dep, beforeDate, lastTimeOnDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime);
+        }
+      }
+    }
+
+    const daysSorted = this._getDaysSortedByLoad();
+    for (const daySchedule of daysSorted) {
+      const date = daySchedule.getDate();
+      if (date.isAfter(beforeDate) || date.isBefore(currentDate)) continue;
+
+      let start = earliestStartTime;
+      if (date.equals(currentDate) && currentTime.isAfter(start)) {
+        start = currentTime;
+      }
+      const end = date.equals(beforeDate) ? lastTimeOnDate : latestEndTime;
+
+      const slot = this.findAvailableSlot(daySchedule, dependency.getDuration(), start, end, minGap);
+
+      if (slot) {
+        try {
+          daySchedule.addFlexibleEvent(dependency, slot[0], slot[1]);
+          scheduled.add(dependency);
+          return;
+        } catch (e) {
+          if (!(e instanceof WorkingLimitExceededError)) throw e;
+        }
+      }
+    }
+  }
+
+  _rescheduleAfterDependencies(event, beforeDate, scheduled, minGap, earliestStartTime, latestEndTime, currentDate, currentTime) {
+    const deps = this.eventDependencies.getDependenciesForEvent(event);
+    let afterDate = null;
+    let earliestTimeOnDate = null;
+
+    for (const dep of deps) {
+      const block = this.balancedWorkSchedule.locateTimeBlockForEvent(dep);
+      if (!afterDate || block.getDate().isAfter(afterDate)) {
+        afterDate = block.getDate();
+        earliestTimeOnDate = block.getEndTime();
+      }
+    }
+
+    const daysSorted = this._getDaysSortedByLoad();
+    for (const daySchedule of daysSorted) {
+      const date = daySchedule.getDate();
+      if (date.isBefore(afterDate) || date.isAfter(beforeDate) || date.isBefore(currentDate)) continue;
+
+      let start = date.equals(afterDate) ? earliestTimeOnDate : earliestStartTime;
+      if (date.equals(currentDate) && currentTime.isAfter(start)) {
+        start = currentTime;
+      }
+
+      const slot = this.findAvailableSlot(daySchedule, event.getDuration(), start, latestEndTime, minGap);
+
+      if (slot) {
+        try {
+          daySchedule.addFlexibleEvent(event, slot[0], slot[1]);
+          scheduled.add(event);
+          return;
+        } catch (e) {
+          if (!(e instanceof WorkingLimitExceededError)) throw e;
+        }
+      }
+    }
+  }
+
+  /**
    * Returns the list of DaySchedules sorted by increasing total working hours.
    * @private
    * @returns {DaySchedule[]}
