@@ -19,7 +19,7 @@ export const serializeTimeBlock = (timeBlock) => {
         startTime: serializeTime24(timeBlock.startTime),
         endTime: serializeTime24(timeBlock.endTime),
         duration: timeBlock.duration,
-        isCompleted: timeBlock.isCompleted,
+        isCompleted: timeBlock.isCompleted(),
         deadline: serializeScheduleDate(timeBlock.deadline),
         type: timeBlock.type
     };

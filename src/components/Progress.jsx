@@ -26,7 +26,7 @@ const Progress = () => {
             for (const date of datesList) {
                 const schedule = appState.activeSchedule.getScheduleForDate(date);
                 totalTasks += schedule.timeBlocks.length;
-                completedTasks += schedule.timeBlocks.filter(tb => tb.isCompleted).length;
+                completedTasks += schedule.timeBlocks.filter(tb => tb.isCompleted()).length;
             }
         }
         const newProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;

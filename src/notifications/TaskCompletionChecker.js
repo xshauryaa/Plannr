@@ -35,7 +35,7 @@ const TaskCompletionChecker = () => {
 
         let allComplete = true;
         for (const task of todaysTasks) {
-            if (!task.isCompleted) {
+            if (!task.isCompleted()) {
                 allComplete = false;
                 break;
             }
