@@ -115,12 +115,13 @@ const TodaysTasksScreen = () => {
                                         updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
                                       
                                         const updatedSchedule = new appState.activeSchedule.constructor(
-                                          appState.activeSchedule.numDays,
-                                          appState.activeSchedule.minGap,
-                                          appState.activeSchedule.day1Date,
-                                          appState.activeSchedule.day1Day,
-                                          appState.activeSchedule.workingHoursLimit,
-                                          updatedScheduleMap
+                                            appState.activeSchedule.numDays,
+                                            appState.activeSchedule.minGap,
+                                            appState.activeSchedule.day1Date,
+                                            appState.activeSchedule.day1Day,
+                                            appState.activeSchedule.workingHoursLimit,
+                                            appState.activeSchedule.eventDependencies,
+                                            updatedScheduleMap
                                         );
                                       
                                         setAppState(prev => ({

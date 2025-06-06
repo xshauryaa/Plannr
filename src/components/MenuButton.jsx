@@ -30,14 +30,14 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 
     if (broad) {
         return (
-            <TouchableOpacity style={{ ...styles.card, width: WIDTH, aspectRatio: WIDTH/90, backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
+            <TouchableOpacity style={{ ...styles.card, width: WIDTH, aspectRatio: WIDTH/90, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
                 <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 { ICONS[icon] || null }
             </TouchableOpacity>
         )
     }
     return (
-        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={navTo}>
+        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
             <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
             { ICONS[icon] || null }
         </TouchableOpacity>

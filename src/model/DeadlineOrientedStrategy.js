@@ -16,7 +16,7 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.deadlineOrientedSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.deadlineOrientedSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, this.eventDependencies, null, 'deadline-oriented');
   }
 
   /**

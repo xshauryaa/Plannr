@@ -21,7 +21,7 @@ class EarliestFitStrategy extends SchedulingStrategy {
     this.flexibleEvents = scheduler.flexibleEvents;
     this.eventDependencies = scheduler.eventDependencies;
 
-    this.earliestFitSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, null);
+    this.earliestFitSchedule = new Schedule(scheduler.numDays, minGap, firstDate, firstDay, workingHoursLimit, this.eventDependencies, null, 'earliest-fit');
   }
 
   /**

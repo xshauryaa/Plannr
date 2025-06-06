@@ -16,14 +16,19 @@ class Schedule {
    * @param {ScheduleDate} day1Date - The date of the first day in the week
    * @param {string} day1Day - The day of the week on which the schedule starts
    * @param {number} workingHoursLimit - Max working hours per day
+   * @param {EventDependencies} eventDependencies - Dependencies between events
+   * @param {Map<string, Day>} schedule - Optional initial schedule map
+   * @param {string} strategy - The scheduling strategy to use (e.g., EarliestFit, BalancedWork, DeadlineOriented)
    */
-  constructor(numDays, minGap, day1Date, day1Day, workingHoursLimit, schedule) {
+  constructor(numDays, minGap, day1Date, day1Day, workingHoursLimit, eventDependencies, schedule, strategy) {
     this.numDays = numDays; // number of days in the schedule
     this.day1Date = day1Date; // the first date of the week
     this.day1Day = day1Day; // the first day of the week
     this.minGap = minGap; // minimum gap between events
     this.workingHoursLimit = workingHoursLimit; // max working hours per day
+    this.eventDependencies = eventDependencies; // dependencies between events
     this.schedule = schedule; // ordered map of day → DaySchedule
+    this.strategy = strategy; // scheduling strategy (e.g., EarliestFit, BalancedWork, DeadlineOriented)
     if (this.schedule == null) {
         this.schedule = new Map();
         this._initiateSchedule(numDays, minGap, day1Date, day1Day, workingHoursLimit);

@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useRef, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import MenuButton from '../components/MenuButton.jsx';
 import Insights from '../components/Insights.jsx';
+import BottomSheet from '@gorhom/bottom-sheet';
 const { width, height } = Dimensions.get('window');
 
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
@@ -14,13 +15,19 @@ const SchedulingCenterScreen = ({ navigation }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    // const bottomSheetRef = useRef(null);
+    // const snapPoints = useMemo(() => ['25%', '50%', '75%'], []);
+
+    // const [selectedSchedule, setSelectedSchedule] = useState(null);
+
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Plannr Center</Text>
             <View style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
 
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
-                {(!appState.activeSchedule)
+                {
+                (!appState.activeSchedule)
                     ? <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>You currently have no active schedule.</Text>
                     </View>
@@ -47,10 +54,32 @@ const SchedulingCenterScreen = ({ navigation }) => {
                         broad={true}
                         title="Reschedule Tasks"
                         icon="Reschedule"
-                        navTo={() => { navigation.navigate("Reschedule") }}
+                        navTo={() => { navigation.navigate("Reschedule") } }
                     />
                 </View>
             </View>
+            {/* <BottomSheet
+                ref={bottomSheetRef}
+                index={-1}
+                snapPoints={snapPoints}
+                backgroundStyle={{ backgroundColor: theme.COMP_COLOR }}
+                handleIndicatorStyle={{ backgroundColor: theme.FOREGROUND+'1A' }}
+            >
+                <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+                    {appState.savedSchedules.map((schedule, index) => (
+                    <TouchableOpacity
+                        key={schedule.name}
+                        onPress={() => {
+                            bottomSheetRef.current?.close();
+                            navigation.navigate('RescheduleScreen', { schedule });
+                        }}
+                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.FOREGROUND+'1A' }}
+                    >
+                        <Text style={{ color: theme.FOREGROUND, fontSize: 16 }}>{schedule.name}</Text>
+                    </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </BottomSheet> */}
         </View>
     );
 }
