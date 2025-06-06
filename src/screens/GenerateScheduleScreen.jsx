@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react'
-import { View, Text, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, StyleSheet } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
@@ -109,17 +109,15 @@ const GenerateScheduleScreen = () => {
     ]
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-                <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
-                {views[genStage]}
-                <SchedulingErrorModal 
-                    isVisible={showErrorModal} 
-                    action1={() => { setShowErrorModal(false) }} 
-                    action2={() => { setShowErrorModal(false); setGenStage(1) }}
-                />
-            </View>
-        </TouchableWithoutFeedback>
+        <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
+            <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
+            {views[genStage]}
+            <SchedulingErrorModal 
+                isVisible={showErrorModal} 
+                action1={() => { setShowErrorModal(false) }} 
+                action2={() => { setShowErrorModal(false); setGenStage(1) }}
+            />
+        </View>
     )
 }
 

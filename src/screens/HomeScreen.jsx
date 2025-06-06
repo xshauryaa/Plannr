@@ -16,7 +16,6 @@ import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
-
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 
@@ -44,21 +43,21 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
                 <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
                 <Progress/>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For Your Existing Schedule</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For Your Scheduling</Text>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
+                        title="Plannr Center"
+                        icon="Center"
+                        navTo={() => { navigation.navigate("Center") }}
+                    />
+                </View>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}> 
+                    <MenuButton
                         title="View Your Saved Schedules"
                         icon="Saved"
                         navTo={() => { navigation.navigate("Saved") }}
-                    />
-                </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For New Schedules & Preferences</Text>
-                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}> 
-                    <MenuButton
-                        title="Generate New Schedule"
-                        icon="Generate"
-                        navTo={() => { navigation.navigate("Generate") }}
                     />
                     <MenuButton
                         title="Change Preferences"

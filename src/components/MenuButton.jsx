@@ -1,8 +1,10 @@
 import React from 'react' 
 import { Text, StyleSheet, TouchableOpacity } from 'react-native'
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg'
-import GenerateIcon from '../../assets/nav-icons/GenerateIcon.svg'
+import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg'
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg'
+import AddIcon from '../../assets/system-icons/AddIcon.svg'
+import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
 import { useAppState } from '../context/AppStateContext.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
@@ -20,8 +22,10 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 
     const ICONS = {
         Saved: <SavedIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
-        Generate: <GenerateIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Center: <PlannrCenterIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Generate: <AddIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
         Preferences: <PreferencesIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Reschedule: <RescheduleIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
     }
 
     if (broad) {

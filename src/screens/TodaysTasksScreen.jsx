@@ -185,12 +185,13 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontFamily: 'PinkSunset',
-        marginTop: 64,
+        marginTop: spacing.SPACING_16,
+        marginBottom: SPACE,
     },
     subHeading: {
         fontSize: 16,
         fontFamily: 'AlbertSans',
-        marginBottom: 16
+        marginBottom: SPACE
     },
     completion: {
         alignSelf: 'center',

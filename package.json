@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.1.6",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-community/masked-view": "^0.1.11",
@@ -16,6 +17,7 @@
     "@react-navigation/bottom-tabs": "^7.3.13",
     "@react-navigation/native": "^7.1.9",
     "@react-navigation/native-stack": "^7.3.13",
+    "@react-navigation/stack": "^7.3.3",
     "expo": "~53.0.9",
     "expo-app-loading": "^1.1.2",
     "expo-constants": "~17.1.6",
@@ -28,8 +30,11 @@
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-native": "0.79.2",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-circular-progress": "^1.4.1",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-gifted-charts": "^1.4.61",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-multiple-select": "^0.5.12",
     "react-native-reanimated": "~3.17.4",

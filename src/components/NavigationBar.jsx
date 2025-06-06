@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from '../../assets/nav-icons/HomeIcon.svg';
 import TasksIcon from '../../assets/nav-icons/TasksIcon.svg';
-import GenerateIcon from '../../assets/nav-icons/GenerateIcon.svg';
+import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg';
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg';
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg';
 import Indicator from '../../assets/nav-icons/Indicator.svg';
@@ -29,7 +29,7 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     const ICONS = {
         Home: HomeIcon,
         Tasks: TasksIcon,
-        Generate: GenerateIcon,
+        Center: PlannrCenterIcon,
         Saved: SavedIcon,
         Preferences: PreferencesIcon,
     };

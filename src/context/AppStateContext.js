@@ -20,48 +20,48 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
     function schedulerTest1() {
-        const scheduler = new Scheduler(7, new ScheduleDate(30, 5, 2025), 'Friday', 30, 6);
+        const scheduler = new Scheduler(7, new ScheduleDate(6, 6, 2025), 'Friday', 30, 6);
         
         // --- Rigid Events ---
         const rigidEvents = [
-            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, new ScheduleDate(30, 5, 2025), 1000, 1100),
-            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, new ScheduleDate(31, 5, 2025), 1000, 1200),
-            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, new ScheduleDate(1, 6, 2025), 900, 930),
-            new RigidEvent("Team Workshop", ActivityType.WORK, 120, new ScheduleDate(2, 6, 2025), 1400, 1600),
-            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, new ScheduleDate(2, 6, 2025), 900, 1000),
-            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, new ScheduleDate(3, 6, 2025), 1100, 1200),
-            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, new ScheduleDate(3, 6, 2025), 1500, 1530),
-            new RigidEvent("Final Presentation", ActivityType.WORK, 60, new ScheduleDate(4, 6, 2025), 1500, 1600),
-            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, new ScheduleDate(5, 6, 2025), 1900, 2100)
+            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, new ScheduleDate(6, 6, 2025), 1000, 1100),
+            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, new ScheduleDate(7, 6, 2025), 1000, 1200),
+            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, new ScheduleDate(8, 6, 2025), 900, 930),
+            new RigidEvent("Team Workshop", ActivityType.WORK, 120, new ScheduleDate(9, 6, 2025), 1400, 1600),
+            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, new ScheduleDate(9, 6, 2025), 900, 1000),
+            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, new ScheduleDate(10, 6, 2025), 1100, 1200),
+            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, new ScheduleDate(10, 6, 2025), 1500, 1530),
+            new RigidEvent("Final Presentation", ActivityType.WORK, 60, new ScheduleDate(11, 6, 2025), 1500, 1600),
+            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, new ScheduleDate(12, 6, 2025), 1900, 2100)
         ];
         rigidEvents.forEach(e => scheduler.addRigidEvent(e));
         
         // --- Flexible Events ---
         const flexibleEvents = [
-            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, new ScheduleDate(31, 5, 2025)),
-            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(1, 6, 2025)),
-            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(2, 6, 2025)),
-            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, new ScheduleDate(3, 6, 2025)),
-            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(3, 6, 2025)),
-            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(5, 6, 2025)),
-            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, new ScheduleDate(4, 6, 2025)),
-            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(4, 6, 2025)),
-            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, new ScheduleDate(4, 6, 2025)),
-            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, new ScheduleDate(5, 6, 2025)),
-            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, new ScheduleDate(5, 6, 2025)),
-            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(30, 6, 2025)),
-            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, new ScheduleDate(2, 6, 2025)),
-            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, new ScheduleDate(4, 6, 2025)),
-            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(3, 6, 2025)),
-            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(5, 6, 2025))
+            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, new ScheduleDate(7, 6, 2025)),
+            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(8, 6, 2025)),
+            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(9, 6, 2025)),
+            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, new ScheduleDate(10, 6, 2025)),
+            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 6, 2025)),
+            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 6, 2025)),
+            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, new ScheduleDate(11, 6, 2025)),
+            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(11, 6, 2025)),
+            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, new ScheduleDate(11, 6, 2025)),
+            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, new ScheduleDate(12, 6, 2025)),
+            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, new ScheduleDate(12, 6, 2025)),
+            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(6, 6, 2025)),
+            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, new ScheduleDate(9, 6, 2025)),
+            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, new ScheduleDate(11, 6, 2025)),
+            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 6, 2025)),
+            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 6, 2025))
         ];
         flexibleEvents.forEach(e => scheduler.addFlexibleEvent(e));
         
         // --- Breaks ---
-        scheduler.addBreak(new ScheduleDate(31, 5, 2025), new Break(30, 1300, 1330));
-        scheduler.addBreak(new ScheduleDate(2, 6, 2025), new Break(30, 1200, 1230));
-        scheduler.addBreak(new ScheduleDate(3, 6, 2025), new Break(30, 1000, 1030));
-        scheduler.addBreak(new ScheduleDate(4, 6, 2025), new Break(30, 900, 930));
+        scheduler.addBreak(new ScheduleDate(7, 6, 2025), new Break(30, 1300, 1330));
+        scheduler.addBreak(new ScheduleDate(9, 6, 2025), new Break(30, 1200, 1230));
+        scheduler.addBreak(new ScheduleDate(10, 6, 2025), new Break(30, 1000, 1030));
+        scheduler.addBreak(new ScheduleDate(11, 6, 2025), new Break(30, 900, 930));
         scheduler.addRepeatedBreak(new Break(30, 1700, 1730));
         
         // --- Dependencies ---
@@ -97,17 +97,7 @@ export const AppStateProvider = ({ children }) => {
         scheduler.setEventDependencies(deps);
         
         // --- Schedule Generation ---
-        return scheduler.createSchedules("Earliest Fit", 800, 1700)
-        
-        // --- Optional ICS Output ---
-        // const paths = [
-        //   'data/earliest-fit-schedule.ics',
-        //   'data/balanced-work-schedule.ics',
-        //   'data/deadline-oriented-schedule.ics'
-        // ];
-        // for (let i = 0; i < paths.length; i++) {
-        //   ICSHandler.getInstance().generateICS(schedules[i], paths[i]);
-        // }
+        return scheduler.createSchedules("Earliest Fit", 800, 1700);
     }
 
     scheduleForTesting = schedulerTest1();

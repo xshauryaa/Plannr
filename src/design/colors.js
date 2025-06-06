@@ -12,6 +12,10 @@ export const lightColor = {
     SELECTED_TEXT: '#FFFFFF',
     GRADIENT_START: '#0091FF',
     GRADIENT_END: '#78C7FF',
+    PURPLE: '#8800FF',
+    GREEN: '#00CC00',
+    RED:'#FF0000',
+    ORANGE:'#FF9000',
 }
 
 export const darkColor = {
@@ -26,4 +30,8 @@ export const darkColor = {
     SELECTED_TEXT: '#FFFFFF',
     GRADIENT_START: '#3A47E4',
     GRADIENT_END: '#4166FB',
+    PURPLE: '#AA00FF',
+    GREEN: '#00FF00',
+    RED:'#FF0000',
+    ORANGE:'#FF9000',
 }
