@@ -103,6 +103,25 @@ class EventDependencies {
     stack.delete(current);
     return false;
   }
+
+  equals(other) {
+    if (!(other instanceof EventDependencies)) {
+      return false;
+    }
+
+    if (this.dependencies.size !== other.dependencies.size) {
+      return false;
+    }
+
+    for (const [event, deps] of this.dependencies.entries()) {
+      const otherDeps = other.dependencies.get(event);
+      if (!otherDeps || deps.length !== otherDeps.length || !deps.every(dep => otherDeps.includes(dep))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 export default EventDependencies;

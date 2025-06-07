@@ -112,7 +112,17 @@ export const AppStateProvider = ({ children }) => {
             taskRemindersEnabled: true,
             leadMinutes: '30',
         },
-        savedSchedules: [{name: 'Schedule 1', schedule: scheduleForTesting}],
+        savedSchedules: [
+            {name: 'Schedule 1', schedule: scheduleForTesting},
+            {name: 'Schedule 2', schedule: scheduleForTesting},
+            {name: 'Schedule 3', schedule: scheduleForTesting},
+            {name: 'Schedule 4', schedule: scheduleForTesting},
+            {name: 'Schedule 5', schedule: scheduleForTesting},
+            {name: 'Schedule 6', schedule: scheduleForTesting},
+            {name: 'Schedule 7', schedule: scheduleForTesting},
+            {name: 'Schedule 8', schedule: scheduleForTesting},
+            {name: 'Schedule 9', schedule: scheduleForTesting}
+        ],
         activeSchedule: scheduleForTesting,
         onboarded: false
     });

@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NavigationBar from './src/components/NavigationBar.jsx';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 import { AppStateProvider } from './src/context/AppStateContext.js';
@@ -36,20 +35,18 @@ const MainTabs = () => {
 
 export default function App() {
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <AppStateProvider>
-                <TaskCompletionChecker />
-                <SafeAreaProvider>
-                    <NavigationContainer>
-                        <AppStack.Navigator screenOptions={{ headerShown: false }}>
-                            <AppStack.Screen name="MainTabs" component={MainTabs} />
-                            <AppStack.Screen name="Generate" component={GenerateScheduleScreen} />
-                            <AppStack.Screen name="Reschedule" component={RescheduleScreen} />
-                        </AppStack.Navigator>
-                    </NavigationContainer>
-                </SafeAreaProvider>
-            </AppStateProvider>
-        </GestureHandlerRootView>
+        <AppStateProvider>
+            <TaskCompletionChecker />
+            <SafeAreaProvider>
+                <NavigationContainer>
+                    <AppStack.Navigator screenOptions={{ headerShown: false }}>
+                        <AppStack.Screen name="MainTabs" component={MainTabs} />
+                        <AppStack.Screen name="Generate" component={GenerateScheduleScreen} />
+                        <AppStack.Screen name="Reschedule" component={RescheduleScreen} />
+                    </AppStack.Navigator>
+                </NavigationContainer>
+            </SafeAreaProvider>
+        </AppStateProvider>
     );
   }
   

@@ -5,20 +5,16 @@ import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import MenuButton from '../components/MenuButton.jsx';
 import Insights from '../components/Insights.jsx';
-import BottomSheet from '@gorhom/bottom-sheet';
+import RescheduleBottomSheet from '../components/RescheduleBottomSheet.jsx';
 const { width, height } = Dimensions.get('window');
 
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_
+const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 const SchedulingCenterScreen = ({ navigation }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-
-    // const bottomSheetRef = useRef(null);
-    // const snapPoints = useMemo(() => ['25%', '50%', '75%'], []);
-
-    // const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const bottomSheetRef = useRef();
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -54,32 +50,14 @@ const SchedulingCenterScreen = ({ navigation }) => {
                         broad={true}
                         title="Reschedule Tasks"
                         icon="Reschedule"
-                        navTo={() => { navigation.navigate("Reschedule") } }
+                        navTo={() => { bottomSheetRef.current?.show() }}
                     />
                 </View>
             </View>
-            {/* <BottomSheet
-                ref={bottomSheetRef}
-                index={-1}
-                snapPoints={snapPoints}
-                backgroundStyle={{ backgroundColor: theme.COMP_COLOR }}
-                handleIndicatorStyle={{ backgroundColor: theme.FOREGROUND+'1A' }}
-            >
-                <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
-                    {appState.savedSchedules.map((schedule, index) => (
-                    <TouchableOpacity
-                        key={schedule.name}
-                        onPress={() => {
-                            bottomSheetRef.current?.close();
-                            navigation.navigate('RescheduleScreen', { schedule });
-                        }}
-                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.FOREGROUND+'1A' }}
-                    >
-                        <Text style={{ color: theme.FOREGROUND, fontSize: 16 }}>{schedule.name}</Text>
-                    </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            </BottomSheet> */}
+            <RescheduleBottomSheet ref={bottomSheetRef} theme={theme}>
+                
+                
+            </RescheduleBottomSheet>
         </View>
     );
 }
@@ -121,7 +99,7 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
         padding: 16,
         marginBottom: SPACE
-    },
+    }
 });
 
 export default SchedulingCenterScreen;

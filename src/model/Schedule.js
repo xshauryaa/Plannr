@@ -191,6 +191,44 @@ class Schedule {
       index++;
     }
   }
+
+  equals(other) {
+    if (!(other instanceof Schedule)) {
+      return false;
+    }
+
+    if (this.numDays !== other.numDays ||
+        this.minGap !== other.minGap ||
+        this.workingHoursLimit !== other.workingHoursLimit ||
+        this.strategy !== other.strategy) {
+      return false;
+    }
+
+    if (!this.day1Date.equals(other.day1Date) || this.day1Day !== other.day1Day) {
+      return false;
+    }
+
+    if (this.eventDependencies.equals(other.eventDependencies) === false) {
+      return false;
+    }
+
+    if (this.startTime.equals(other.startTime) === false || this.endTime.equals(other.endTime) === false) {
+      return false;
+    }
+
+    if (this.schedule.size !== other.schedule.size) {
+      return false;
+    }
+
+    for (const [date, day] of this.schedule.entries()) {
+      const otherDay = other.schedule.get(date);
+      if (!day.equals(otherDay)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 export default Schedule;
