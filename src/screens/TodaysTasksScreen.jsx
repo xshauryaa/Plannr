@@ -30,13 +30,15 @@ const TodaysTasksScreen = () => {
         }
     }
 
+
+
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     useEffect( () => {
-        const check = taskData.every(task => task.isCompleted)
+        const check = taskData.every(task => task.completed)
         setAllComplete(check)
     }, [taskData])
 
@@ -84,12 +86,12 @@ const TodaysTasksScreen = () => {
                                     <Text style={{ ...styles.time, color: theme.FOREGROUND }}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                 </View>
                                 <Checkbox 
-                                    checked={item.isCompleted}
+                                    checked={item.completed}
                                     onChange={() => {
                                         // 1. Update local UI
                                         const updatedTasks = [...taskData];
                                         const updatedTask = { ...updatedTasks[index] };
-                                        updatedTask.isCompleted = !updatedTask.isCompleted;
+                                        updatedTask.completed = !updatedTask.completed;
                                         updatedTasks[index] = updatedTask;
                                         setTaskData(updatedTasks);
                                       
@@ -98,7 +100,7 @@ const TodaysTasksScreen = () => {
                                       
                                         const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
                                         const updatedBlock = { ...updatedTimeBlocks[index] };
-                                        updatedBlock.isCompleted = !updatedBlock.isCompleted;
+                                        updatedBlock.completed = !updatedBlock.completed;
                                         updatedTimeBlocks[index] = updatedBlock;
                                       
                                         const updatedDaySchedule = new currentDaySchedule.constructor(
@@ -115,13 +117,16 @@ const TodaysTasksScreen = () => {
                                         updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
                                       
                                         const updatedSchedule = new appState.activeSchedule.constructor(
-                                            appState.activeSchedule.numDays,
-                                            appState.activeSchedule.minGap,
-                                            appState.activeSchedule.day1Date,
-                                            appState.activeSchedule.day1Day,
-                                            appState.activeSchedule.workingHoursLimit,
-                                            appState.activeSchedule.eventDependencies,
-                                            updatedScheduleMap
+                                          appState.activeSchedule.numDays,
+                                          appState.activeSchedule.minGap,
+                                          appState.activeSchedule.day1Date,
+                                          appState.activeSchedule.day1Day,
+                                          appState.activeSchedule.workingHoursLimit,
+                                          appState.activeSchedule.eventDependencies,
+                                          updatedScheduleMap,
+                                          appState.activeSchedule.strategy,
+                                          appState.activeSchedule.startTime,
+                                          appState.activeSchedule.endTime,
                                         );
                                       
                                         setAppState(prev => ({

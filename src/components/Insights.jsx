@@ -53,7 +53,7 @@ const Insights = ({ version, schedule }) => {
             for (const date of datesList) {
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
                 total += tasks.length;
-                done += tasks.filter(task => task.isCompleted()).length;
+                done += tasks.filter(task => task.completed).length;
             }
 
             setCompleted(done);
@@ -107,7 +107,7 @@ const Insights = ({ version, schedule }) => {
             for (const date of datesList) {
                 if (date === currentDate) { break; }
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
-                missingTasks += tasks.filter(task => !task.isCompleted()).length;
+                missingTasks += tasks.filter(task => !task.completed).length;
             }
             setMissedTasks(missingTasks);
         }, [schedule]);
@@ -139,14 +139,14 @@ const Insights = ({ version, schedule }) => {
             for (const date of datesList) {
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
                 if (date === currentDate) {
-                    if (tasks.length > 0 && tasks.every(task => task.isCompleted())) {
+                    if (tasks.length > 0 && tasks.every(task => task.completed)) {
                         currStreak += 1;
                         break;
                     } else {
                         break;
                     }
                 }
-                if (tasks.length > 0 && tasks.every(task => task.isCompleted())) {
+                if (tasks.length > 0 && tasks.every(task => task.completed)) {
                     currStreak += 1;
                 } else {
                     currStreak = 0;

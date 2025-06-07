@@ -21,7 +21,7 @@ class TimeBlock {
     this.activityType = activityType;
     this.priority = priority;
     this.deadline = deadline;
-    this._completed = isCompleted;
+    this.completed = isCompleted;
   }
 
   /** @returns {string} name of the time block */
@@ -71,7 +71,7 @@ class TimeBlock {
 
   /** @returns {boolean} true if completed */
   isCompleted() {
-    return this._completed;
+    return this.completed;
   }
 
   /**
@@ -79,7 +79,7 @@ class TimeBlock {
    * @param {boolean} completed 
    */
   setCompleted(completed) {
-    this._completed = completed;
+    this.completed = completed;
   }
 
   /**
@@ -98,7 +98,7 @@ class TimeBlock {
       this.activityType === other.getActivityType() &&
       this.priority === other.getPriority() &&
       this.deadline.equals(other.getDeadline()) && 
-      this._completed === other.isCompleted()
+      this.completed === other.isCompleted()
     );
   }
 

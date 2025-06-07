@@ -1,5 +1,5 @@
 import Schedule from "../model/Schedule.js";
-import { serializeTime24, parseTime24 } from "./TimeHandler.js";
+import { serializeTime24, parseTime24 } from "./Time24Handler.js";
 import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
 import { serializeDaySchedule, parseDaySchedule } from "./DayHandler.js";
 import { serializeEventDependencies, parseEventDependencies } from "./EventDependenciesHandler.js";

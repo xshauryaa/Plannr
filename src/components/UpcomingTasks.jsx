@@ -46,7 +46,7 @@ const UpcomingTasks = ({ onClick }) => {
     useEffect( () => {
         const timer = setInterval(() => {
             loadTodaysTasks()
-            const check = todaysTasks.every(task => task.isCompleted())
+            const check = todaysTasks.every(task => task.completed)
             setAllComplete(check)
             const tasksLeft = todaysTasks.filter(task => {
                 let curr = convertTimeToTime24(currentTime)
