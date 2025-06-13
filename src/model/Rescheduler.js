@@ -88,7 +88,7 @@ class Rescheduler {
      * @param {Schedule} schedule
      * @return {Schedule} the updated schedule with all missing tasks moved to future time slots
      */
-    missedTasksReplacement(schedule) {
+    missedTaskShifting(schedule) {
         const now = new Date();
         const currentDate = convertDateToScheduleDate(now);
         const currentTime = new Time24(now.getHours() * 100 + now.getMinutes());

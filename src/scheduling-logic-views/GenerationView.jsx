@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import GoToIcon from '../../assets/system-icons/GoToIcon.svg';
+import { useAppState } from '../context/AppStateContext.js';
 
 const GenerationView = ({ playAnim }) => {
+    const { appState } = useAppState();
     const [showAnim, setShowAnim] = useState(playAnim);
     const [showFinish, setShowFinish] = useState(false);
     const [title, setTitle] = useState('Generating Schedule');
@@ -18,11 +20,16 @@ const GenerationView = ({ playAnim }) => {
         setShowAnim(playAnim);
     }, [playAnim]);
 
+    const animMap = {
+        light: require('../../assets/animations/light/CalendarLoadingAnimation.json'),
+        dark: require('../../assets/animations/dark/CalendarLoadingAnimation.json'),
+    }
+
     return (
         <View style={styles.subContainer}>
             <Text style={styles.title}>{title}</Text>
             <LottieView
-                source={require('../../assets/animations/CalendarLoadingAnimation.json')}
+                source={animMap[appState.userPreferences.theme]}
                 autoPlay
                 loop={false}
                 speed={2} 

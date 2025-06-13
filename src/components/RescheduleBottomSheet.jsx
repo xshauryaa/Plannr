@@ -86,7 +86,6 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
             <Pressable style={{ flex: 1 }} onPress={hide} />
         </Animated.View>
 
-        {/* Bottom Sheet */}
         <Animated.View
             style={{
                 position: 'absolute',
