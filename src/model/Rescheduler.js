@@ -111,24 +111,25 @@ class Rescheduler {
         if (toReschedule.length === 0) return schedule;
 
         let strat;
+        let rescheduled;
         switch (this.strategy) {
             case 'earliest-fit':
                 strat = new EarliestFitStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
-                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             case 'balanced-work':
                 strat = new BalancedWorkStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
-                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             case 'deadline-oriented':
                 strat = new DeadlineOrientedStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
-                strat.reschedule(schedule, toReschedule, currentDate, currentTime);
+                rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             default:
                 throw new Error(`Unknown strategy: ${this.strategy}`);
         }
 
-        return schedule;
+        return rescheduled;
     }
 
     /**

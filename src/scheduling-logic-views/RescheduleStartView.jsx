@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacit
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { Picker } from '@react-native-picker/picker'
-import useCurrentTime from '../utils/useCurrentTime.js';
-import convertDateToScheduleDate from '../utils/dateConversion.js';
+import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
 
 const RescheduleStartView = ({ onNext, schedule }) => {
     const { appState } = useAppState();
@@ -19,22 +18,6 @@ const RescheduleStartView = ({ onNext, schedule }) => {
         'Integrates newly added events and breaks into the existing schedule without disrupting valid time blocks.',
         'Recalculates the entire schedule using a new scheduling strategy while preserving user constraints.'
     ]
-
-    const time = useCurrentTime();
-        const currentDate = convertDateToScheduleDate(time).getId();
-        const [missedTasks, setMissedTasks] = useState(0);
-
-    useEffect(() => {
-        const datesList = schedule.schedule.getAllDatesInOrder();
-        let missingTasks = 0;
-
-        for (const date of datesList) {
-            if (date === currentDate) { break; }
-            const tasks = schedule.schedule.getScheduleForDate(date).getTimeBlocks();
-            missingTasks += tasks.filter(task => !task.completed).length;
-        }
-        setMissedTasks(missingTasks);
-    }, [schedule]);
 
     return (
         <View style={styles.subContainer}>
@@ -82,9 +65,15 @@ const RescheduleStartView = ({ onNext, schedule }) => {
             </View>
             <TouchableOpacity 
                 style={styles.button}
-                onPress={() => onNext()}
+                onPress={() => onNext(rescheduleMethods.indexOf(rescheduleMethod))}
             >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                {(rescheduleMethod === 'Missed Task Shifting') 
+                    ? <View style={{ flexDirection: 'row', gap: 12 }}>
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Reschedule</Text>
+                        <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
+                    </View>
+                    : <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Next</Text>
+                }
             </TouchableOpacity>
         </View>
     );

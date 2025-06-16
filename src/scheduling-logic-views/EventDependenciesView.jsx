@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native' 
 import EventDependencies from '../model/EventDependencies';
-import AddDependencyModal from '../components/AddDependencyModal';
+import AddDependencyModal from '../modals/AddDependencyModal';
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 

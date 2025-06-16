@@ -39,7 +39,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
                     </View>
                 }
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Manage your scheduling</Text>
-                <View>
+                <View style={{ gap: SPACE}}>
                     <MenuButton
                         broad={true}
                         title="Generate a New Schedule"

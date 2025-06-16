@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import FlexibleEvent from '../model/FlexibleEvent'
-import AddFlexibleEventsModal from '../components/AddFlexibleEventsModal'
+import AddFlexibleEventsModal from '../modals/AddFlexibleEventsModal'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'

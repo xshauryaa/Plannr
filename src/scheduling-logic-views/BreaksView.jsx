@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native' 
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native' 
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import { useAppState } from '../context/AppStateContext.js'
@@ -9,7 +9,7 @@ import Break from '../model/Break'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
-import AddBreaksModal from '../components/AddBreaksModal'
+import AddBreaksModal from '../modals/AddBreaksModal'
 import { Dimensions} from 'react-native';
 const { width, height } = Dimensions.get('window');
 const CARDHEIGHT = (height > 900) ? 180 : (height > 800) ? 150 : 120;

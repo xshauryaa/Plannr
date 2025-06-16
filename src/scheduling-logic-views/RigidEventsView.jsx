@@ -4,7 +4,7 @@ import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
 import RigidEvent from '../model/RigidEvent'
-import AddRigidEventsModal from '../components/AddRigidEventsModal'
+import AddRigidEventsModal from '../modals/AddRigidEventsModal'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'

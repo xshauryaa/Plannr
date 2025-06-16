@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Image, Text, StyleSheet, TouchableOpacity  } from 'react-native'
 import Modal from 'react-native-modal';
-import { useAppState } from '../context/AppStateContext'
+import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
 const SchedulingErrorModal = ({ isVisible, action1, action2 }) => {

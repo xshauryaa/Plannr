@@ -6,26 +6,26 @@ import Time24 from '../model/Time24.js'
 
 const NotificationService = {
     async requestPermissions() {
-    // request and return status
-    if (!Device.isDevice) {
-        console.warn('Must use physical device for Notifications')
-        return false
-    }
+        // request and return status
+        if (!Device.isDevice) {
+            console.warn('Must use physical device for Notifications')
+            return false
+        }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
 
-    if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-    }
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
 
-    if (finalStatus !== 'granted') {
-        console.warn('Notification permissions not granted');
-        return false;
-    }
+        if (finalStatus !== 'granted') {
+            console.warn('Notification permissions not granted');
+            return false;
+        }
 
-    console.log('Notification permissions granted');
+        console.log('Notification permissions granted');
         return true;
     },
 
@@ -58,7 +58,7 @@ const NotificationService = {
 
             console.log(`Notification scheduled for "${name}" → ID: ${notificationId}`);
             return notificationId;
-        } catch (e) {
+        } catch (error) {
             console.error(`Error scheduling reminder for "${timeBlock.name}":`, error);
             return null;
         }
@@ -114,7 +114,7 @@ const NotificationService = {
                 },
             });
 
-            console.log(`[Daily Summary] Scheduled for 11 PM → allComplete=${allComplete}, ID=${notificationId}`);
+            console.log(`[Daily Summary] Scheduled for 11 PM → allComplete=${allTasksCompleted}, ID=${notificationId}`);
             return notificationId;
 
         } catch (error) {

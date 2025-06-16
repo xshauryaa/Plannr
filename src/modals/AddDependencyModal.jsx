@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList, Pressable } from 'react-native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
-import MultiSelect from './MultiSelect.jsx';
+import MultiSelect from '../components/MultiSelect.jsx';
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';

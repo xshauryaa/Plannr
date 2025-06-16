@@ -93,7 +93,7 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
                 right: 0,
                 bottom: 0,
                 transform: [{ translateY }],
-                backgroundColor: theme.COMP_COLOR,
+                backgroundColor: theme.BACKGROUND,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
                 paddingBottom: 16,
@@ -112,7 +112,7 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
                 <View style={{ height: 8, width: 40, backgroundColor: theme.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
                 <Text style={{ fontSize: 20, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE, alignSelf: 'center' }}>Pick a schedule to reschedule</Text>
             </View>
-            <ScrollView style={{ borderRadius: 12}}>
+            <ScrollView style={{ borderRadius: 12 }}>
                 {appState.savedSchedules.map(schedule => (
                     <TouchableOpacity
                         key={schedule.name}
@@ -120,7 +120,7 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
                             ref.current?.hide();
                             navigation.navigate('Reschedule', { schedule });
                         }}
-                        style={{ ...styles.button, backgroundColor: theme.INPUT, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                        style={{ ...styles.button, backgroundColor: theme.COMP_COLOR, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                         <Text style={{ color: theme.FOREGROUND }}>{schedule.name}</Text>
                         <RightArrowIcon width={16} height={16} color={theme.FOREGROUND}/>

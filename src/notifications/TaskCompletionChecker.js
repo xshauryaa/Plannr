@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useAppState } from "../context/AppStateContext";
-import useCurrentTime from "../utils/useCurrentTime";
-import convertDateToScheduleDate from "../utils/dateConversion";
-import convertTimeToTime24 from "../utils/timeConversion";
-import NotificationService from "./NotificationService";
+import { useAppState } from "../context/AppStateContext.js";
+import useCurrentTime from "../utils/useCurrentTime.js";
+import convertDateToScheduleDate from "../utils/dateConversion.js";
+import convertTimeToTime24 from "../utils/timeConversion.js";
+import NotificationService from "./NotificationService.js";
+import Time24 from '../model/Time24.js';
 
 const TaskCompletionChecker = () => {
     const currentTime = useCurrentTime();

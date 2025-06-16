@@ -20,48 +20,55 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
     function schedulerTest1() {
-        const scheduler = new Scheduler(7, new ScheduleDate(6, 6, 2025), 'Friday', 30, 6);
+        const date1 = new ScheduleDate(14, 6, 2025);
+        const date2 = new ScheduleDate(15, 6, 2025);
+        const date3 = new ScheduleDate(16, 6, 2025);
+        const date4 = new ScheduleDate(17, 6, 2025);
+        const date5 = new ScheduleDate(18, 6, 2025);
+        const date6 = new ScheduleDate(19, 6, 2025);
+        const date7 = new ScheduleDate(20, 6, 2025);
+        const scheduler = new Scheduler(7, date1, 'Saturday', 30, 6);
         
         // --- Rigid Events ---
         const rigidEvents = [
-            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, new ScheduleDate(6, 6, 2025), 1000, 1100),
-            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, new ScheduleDate(7, 6, 2025), 1000, 1200),
-            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, new ScheduleDate(8, 6, 2025), 900, 930),
-            new RigidEvent("Team Workshop", ActivityType.WORK, 120, new ScheduleDate(9, 6, 2025), 1400, 1600),
-            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, new ScheduleDate(9, 6, 2025), 900, 1000),
-            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, new ScheduleDate(10, 6, 2025), 1100, 1200),
-            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, new ScheduleDate(10, 6, 2025), 1500, 1530),
-            new RigidEvent("Final Presentation", ActivityType.WORK, 60, new ScheduleDate(11, 6, 2025), 1500, 1600),
-            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, new ScheduleDate(12, 6, 2025), 1900, 2100)
+            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, date1, 1000, 1100),
+            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, date2, 1000, 1200),
+            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, date3, 900, 930),
+            new RigidEvent("Team Workshop", ActivityType.WORK, 120, date4, 1400, 1600),
+            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, date4, 900, 1000),
+            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, date5, 1100, 1200),
+            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, date6, 1500, 1530),
+            new RigidEvent("Final Presentation", ActivityType.WORK, 60, date6, 1500, 1600),
+            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, date7, 1900, 2100)
         ];
         rigidEvents.forEach(e => scheduler.addRigidEvent(e));
         
         // --- Flexible Events ---
         const flexibleEvents = [
-            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, new ScheduleDate(7, 6, 2025)),
-            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(8, 6, 2025)),
-            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(9, 6, 2025)),
-            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, new ScheduleDate(10, 6, 2025)),
-            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 6, 2025)),
-            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 6, 2025)),
-            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, new ScheduleDate(11, 6, 2025)),
-            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, new ScheduleDate(11, 6, 2025)),
-            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, new ScheduleDate(11, 6, 2025)),
-            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, new ScheduleDate(12, 6, 2025)),
-            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, new ScheduleDate(12, 6, 2025)),
-            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, new ScheduleDate(6, 6, 2025)),
-            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, new ScheduleDate(9, 6, 2025)),
-            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, new ScheduleDate(11, 6, 2025)),
-            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, new ScheduleDate(10, 6, 2025)),
-            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, new ScheduleDate(12, 6, 2025))
+            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, date2),
+            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, date3),
+            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, date4),
+            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, date5),
+            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, date5),
+            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, date7),
+            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, date6),
+            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, date6),
+            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, date6),
+            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, date7),
+            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, date7),
+            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, date1),
+            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, date4),
+            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, date6),
+            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, date5),
+            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, date7)
         ];
         flexibleEvents.forEach(e => scheduler.addFlexibleEvent(e));
         
         // --- Breaks ---
-        scheduler.addBreak(new ScheduleDate(7, 6, 2025), new Break(30, 1300, 1330));
-        scheduler.addBreak(new ScheduleDate(9, 6, 2025), new Break(30, 1200, 1230));
-        scheduler.addBreak(new ScheduleDate(10, 6, 2025), new Break(30, 1000, 1030));
-        scheduler.addBreak(new ScheduleDate(11, 6, 2025), new Break(30, 900, 930));
+        scheduler.addBreak(date2, new Break(30, 1300, 1330));
+        scheduler.addBreak(date4, new Break(30, 1200, 1230));
+        scheduler.addBreak(date5, new Break(30, 1000, 1030));
+        scheduler.addBreak(date6, new Break(30, 900, 930));
         scheduler.addRepeatedBreak(new Break(30, 1700, 1730));
         
         // --- Dependencies ---
@@ -114,14 +121,6 @@ export const AppStateProvider = ({ children }) => {
         },
         savedSchedules: [
             {name: 'Schedule 1', schedule: scheduleForTesting},
-            {name: 'Schedule 2', schedule: scheduleForTesting},
-            {name: 'Schedule 3', schedule: scheduleForTesting},
-            {name: 'Schedule 4', schedule: scheduleForTesting},
-            {name: 'Schedule 5', schedule: scheduleForTesting},
-            {name: 'Schedule 6', schedule: scheduleForTesting},
-            {name: 'Schedule 7', schedule: scheduleForTesting},
-            {name: 'Schedule 8', schedule: scheduleForTesting},
-            {name: 'Schedule 9', schedule: scheduleForTesting}
         ],
         activeSchedule: scheduleForTesting,
         onboarded: false
@@ -173,9 +172,9 @@ export const AppStateProvider = ({ children }) => {
         console.log(id);
     };
 
-    // useEffect(() => {
-    //     runTest();
-    // }, []);      
+    useEffect(() => {
+        runTest();
+    }, []);      
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>

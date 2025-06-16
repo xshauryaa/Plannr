@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
+import Rescheduler from '../model/Rescheduler.js';
 
 import RescheduleStartView from '../scheduling-logic-views/RescheduleStartView.jsx';
 import BreaksView from '../scheduling-logic-views/BreaksView.jsx';
@@ -10,6 +11,7 @@ import RigidEventsView from '../scheduling-logic-views/RigidEventsView.jsx';
 import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx';
 import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx';
 import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx';
+import GenerationModal from '../modals/GenerationModal.jsx';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -18,6 +20,8 @@ const RescheduleScreen = ({ route }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedule } = route.params;
+
+    const rescheduler = new Rescheduler(schedule.schedule);
 
     const flow1 = [
         <RescheduleStartView schedule={schedule}/>
@@ -40,11 +44,15 @@ const RescheduleScreen = ({ route }) => {
 
     const [reschedStage, setReschedStage] = useState(0);
     const [flow, setFlow] = useState(flow1);
+    const [showReschedulingModal, setShowReschedulingModal] = useState(false);
+    let rescheduled = null;
 
     const RescheduleSelection = (index) => {
         setFlow(flows[index]);
         if (index === 0) {
             // Handle Missed Task Shifting
+            rescheduled = rescheduler.missedTaskShifting(schedule.schedule);
+            setShowReschedulingModal(true);
         } else {
             // Handle Add New Tasks & Breaks or Switch Strategies
             setReschedStage(1);
@@ -54,7 +62,12 @@ const RescheduleScreen = ({ route }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Reschedule Tasks</Text>
-            <RescheduleStartView schedule={schedule} />
+            <RescheduleStartView schedule={schedule} onNext={(index) => RescheduleSelection(index)}/>
+            <GenerationModal 
+                isVisible={showReschedulingModal} 
+                onViewSchedule={() => { setShowReschedulingModal(false) }} 
+                reschedule={true}
+            />
         </View>
     );
 }

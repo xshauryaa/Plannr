@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Image, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform } from 'react-native' 
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform } from 'react-native' 
 import { useAppState } from '../context/AppStateContext';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion';

@@ -5,10 +5,10 @@
  * @returns {Date} JavaScript Date object
  */
 const combineScheduleDateAndTime24 = (scheduleDate, time24) => {
-    const { day, month, year } = scheduleDate;
+    const { date, month, year } = scheduleDate;
     const { hours, minutes } = time24;
   
-    return new Date(year, month - 1, day, hours, minutes);
+    return new Date(year, month - 1, date, hours, minutes);
 };
   
 export default combineScheduleDateAndTime24;  

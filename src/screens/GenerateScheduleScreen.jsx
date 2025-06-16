@@ -9,11 +9,11 @@ import RigidEventsView from '../scheduling-logic-views/RigidEventsView.jsx'
 import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx'
 import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx'
 import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx'
-import GenerationView from '../scheduling-logic-views/GenerationView.jsx'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Scheduler from '../model/Scheduler'
 import EventDependencies from '../model/EventDependencies.js'
-import SchedulingErrorModal from '../components/SchedulingErrorModal.jsx'
+import GenerationModal from '../modals/GenerationModal.jsx'
+import SchedulingErrorModal from '../modals/SchedulingErrorModal.jsx'
 
 const GenerateScheduleScreen = () => {
     const { appState, setAppState } = useAppState();
@@ -28,9 +28,8 @@ const GenerateScheduleScreen = () => {
     const [flexibleEvents, setFlexibleEvents] = useState([]);
     const [events, setEvents] = useState([]);
     const [deps, setDeps] = useState(new EventDependencies());
-    const [schedule, setSchedule] = useState(null);
     const [firstDate, setFirstDate] = useState(new Date());
-    const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+    const [showGenerationModal, setShowGenerationModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
@@ -86,14 +85,12 @@ const GenerateScheduleScreen = () => {
                     ? strategy = "Deadline Oriented"
                     : null
         try {
-            setSchedule(scheduler.createSchedules(strategy, startTime, endTime))
-            setGenStage(6);
-            setShowLoadingScreen(true);
-            setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule}]});
+            const schedule = scheduler.createSchedules(strategy, startTime, endTime);
+            setShowGenerationModal(true);
+            setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule }]});
         } catch {
             setShowErrorModal(true);
             console.error("Error in schedule generation. Please check your inputs.");
-            setShowLoadingScreen(false);
             return;
         }
     }
@@ -104,8 +101,7 @@ const GenerateScheduleScreen = () => {
         <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={rigidEvents}/>,
         <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={flexibleEvents}/>,
         <EventDependenciesView onNext={EventDepsSetup} events={events} depsInput={deps}/>,
-        <FinalCheckView onNext={Generation}/>,
-        <GenerationView playAnim={showLoadingScreen}/>
+        <FinalCheckView onNext={Generation}/>
     ]
 
     return (
@@ -116,6 +112,10 @@ const GenerateScheduleScreen = () => {
                 isVisible={showErrorModal} 
                 action1={() => { setShowErrorModal(false) }} 
                 action2={() => { setShowErrorModal(false); setGenStage(1) }}
+            />
+            <GenerationModal 
+                isVisible={showGenerationModal} 
+                onViewSchedule={() => { setShowGenerationModal(false) }} 
             />
         </View>
     )
