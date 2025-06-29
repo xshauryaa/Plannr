@@ -5,6 +5,7 @@ import { lightColor, darkColor } from '../design/colors.js';
 import { spacing } from '../design/spacing.js';
 
 const ROW_HEIGHT = 60;
+const MIN_HEIGHT = 15;
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -46,13 +47,15 @@ const ScheduleCalendarView = ({ schedule, date, isVisible }) => {
                     const endHour = block.getEndTime().to12HourString();
                     const duration = block.getDuration();
                     const OFFSET = (ROW_HEIGHT / 2) + (block.getStartTime().getHour() * 60 + block.getStartTime().getMinute() - (start * 60)) * ROW_HEIGHT / 60;
+                    const blockHeight = ((duration * ROW_HEIGHT / 60) < MIN_HEIGHT) ? MIN_HEIGHT : (duration * ROW_HEIGHT / 60);
+                    const fontSize = (blockHeight > 30) ? 16 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
 
                     return (
-                        <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: duration * ROW_HEIGHT / 60, top: OFFSET }} key={index}>
-                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1 }}>
+                        <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index}>
+                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1, fontSize: fontSize }}>
                                 {block.getName()}
                             </Text>
-                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6 }}>
+                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6, fontSize: fontSize }}>
                                 {startHour} - {endHour}
                             </Text>
                         </View>
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 12,
-        padding: 12,
+        paddingHorizontal: 12,
         position: 'absolute',
         left: 0,
         flexDirection: 'row',
