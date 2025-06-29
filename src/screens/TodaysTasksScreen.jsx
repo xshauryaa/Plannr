@@ -23,8 +23,8 @@ const TodaysTasksScreen = () => {
     let tasks = []
 
     // Check if the user has an active schedule
-    if (appState.activeSchedule !== null) {
-        const todaysSchedule = appState.activeSchedule.getScheduleForDate(todaysDate.getId());
+    if (appState.activeSchedule.schedule !== null) {
+        const todaysSchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
         if (todaysSchedule !== undefined) {
             tasks = todaysSchedule.getTimeBlocks();
         }
@@ -96,7 +96,7 @@ const TodaysTasksScreen = () => {
                                         setTaskData(updatedTasks);
                                       
                                         // 2. Update appState.activeSchedule.schedule
-                                        const currentDaySchedule = appState.activeSchedule.getScheduleForDate(todaysDate.getId());
+                                        const currentDaySchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
                                       
                                         const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
                                         const updatedBlock = { ...updatedTimeBlocks[index] };
@@ -113,26 +113,31 @@ const TodaysTasksScreen = () => {
                                           updatedTimeBlocks
                                         );
                                       
-                                        const updatedScheduleMap = new Map(appState.activeSchedule.schedule);
+                                        const updatedScheduleMap = new Map(appState.activeSchedule.schedule.schedule);
                                         updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
                                       
-                                        const updatedSchedule = new appState.activeSchedule.constructor(
-                                          appState.activeSchedule.numDays,
-                                          appState.activeSchedule.minGap,
-                                          appState.activeSchedule.day1Date,
-                                          appState.activeSchedule.day1Day,
-                                          appState.activeSchedule.workingHoursLimit,
-                                          appState.activeSchedule.eventDependencies,
+                                        const updatedSchedule = new appState.activeSchedule.schedule.constructor(
+                                          appState.activeSchedule.schedule.numDays,
+                                          appState.activeSchedule.schedule.minGap,
+                                          appState.activeSchedule.schedule.day1Date,
+                                          appState.activeSchedule.schedule.day1Day,
+                                          appState.activeSchedule.schedule.workingHoursLimit,
+                                          appState.activeSchedule.schedule.eventDependencies,
                                           updatedScheduleMap,
-                                          appState.activeSchedule.strategy,
-                                          appState.activeSchedule.startTime,
-                                          appState.activeSchedule.endTime,
+                                          appState.activeSchedule.schedule.strategy,
+                                          appState.activeSchedule.schedule.startTime,
+                                          appState.activeSchedule.schedule.endTime,
                                         );
                                       
-                                        setAppState(prev => ({
-                                          ...prev,
-                                          activeSchedule: updatedSchedule
-                                        }));
+                                        setAppState(prev => {
+                                            const saved = prev.savedSchedules;
+                                            saved[prev.activeSchedule.name] = { name: prev.activeSchedule.name, schedule: updatedSchedule, active: true };
+                                            return ({
+                                                ...prev,
+                                                activeSchedule: { ...appState.activeSchedule, schedule: updatedSchedule},
+                                                savedSchedules: saved
+                                            })
+                                        });
                                       }}
                                 />
                             </View>

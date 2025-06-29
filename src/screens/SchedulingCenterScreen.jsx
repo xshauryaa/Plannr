@@ -23,18 +23,18 @@ const SchedulingCenterScreen = ({ navigation }) => {
 
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
                 {
-                (!appState.activeSchedule)
+                (!appState.activeSchedule.schedule)
                     ? <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>You currently have no active schedule.</Text>
                     </View>
                     : <View>
                         <View style={styles.horizontalGrid}>
-                            <Insights version={1} schedule={appState.activeSchedule}/>
-                            <Insights version={2} schedule={appState.activeSchedule}/>
+                            <Insights version={1} schedule={appState.activeSchedule.schedule}/>
+                            <Insights version={2} schedule={appState.activeSchedule.schedule}/>
                         </View>
                         <View style={styles.horizontalGrid}>
-                            <Insights version={3} schedule={appState.activeSchedule}/>
-                            <Insights version={4} schedule={appState.activeSchedule}/>
+                            <Insights version={3} schedule={appState.activeSchedule.schedule}/>
+                            <Insights version={4} schedule={appState.activeSchedule.schedule}/>
                         </View>
                     </View>
                 }

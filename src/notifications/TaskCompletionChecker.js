@@ -8,7 +8,7 @@ import Time24 from '../model/Time24.js';
 
 const TaskCompletionChecker = () => {
     const currentTime = useCurrentTime();
-    const { activeSchedule } = useAppState();
+    const { appState } = useAppState();
     const [scheduledSummaryToday, setScheduledSummaryToday] = useState(false);
 
     useEffect(() => {
@@ -23,10 +23,10 @@ const TaskCompletionChecker = () => {
     }, []);
 
     useEffect(() => {
-        if (!activeSchedule) return;
+        if (!appState.activeSchedule.schedule) return;
 
         const todaysDate = convertDateToScheduleDate(currentTime);
-        const todaysTasks = activeSchedule.getScheduleForDate(todaysDate).getTimeBlocks();
+        const todaysTasks = appState.activeSchedule.schedule.getScheduleForDate(todaysDate).getTimeBlocks();
         if (todaysTasks.length === 0) return;
 
         const currTime = convertTimeToTime24(currentTime);

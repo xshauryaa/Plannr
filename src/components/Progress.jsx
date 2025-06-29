@@ -20,11 +20,11 @@ const Progress = () => {
     useEffect(() => {
         let totalTasks = 0;
         let completedTasks = 0;
-        if (appState.activeSchedule) {
-            const datesList = appState.activeSchedule.getAllDatesInOrder();
+        if (appState.activeSchedule.schedule) {
+            const datesList = appState.activeSchedule.schedule.getAllDatesInOrder();
             
             for (const date of datesList) {
-                const schedule = appState.activeSchedule.getScheduleForDate(date);
+                const schedule = appState.activeSchedule.schedule.getScheduleForDate(date);
                 totalTasks += schedule.timeBlocks.length;
                 completedTasks += schedule.timeBlocks.filter(tb => tb.completed).length;
             }

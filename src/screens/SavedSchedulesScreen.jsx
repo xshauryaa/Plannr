@@ -4,7 +4,7 @@ import { useAppState } from '../context/AppStateContext'
 import EditIcon from '../../assets/system-icons/EditIcon.svg'
 import { lightColor, darkColor } from '../design/colors'
 
-const SavedSchedulesScreen = () => {
+const SavedSchedulesScreen = ({ navigation }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -30,23 +30,27 @@ const SavedSchedulesScreen = () => {
                             dark: require('../../assets/images/dark/BG-Gradient.png'),
                         };
                             return (
-                                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                                    {/* Background Image */}
-                                    <Image source={imageMap[appState.userPreferences.theme]} style={styles.bgImage} />
-                                    <View style={{ ...styles.bottomCover, backgroundColor: theme.COMP_COLOR }}> 
-                                        <View>
-                                            <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
-                                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
-                                                {item.schedule.getFirstDate().getDateString()} onwards
-                                            </Text>
-                                        </View>
-                                        <View style={{ flexDirection: 'row', gap: 12 }}>
-                                            <TouchableOpacity onPress={() => {}}> 
-                                                <EditIcon width={24} height={24} color={theme.FOREGROUND} />
-                                            </TouchableOpacity> 
+                                <TouchableOpacity
+                                    onPress={() => { navigation.navigate("View", { schedule: item }) }}
+                                >
+                                    <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                                        {/* Background Image */}
+                                        <Image source={imageMap[appState.userPreferences.theme]} style={styles.bgImage} />
+                                        <View style={{ ...styles.bottomCover, backgroundColor: theme.COMP_COLOR }}> 
+                                            <View>
+                                                <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
+                                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
+                                                    {item.schedule.getFirstDate().getDateString()} onwards
+                                                </Text>
+                                            </View>
+                                            <View style={{ flexDirection: 'row', gap: 12 }}>
+                                                <TouchableOpacity onPress={() => {}}> 
+                                                    <EditIcon width={24} height={24} color={theme.FOREGROUND} />
+                                                </TouchableOpacity> 
+                                            </View>
                                         </View>
                                     </View>
-                                </View>
+                                </TouchableOpacity>
                             )
                         }
                     }

@@ -6,7 +6,6 @@ import CheckIcon from '../../assets/system-icons/CheckIcon.svg';
 import ClockIcon from '../../assets/system-icons/ClockIcon.svg';
 import useCurrentTime from '../utils/useCurrentTime.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js';
-import { BarChart } from 'react-native-gifted-charts';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';

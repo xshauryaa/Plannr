@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: 20,
         fontFamily: 'AlbertSans',
         marginBottom: 8
     },

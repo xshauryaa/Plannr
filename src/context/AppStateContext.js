@@ -20,13 +20,13 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
     function schedulerTest1() {
-        const date1 = new ScheduleDate(14, 6, 2025);
-        const date2 = new ScheduleDate(15, 6, 2025);
-        const date3 = new ScheduleDate(16, 6, 2025);
-        const date4 = new ScheduleDate(17, 6, 2025);
-        const date5 = new ScheduleDate(18, 6, 2025);
-        const date6 = new ScheduleDate(19, 6, 2025);
-        const date7 = new ScheduleDate(20, 6, 2025);
+        const date1 = new ScheduleDate(27, 6, 2025);
+        const date2 = new ScheduleDate(28, 6, 2025);
+        const date3 = new ScheduleDate(29, 6, 2025);
+        const date4 = new ScheduleDate(30, 6, 2025);
+        const date5 = new ScheduleDate(1, 7, 2025);
+        const date6 = new ScheduleDate(2, 7, 2025);
+        const date7 = new ScheduleDate(3, 7, 2025);
         const scheduler = new Scheduler(7, date1, 'Saturday', 30, 6);
         
         // --- Rigid Events ---
@@ -120,12 +120,16 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            {name: 'Schedule 1', schedule: scheduleForTesting},
+            {name: 'Schedule 1', schedule: scheduleForTesting, active: true},
+            {name: 'Schedule 2', schedule: scheduleForTesting, active: true},
+            {name: 'Schedule 3', schedule: scheduleForTesting, active: true},
+            {name: 'Schedule 4', schedule: scheduleForTesting, active: true},
         ],
-        activeSchedule: scheduleForTesting,
+        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting, active: true},
         onboarded: false
     });
     const [storageLoaded, setStorageLoaded] = useState(true);
+
 
     useEffect(() => {
         const loadAppState = async () => {
@@ -150,16 +154,13 @@ export const AppStateProvider = ({ children }) => {
         }
     }, [appState]);
 
-    // useScheduleNotificationSync(appState.activeSchedule, appState.userPreferences);
+    // useScheduleNotificationSync(appState.activeSchedule.schedule, appState.userPreferences);
 
     const runTest = async () => {
         await NotificationService.requestPermissions();
-      
-        const now = new Date();
-        const date = new ScheduleDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
-      
-        const start = new Date(now.getTime() + 5 * 60000); // 5 minutes from now
-        const startHHMM = start.getHours() * 100 + start.getMinutes();
+    
+        const date = new ScheduleDate(20, 6, 2025);
+        const startHHMM = 2130;
         const endHHMM = startHHMM + 30;
       
         const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 30, date, startHHMM, endHHMM);
@@ -167,14 +168,14 @@ export const AppStateProvider = ({ children }) => {
 
         console.log("Scheduling test notification for:", testTb);
       
-        const id = await NotificationService.scheduleTaskReminder(testTb, 2);
+        const id = await NotificationService.scheduleTaskReminder(testTb, 5);
 
         console.log(id);
     };
 
-    useEffect(() => {
-        runTest();
-    }, []);      
+    // useEffect(() => {
+    //     runTest();
+    // }, []);      
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>
@@ -193,13 +194,13 @@ const serializeAppState = (appState) => {
             name: schedule.name,
             schedule: serializeSchedule(schedule.schedule)
         })),
-        activeSchedule: serializeSchedule(appState.activeSchedule),
+        activeSchedule: { name: appState.activeSchedule.name, schedule: serializeSchedule(appState.activeSchedule.schedule), active: appState.activeSchedule.active },
         onboarded: appState.onboarded
     };
 }
 
 const parseAppState = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.activeSchedule == null || rawObj.onboarded == null) {
+    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.activeSchedule.schedule == null || rawObj.onboarded == null) {
         return null;
     }
 
@@ -210,7 +211,7 @@ const parseAppState = (rawObj) => {
             name: sched.name,
             schedule: parseSchedule(sched.schedule)
         })),
-        activeSchedule: parseSchedule(rawObj.activeSchedule),
+        activeSchedule: {name: rawObj.activeSchedule.name, schedule: parseSchedule(rawObj.activeSchedule.schedule), active: rawObj.activeSchedule.active},
         onboarded: rawObj.onboarded
     };
 }

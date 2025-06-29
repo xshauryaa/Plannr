@@ -47,8 +47,8 @@ const GenerationModal = ({ isVisible, onViewSchedule, reschedule=false }) => {
                     onAnimationFinish={() => onAnimFinish()}
                     style={{ width: 300, height: 250 }}
                 />
-                {showFinish &&
-                    <View style={{ alignItems: 'center' }}>
+                {(showFinish)
+                    ? <View style={{ alignItems: 'center' }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>The process is complete. You can now view your schedule!</Text>
                         <TouchableOpacity 
                             style={styles.button}
@@ -60,6 +60,7 @@ const GenerationModal = ({ isVisible, onViewSchedule, reschedule=false }) => {
                             </View>
                         </TouchableOpacity>
                     </View>
+                    : <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>This may take a few seconds...</Text>
                 }
             </View>
         </Modal>
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: 20,
         fontFamily: 'AlbertSans',
         marginVertical: 8,
         textAlign: 'center'

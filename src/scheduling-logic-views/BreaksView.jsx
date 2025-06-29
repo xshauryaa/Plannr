@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: 20,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },

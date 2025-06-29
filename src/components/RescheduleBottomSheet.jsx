@@ -120,7 +120,7 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
                             ref.current?.hide();
                             navigation.navigate('Reschedule', { schedule });
                         }}
-                        style={{ ...styles.button, backgroundColor: theme.COMP_COLOR, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                        style={{ ...styles.button, backgroundColor: theme.INPUT, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                         <Text style={{ color: theme.FOREGROUND }}>{schedule.name}</Text>
                         <RightArrowIcon width={16} height={16} color={theme.FOREGROUND}/>

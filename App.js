@@ -15,6 +15,7 @@ import PreferencesScreen from './src/screens/PreferencesScreen';
 import SchedulingCenterScreen from './src/screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from './src/screens/GenerateScheduleScreen.jsx';
 import RescheduleScreen from './src/screens/RescheduleScreen.jsx';
+import ScheduleViewScreen from './src/screens/ScheduleViewScreen.jsx';
 
 const AppStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -36,11 +37,12 @@ const MainTabs = () => {
 export default function App() {
     return (
         <AppStateProvider>
-            <TaskCompletionChecker />
+            {/* <TaskCompletionChecker /> */}
             <SafeAreaProvider>
                 <NavigationContainer>
                     <AppStack.Navigator screenOptions={{ headerShown: false }}>
                         <AppStack.Screen name="MainTabs" component={MainTabs} />
+                        <AppStack.Screen name="View" component={ScheduleViewScreen} />
                         <AppStack.Screen name="Generate" component={GenerateScheduleScreen} />
                         <AppStack.Screen name="Reschedule" component={RescheduleScreen} />
                     </AppStack.Navigator>

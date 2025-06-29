@@ -14,7 +14,7 @@ import { Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const BAR_HEIGHT = 64; // 64px for 430px width screen
+const BAR_HEIGHT = (width > 400) ? 64 : (width > 380) ? 56 : 48; // 64px for 430px width screen
 const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
 const ICON_DIM = INDICATOR_DIM / 2;
 const PADDING_HORIZONTAL = 5/6 * ICON_DIM;

@@ -5,10 +5,14 @@
  * @returns {Date} JavaScript Date object
  */
 const combineScheduleDateAndTime24 = (scheduleDate, time24) => {
+    if (!scheduleDate || !time24) return null;
+
+    console.log(`Combining ScheduleDate: ${JSON.stringify(scheduleDate)} with Time24: ${JSON.stringify(time24)}`);
+
     const { date, month, year } = scheduleDate;
-    const { hours, minutes } = time24;
+    const { hour, minute } = time24;
   
-    return new Date(year, month - 1, date, hours, minutes);
+    return new Date(year, month - 1, date, hour, minute, 0, 0);
 };
   
 export default combineScheduleDateAndTime24;  
