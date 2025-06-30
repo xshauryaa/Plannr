@@ -10,8 +10,8 @@ import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
-import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
-import NotificationService from '../notifications/NotificationService.js';
+// import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
+// import NotificationService from '../notifications/NotificationService.js';
 import TimeBlock from '../model/TimeBlock.js';
 
 export const AppStateContext = createContext();
@@ -37,7 +37,7 @@ export const AppStateProvider = ({ children }) => {
             new RigidEvent("Team Workshop", ActivityType.WORK, 120, date4, 1400, 1600),
             new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, date4, 900, 1000),
             new RigidEvent("Staff Meeting", ActivityType.WORK, 60, date5, 1100, 1200),
-            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, date6, 1500, 1530),
+            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, date5, 1500, 1530),
             new RigidEvent("Final Presentation", ActivityType.WORK, 60, date6, 1500, 1600),
             new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, date7, 1900, 2100)
         ];
@@ -156,22 +156,22 @@ export const AppStateProvider = ({ children }) => {
 
     // useScheduleNotificationSync(appState.activeSchedule.schedule, appState.userPreferences);
 
-    const runTest = async () => {
-        await NotificationService.requestPermissions();
+    // const runTest = async () => {
+    //     await NotificationService.requestPermissions();
     
-        const date = new ScheduleDate(20, 6, 2025);
-        const startHHMM = 2130;
-        const endHHMM = startHHMM + 30;
+    //     const date = new ScheduleDate(20, 6, 2025);
+    //     const startHHMM = 2130;
+    //     const endHHMM = startHHMM + 30;
       
-        const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 30, date, startHHMM, endHHMM);
-        const testTb = TimeBlock.fromRigidEvent(event, false);
+    //     const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 30, date, startHHMM, endHHMM);
+    //     const testTb = TimeBlock.fromRigidEvent(event, false);
 
-        console.log("Scheduling test notification for:", testTb);
+    //     console.log("Scheduling test notification for:", testTb);
       
-        const id = await NotificationService.scheduleTaskReminder(testTb, 5);
+    //     const id = await NotificationService.scheduleTaskReminder(testTb, 5);
 
-        console.log(id);
-    };
+    //     console.log(id);
+    // };
 
     // useEffect(() => {
     //     runTest();

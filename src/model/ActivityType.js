@@ -12,6 +12,6 @@ const ActivityType = {
     ERRAND: 'ERRAND',
     OTHER: 'OTHER',
     BREAK: 'BREAK'
-  };
+};
   
-  export default ActivityType;
+export default ActivityType;

@@ -6,7 +6,7 @@ import NavigationBar from './src/components/NavigationBar.jsx';
 
 
 import { AppStateProvider } from './src/context/AppStateContext.js';
-import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
+// import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';

@@ -1,8 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing } from '../design/spacing.js';
+import ActivityType from '../model/ActivityType.js'
+
+const ActivityTypeColors = {
+  [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
+  [ActivityType.MEETING]:      '#48C9B0',  // Teal
+  [ActivityType.WORK]:         '#27AE60',  // Green
+  [ActivityType.EVENT]:        '#E67E22',  // Orange
+  [ActivityType.EDUCATION]:    '#F39C12',  // Amber
+  [ActivityType.TRAVEL]:       '#8E44AD',  // Purple
+  [ActivityType.RECREATIONAL]: '#D35400',  // Dark Orange
+  [ActivityType.ERRAND]:       '#C0392B',  // Crimson
+  [ActivityType.OTHER]:        '#7F8C8D',  // Slate Gray
+  [ActivityType.BREAK]:        '#95A5A6',  // Light Gray
+};
 
 const ROW_HEIGHT = 60;
 const MIN_HEIGHT = 15;
@@ -10,7 +24,7 @@ const MIN_HEIGHT = 15;
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
 
-const ScheduleCalendarView = ({ schedule, date, isVisible }) => {
+const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -51,14 +65,23 @@ const ScheduleCalendarView = ({ schedule, date, isVisible }) => {
                     const fontSize = (blockHeight > 30) ? 16 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
 
                     return (
-                        <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index}>
-                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1, fontSize: fontSize }}>
-                                {block.getName()}
-                            </Text>
-                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6, fontSize: fontSize }}>
-                                {startHour} - {endHour}
-                            </Text>
-                        </View>
+                        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index} onPress={() => onBlockSelect(block)}>
+                            <View style={{ 
+                                    width: 3, 
+                                    height: '80%', 
+                                    backgroundColor: ActivityTypeColors[block.activityType] || '#FF0000',
+                                    borderRadius: 3,
+                                    marginRight: 8
+                            }}/>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1, fontSize: fontSize }}>
+                                    {block.getName()}
+                                </Text>
+                                <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6, fontSize: fontSize, marginRight: 12 }}>
+                                    {startHour} - {endHour}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
                     );
                 })}
             </View>
@@ -97,7 +120,7 @@ const styles = StyleSheet.create({
     card: {
         width: '100%',
         height: 202,
-        borderRadius: 12,
+        borderRadius: 6,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -105,11 +128,11 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 12,
-        paddingHorizontal: 12,
+        paddingRight: 12,
+        paddingLeft: 4,
         position: 'absolute',
         left: 0,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center'
     },
 });

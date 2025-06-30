@@ -30,8 +30,6 @@ const TodaysTasksScreen = () => {
         }
     }
 
-
-
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
 

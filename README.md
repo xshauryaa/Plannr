@@ -33,5 +33,5 @@ Welcome to Plannr - a dynamic auto-scheduling appliation. It generates smart, op
 | ----------- | ------------------------------------------ |
 | Core Logic  | JavaScript (Migrated from Java) (Pure OOP) |
 | Frontend    | React Native                               |
-| Persistence | JSON (Local)                               |
+| Persistence | JSON + RN AsyncStorage (Local)             |
 | Deployment  | APK                                        |

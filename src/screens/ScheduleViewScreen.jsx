@@ -5,6 +5,7 @@ import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import Indicator from '../../assets/system-icons/Indicator.svg';
 import ScheduleCalendarView from '../components/ScheduleCalendarView.jsx';
+import EventInfoModal from '../modals/EventInfoModal.jsx';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -18,6 +19,8 @@ const ScheduleViewScreen = ({ route }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedule } = route.params;
     const [selectedDate, setSelectedDate] = useState(schedule.schedule.getFirstDate().getId());
+    const [selectedTB, setSelectedTB] = useState(schedule.schedule.getScheduleForDate(schedule.schedule.getFirstDate().getId()).getTimeBlocks()[0]);
+    const [showModal, setShowModal] = useState(false);
 
     const indicatorX = useRef(new Animated.Value(0)).current;
 
@@ -29,6 +32,15 @@ const ScheduleViewScreen = ({ route }) => {
             useNativeDriver: true,
         }).start();
     }, [selectedDate]);
+
+    const onSelectTB = (tb) => {
+        setSelectedTB(tb);
+        setShowModal(true);
+    }
+
+    const onCloseModal = () => {
+        setShowModal(false);
+    }
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -67,11 +79,12 @@ const ScheduleViewScreen = ({ route }) => {
                         const visible = (date === selectedDate);
 
                         return (
-                            <ScheduleCalendarView schedule={schedule.schedule} date={date} isVisible={visible} key={index}/>
+                            <ScheduleCalendarView schedule={schedule.schedule} date={date} isVisible={visible} onBlockSelect={(block) => onSelectTB(block)} key={index}/>
                         )
                     })}
                 </View>
             </View>
+            <EventInfoModal isVisible={showModal} tb={selectedTB} onClose={onCloseModal} />
         </View>
     );
 }

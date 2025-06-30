@@ -6,7 +6,6 @@ import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg'
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg'
 import LightMode from '../../assets/system-icons/LightMode.svg'
 import DarkMode from '../../assets/system-icons/DarkMode.svg'
-import CheckIcon from '../../assets/system-icons/CheckIcon.svg'
 import { lightColor, darkColor } from '../design/colors.js'
 
 const PreferencesScreen = () => {
