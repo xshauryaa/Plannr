@@ -10,8 +10,8 @@ import Break from '../model/Break';
 import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
-// import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
-// import NotificationService from '../notifications/NotificationService.js';
+import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
+import NotificationService from '../notifications/NotificationService.js';
 import TimeBlock from '../model/TimeBlock.js';
 
 export const AppStateContext = createContext();
@@ -154,28 +154,7 @@ export const AppStateProvider = ({ children }) => {
         }
     }, [appState]);
 
-    // useScheduleNotificationSync(appState.activeSchedule.schedule, appState.userPreferences);
-
-    // const runTest = async () => {
-    //     await NotificationService.requestPermissions();
-    
-    //     const date = new ScheduleDate(20, 6, 2025);
-    //     const startHHMM = 2130;
-    //     const endHHMM = startHHMM + 30;
-      
-    //     const event = new RigidEvent("Test Event", ActivityType.PERSONAL, 30, date, startHHMM, endHHMM);
-    //     const testTb = TimeBlock.fromRigidEvent(event, false);
-
-    //     console.log("Scheduling test notification for:", testTb);
-      
-    //     const id = await NotificationService.scheduleTaskReminder(testTb, 5);
-
-    //     console.log(id);
-    // };
-
-    // useEffect(() => {
-    //     runTest();
-    // }, []);      
+    useScheduleNotificationSync(appState.activeSchedule.schedule, appState.userPreferences);    
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>

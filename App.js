@@ -5,7 +5,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NavigationBar from './src/components/NavigationBar.jsx';
 import { AppStateProvider } from './src/context/AppStateContext.js';
 // import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
-import { initializeNotificationService, scheduleNotification } from './src/notifications/NotificationService.js';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';
@@ -34,14 +33,6 @@ const MainTabs = () => {
 }
 
 export default function App() {
-    // Initialize notification service
-    initializeNotificationService().then((status) => {
-        if (status) {
-            console.log('Notification service initialized successfully');
-        } else {
-            console.warn('Notification service initialization failed');
-        }
-    });
     return (
         <AppStateProvider>
             {/* <TaskCompletionChecker /> */}

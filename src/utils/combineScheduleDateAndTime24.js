@@ -7,8 +7,6 @@
 const combineScheduleDateAndTime24 = (scheduleDate, time24) => {
     if (!scheduleDate || !time24) return null;
 
-    console.log(`Combining ScheduleDate: ${JSON.stringify(scheduleDate)} with Time24: ${JSON.stringify(time24)}`);
-
     const { date, month, year } = scheduleDate;
     const { hour, minute } = time24;
   
