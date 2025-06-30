@@ -10,6 +10,7 @@ import MenuButton from '../components/MenuButton.jsx';
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
+import { scheduleNotification } from '../notifications/NotificationService.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 
@@ -35,6 +36,21 @@ const HomeScreen = ({ navigation }) => {
     if (!fontsLoaded) return null;
 
     const todaysDate = convertDateToScheduleDate(currentTime);
+
+    const showNotification = async () => {
+        scheduleNotification({
+            title: 'Test Notification',
+            body: 'This is a test notification',
+        }, {
+            seconds: 10,
+        }).then((id) => {
+            if (id) {
+                console.log(`Test notification scheduled with ID: ${id}`);
+            } else {
+                console.error('Failed to schedule test notification');
+            }
+        });
+    }
     
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -49,7 +65,10 @@ const HomeScreen = ({ navigation }) => {
                         broad={true}
                         title="Plannr Center"
                         icon="Center"
-                        navTo={() => { navigation.navigate("Center") }}
+                        navTo={() => { 
+                            // navigation.navigate("Center") 
+                            showNotification(); // For testing notification scheduling
+                        }}
                     />
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>

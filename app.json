@@ -15,7 +15,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sthareja19.Plannr",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -37,21 +36,7 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
-            "extraIosPodDependencies": [
-              {
-                "name": "GoogleUtilities",
-                "modular_headers": true
-              },
-              {
-                "name": "nanopb",
-                "modular_headers": true
-              },
-              {
-                "name": "FirebaseCoreInternal",
-                "modular_headers": true
-              }
-            ]
+            "useFrameworks": "static"
           }
         }
       ]
