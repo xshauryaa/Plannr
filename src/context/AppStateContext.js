@@ -11,8 +11,6 @@ import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
-import NotificationService from '../notifications/NotificationService.js';
-import TimeBlock from '../model/TimeBlock.js';
 
 export const AppStateContext = createContext();
 

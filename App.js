@@ -4,7 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NavigationBar from './src/components/NavigationBar.jsx';
 import { AppStateProvider } from './src/context/AppStateContext.js';
-// import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
+import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
+import NotificationService from './src/notifications/NotificationService.js';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';
@@ -33,9 +34,10 @@ const MainTabs = () => {
 }
 
 export default function App() {
+    NotificationService.requestPermissions();
     return (
         <AppStateProvider>
-            {/* <TaskCompletionChecker /> */}
+            <TaskCompletionChecker />
             <SafeAreaProvider>
                 <NavigationContainer>
                     <AppStack.Navigator screenOptions={{ headerShown: false }}>
