@@ -35,6 +35,7 @@ const MainTabs = () => {
 
 export default function App() {
     NotificationService.requestPermissions();
+    
     return (
         <AppStateProvider>
             <TaskCompletionChecker />

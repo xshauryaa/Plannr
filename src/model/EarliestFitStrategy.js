@@ -1,7 +1,9 @@
 import SchedulingStrategy from './SchedulingStrategy.js';
 import Schedule from './Schedule.js';
+import ScheduleDate from './ScheduleDate.js';
+import Scheduler from './Scheduler.js';
+import FlexibleEvent from './FlexibleEvent.js';
 import Time24 from './Time24.js';
-import EventConflictError from './exceptions/EventConflictError.js';
 import WorkingLimitExceededError from './exceptions/WorkingLimitExceededError.js';
 
 class EarliestFitStrategy extends SchedulingStrategy {
@@ -176,9 +178,13 @@ class EarliestFitStrategy extends SchedulingStrategy {
    * @param {Time24} currentTime
    * @returns {Schedule}
    */
-  reschedule(schedule, events, currentDate, currentTime) {
+  reschedule(schedule, events, currentDate, currentTime, eventDependencies = null) {
     this.earliestFitSchedule = schedule;
     this.flexibleEvents = events;
+    if (eventDependencies) {
+        this.eventDependencies = eventDependencies;
+        this.earliestFitSchedule.eventDependencies = eventDependencies;
+    }
 
     const earliestStart = schedule.startTime;
     const latestEnd = schedule.endTime;

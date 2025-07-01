@@ -174,9 +174,13 @@ class BalancedWorkStrategy extends SchedulingStrategy {
    * @param {Time24} currentTime
    * @returns {Schedule}
    */
-  reschedule(schedule, events, currentDate, currentTime) {
+  reschedule(schedule, events, currentDate, currentTime, eventDependencies = null) {
     this.balancedWorkSchedule = schedule;
     this.flexibleEvents = events;
+    if (eventDependencies) {
+        this.eventDependencies = eventDependencies;
+        this.balancedWorkSchedule.eventDependencies = eventDependencies;
+    }
 
     const earliestStart = schedule.startTime;
     const latestEnd = schedule.endTime;

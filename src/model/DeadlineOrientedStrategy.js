@@ -184,9 +184,13 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
    * @param {Time24} currentTime
    * @returns {Schedule}
    */
-  reschedule(schedule, events, currentDate, currentTime) {
+  reschedule(schedule, events, currentDate, currentTime, eventDependencies = null) {
     this.deadlineOrientedSchedule = schedule;
     this.flexibleEvents = events;
+    if (eventDependencies) {
+        this.eventDependencies = eventDependencies;
+        this.deadlineOrientedSchedule.eventDependencies = eventDependencies;
+    }
 
     const earliestStart = schedule.startTime;
     const latestEnd = schedule.endTime;

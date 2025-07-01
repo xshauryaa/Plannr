@@ -142,38 +142,33 @@ class Rescheduler {
      * @param {Break[]} newBreaks - New breaks to be added to the schedule.
      * @return {Schedule} the schedule with new time blocks added
      */
-    addNewTimeBlocks(schedule, newEvents, newBreaks) {
+    addNewTimeBlocks(schedule, newEvents, newBreaks, newRepeatedBreaks, newEventDependencies) {
+        if (newEventDependencies) {
+            this.dependencies = newEventDependencies;
+            schedule.eventDependencies = newEventDependencies;
+        }
         const now = new Date();
         const currentDate = convertDateToScheduleDate(now);
         const currentTime = new Time24(now.getHours() * 100 + now.getMinutes());
 
         const flexEvents = [];
 
-        if (newBreaks && Array.isArray(newBreaks)) {
-            for (const br of newBreaks) {
-                if (Array.isArray(br)) {
-                    const [date, breakTime] = br;
-                    if (date && breakTime) {
-                        schedule.addBreak(date, breakTime);
-                    }
-                } else if (br && br.repeated && br.breakTime) {
-                    schedule.addBreakToFullWeek(br.breakTime);
-                } else if (br && br.date && br.breakTime) {
-                    schedule.addBreak(br.date, br.breakTime);
-                } else if (br instanceof Object && br.startTime && br.endTime) {
-                    // treat as repeated break if date not provided
-                    schedule.addBreakToFullWeek(br);
-                }
+        for (const br of newBreaks) {
+            const [date, breakTime] = br;
+            if (date && breakTime) {
+                schedule.addBreak(date, breakTime);
             }
         }
 
-        if (newEvents && Array.isArray(newEvents)) {
-            for (const evt of newEvents) {
-                if (evt instanceof RigidEvent) {
-                    schedule.addRigidEvent(evt.getDate(), evt);
-                } else {
-                    flexEvents.push(evt);
-                }
+        for (const rb of newRepeatedBreaks) {
+            schedule.addRepeatedBreak(rb);
+        }
+
+        for (const evt of newEvents) {
+            if (evt instanceof RigidEvent) {
+                schedule.addRigidEvent(evt.getDate(), evt);
+            } else {
+                flexEvents.push(evt);
             }
         }
 

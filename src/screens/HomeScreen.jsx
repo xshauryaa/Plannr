@@ -10,7 +10,6 @@ import MenuButton from '../components/MenuButton.jsx';
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
-import { scheduleNotification } from '../notifications/NotificationService.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 

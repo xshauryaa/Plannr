@@ -8,8 +8,9 @@ import { lightColor, darkColor } from '../design/colors';
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
+import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg';
 
-const FinalCheckView = ({ onNext }) => {
+const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Schedule' }) => {
     const { appState } = useAppState();
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
@@ -24,73 +25,77 @@ const FinalCheckView = ({ onNext }) => {
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - what are the daily time periods and the scheduling strategy you'd like?</Text>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start & End Time</Text>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
-                            <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); }}>
-                                <TextInput
-                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                                    pointerEvents="none"
-                                    value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    editable={false}
-                                />
-                            </Pressable>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - some final preferences</Text>
+                {includeTimes && 
+                    <>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start & End Time</Text>
+                        <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <View style={{ width: '50%' }}>
+                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                                    <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); }}>
+                                        <TextInput
+                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                            pointerEvents="none"
+                                            value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            editable={false}
+                                        />
+                                    </Pressable>
+                                </View>
+                                <View style={{ width: '50%' }}>
+                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                                    <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); }}>
+                                        <TextInput
+                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                            pointerEvents="none"
+                                            value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            editable={false}
+                                        />
+                                    </Pressable>
+                                </View>
+                            </View>
+                            {showStartPicker && (
+                                <View>
+                                    <DateTimePicker
+                                        value={startTime}
+                                        mode="time"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        onChange={(event, time) => {
+                                            if (time) setStartTime(time);
+                                        }}
+                                        themeVariant={appState.userPreferences.theme}
+                                    />
+                                    <TouchableOpacity 
+                                        style={styles.button}
+                                        onPress={() => setShowStartPicker(false)}
+                                    >
+                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            {showEndPicker && (
+                                <View>
+                                    <DateTimePicker
+                                        value={endTime}
+                                        mode="time"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        onChange={(event, time) => {
+                                            if (time) setEndTime(time);
+                                        }}
+                                        themeVariant={appState.userPreferences.theme}
+                                    />
+                                    <TouchableOpacity 
+                                        style={styles.button}
+                                        onPress={() => setShowEndPicker(false)}
+                                    >
+                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            {showWarning && <Text style={styles.warning}>{warning}</Text>}
                         </View>
-                        <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
-                            <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); }}>
-                                <TextInput
-                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                                    pointerEvents="none"
-                                    value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    editable={false}
-                                />
-                            </Pressable>
-                        </View>
-                    </View>
-                    {showStartPicker && (
-                        <View>
-                            <DateTimePicker
-                                value={startTime}
-                                mode="time"
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={(event, time) => {
-                                    if (time) setStartTime(time);
-                                }}
-                                themeVariant={appState.userPreferences.theme}
-                            />
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowStartPicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {showEndPicker && (
-                        <View>
-                            <DateTimePicker
-                                value={endTime}
-                                mode="time"
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={(event, time) => {
-                                    if (time) setEndTime(time);
-                                }}
-                                themeVariant={appState.userPreferences.theme}
-                            />
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowEndPicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
-                </View>
+                    </>
+                }
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Scheduling Strategy</Text>
                 <View style={{ ...styles.card, gap: 12, backgroundColor: theme.COMP_COLOR }}>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -135,7 +140,14 @@ const FinalCheckView = ({ onNext }) => {
                     }
                 }}
             >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Generate Schedule</Text>
+                {(buttonText === 'Generate Schedule') 
+                    ? <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                        {buttonText}
+                    </Text> 
+                    : <View style={{ flexDirection: 'row', gap: 12 }}>
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Reschedule</Text>
+                        <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
+                    </View>}
             </TouchableOpacity>
         </View>
     );
