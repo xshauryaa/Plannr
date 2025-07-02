@@ -12,6 +12,10 @@ const InfoView = ({ onNext }) => {
     const [numDays, setNumDays] = useState('1');
     const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap);
     const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours);
+    const [showNameWarning, setShowNameWarning] = useState(false);
+    const [showNumDaysWarning, setShowNumDaysWarning] = useState(false);
+    const [showMinGapWarning, setShowMinGapWarning] = useState(false);
+    const [showMaxHoursWarning, setShowMaxHoursWarning] = useState(false);
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -30,6 +34,7 @@ const InfoView = ({ onNext }) => {
                             setName(nativeEvent.text)
                         } }
                     />
+                    {showNameWarning && <Text style={styles.warning}>Please enter a schedule name</Text>}
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What date would you like to schedule from?</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -68,41 +73,84 @@ const InfoView = ({ onNext }) => {
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={numDays}
+                        keyboardType='numeric'
                         autoCorrect={false}
                         autoCapitalize='words'
                         onChange={ ({ nativeEvent }) => { 
                             setNumDays(nativeEvent.text)
                         } }
                     />
+                    {showNumDaysWarning && <Text style={styles.warning}>Number of days must be a positive number</Text>}
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Minimum gap between scheduled events (in mins)</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={minGap}
+                        keyboardType='numeric'
                         autoCorrect={false}
                         autoCapitalize='words'
                         onChange={ ({ nativeEvent }) => { 
                             setMinGap(nativeEvent.text)
                         } }
                     />
+                    {showMinGapWarning && <Text style={styles.warning}>Minimum gap must be a non-negative number</Text>}
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Maximum working hours per day</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={maxHours}
+                        keyboardType='numeric'
                         autoCorrect={false}
                         autoCapitalize='words'
                         onChange={ ({ nativeEvent }) => { 
                             setMaxHours(nativeEvent.text)
                         } }
                     />
+                    {showMaxHoursWarning && <Text style={styles.warning}>Maximum working hours must be between 0 and 24</Text>}
                 </View>
             </ScrollView>
-            <TouchableOpacity 
+                <TouchableOpacity 
                 style={styles.button}
-                onPress={() => onNext(name, numDays, startDate, minGap, maxHours)}
+                onPress={() => {
+                    // Reset all warnings first
+                    setShowNameWarning(false);
+                    setShowNumDaysWarning(false);
+                    setShowMinGapWarning(false);
+                    setShowMaxHoursWarning(false);
+                    
+                    let hasError = false;
+                    
+                    // Validation logic
+                    if (!name.trim()) {
+                        setShowNameWarning(true);
+                        hasError = true;
+                    }
+                    
+                    const numDaysInt = parseInt(numDays);
+                    if (isNaN(numDaysInt) || numDaysInt <= 0) {
+                        setShowNumDaysWarning(true);
+                        hasError = true;
+                    }
+                    
+                    const minGapInt = parseInt(minGap);
+                    if (isNaN(minGapInt) || minGapInt < 0) {
+                        setShowMinGapWarning(true);
+                        hasError = true;
+                    }
+                    
+                    const maxHoursFloat = parseFloat(maxHours);
+                    if (isNaN(maxHoursFloat) || maxHoursFloat <= 0 || maxHoursFloat > 24) {
+                        setShowMaxHoursWarning(true);
+                        hasError = true;
+                    }
+                    
+                    // If all validations pass
+                    if (!hasError) {
+                        onNext(name, numDays, startDate, minGap, maxHours);
+                    }
+                }}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>
@@ -156,7 +204,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 12
-    }
+    },
+    warning: {
+        fontSize: 12,
+        fontFamily: 'AlbertSans',
+        marginTop: 8,
+        color: '#FF0000',
+        alignSelf: 'center'
+    },
 })
 
 export default InfoView

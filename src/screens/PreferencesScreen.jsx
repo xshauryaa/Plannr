@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg'
@@ -10,7 +10,54 @@ import { lightColor, darkColor } from '../design/colors.js'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
+    const [showNameWarning, setShowNameWarning] = useState(false);
+    const [showMinGapWarning, setShowMinGapWarning] = useState(false);
+    const [showMaxHoursWarning, setShowMaxHoursWarning] = useState(false);
+    const [showLeadMinutesWarning, setShowLeadMinutesWarning] = useState(false);
+    
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    const validateAndSave = () => {
+        // Reset all warnings
+        setShowNameWarning(false);
+        setShowMinGapWarning(false);
+        setShowMaxHoursWarning(false);
+        setShowLeadMinutesWarning(false);
+
+        let hasError = false;
+
+        // Validate name
+        if (!appState.name.trim()) {
+            setShowNameWarning(true);
+            hasError = true;
+        }
+
+        // Validate min gap
+        const minGapInt = parseInt(appState.userPreferences.defaultMinGap);
+        if (isNaN(minGapInt) || minGapInt < 0) {
+            setShowMinGapWarning(true);
+            hasError = true;
+        }
+
+        // Validate max working hours
+        const maxHoursFloat = parseFloat(appState.userPreferences.defaultMaxWorkingHours);
+        if (isNaN(maxHoursFloat) || maxHoursFloat <= 0 || maxHoursFloat > 24) {
+            setShowMaxHoursWarning(true);
+            hasError = true;
+        }
+
+        // Validate lead minutes (only if task reminders are enabled)
+        if (appState.userPreferences.taskRemindersEnabled) {
+            const leadMinutesInt = parseInt(appState.userPreferences.leadMinutes);
+            if (isNaN(leadMinutesInt) || leadMinutesInt <= 0) {
+                setShowLeadMinutesWarning(true);
+                hasError = true;
+            }
+        }
+
+        // Return true if no errors (could be used for saving logic)
+        return !hasError;
+    };
     
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -26,7 +73,9 @@ const PreferencesScreen = () => {
                         onChange={ ({ nativeEvent }) => { 
                             setAppState({ ...appState, name: nativeEvent.text })
                         } }
+                        onBlur={validateAndSave}
                     />
+                    {showNameWarning && <Text style={styles.warning}>Please enter your name</Text>}
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>App Theme</Text>
                 <View style={{ ...styles.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.COMP_COLOR }}>
@@ -87,24 +136,30 @@ const PreferencesScreen = () => {
                             <TextInput
                                 style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                 value={appState.userPreferences.defaultMinGap}
+                                keyboardType='numeric'
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
                                     setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMinGap: nativeEvent.text }})
                                 } }
+                                onBlur={validateAndSave}
                             />
+                            {showMinGapWarning && <Text style={styles.warning}>Must be non-negative</Text>}
                         </View>
                         <View style={{ width: '50%' }}>
                             <Text style={{ ...styles.subHeading, marginTop: 0, marginBottom: 8, color: theme.FOREGROUND }}>Max. Working Hours</Text>
                             <TextInput
                                 style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                                 value={appState.userPreferences.defaultMaxWorkingHours}
+                                keyboardType='numeric'
                                 autoCorrect={false}
                                 autoCapitalize='words'
                                 onChange={ ({ nativeEvent }) => { 
                                     setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMaxWorkingHours: nativeEvent.text }})
                                 } }
+                                onBlur={validateAndSave}
                             />
+                            {showMaxHoursWarning && <Text style={styles.warning}>Must be 0-24</Text>}
                         </View>
                     </View>
                 </View>
@@ -123,18 +178,23 @@ const PreferencesScreen = () => {
                         />
                     </View>
                     {appState.userPreferences.taskRemindersEnabled && (
-                        <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 8}}>
-                            <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>Remind me</Text>
-                            <TextInput
-                                style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                                value={appState.userPreferences.leadMinutes}
-                                autoCorrect={false}
-                                autoCapitalize='words'
-                                onChange={ ({ nativeEvent }) => { 
-                                    setAppState({ ...appState, userPreferences: { ...appState.userPreferences, leadMinutes: nativeEvent.text } })
-                                } }
-                            />
-                            <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>minutes before a task</Text>
+                        <View>
+                            <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 8}}>
+                                <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>Remind me</Text>
+                                <TextInput
+                                    style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                    value={appState.userPreferences.leadMinutes}
+                                    keyboardType='numeric'
+                                    autoCorrect={false}
+                                    autoCapitalize='words'
+                                    onChange={ ({ nativeEvent }) => { 
+                                        setAppState({ ...appState, userPreferences: { ...appState.userPreferences, leadMinutes: nativeEvent.text } })
+                                    } }
+                                    onBlur={validateAndSave}
+                                />
+                                <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>minutes before a task</Text>
+                            </View>
+                            {showLeadMinutesWarning && <Text style={styles.warning}>Must be a positive number</Text>}
                         </View>
                     )}
                 </View>
@@ -230,7 +290,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 8,
         alignSelf: 'center'
-    }
+    },
+    warning: {
+        fontSize: 12,
+        fontFamily: 'AlbertSans',
+        marginTop: 8,
+        color: '#FF0000',
+        alignSelf: 'center'
+    },
 })
 
 export default PreferencesScreen
