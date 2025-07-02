@@ -76,14 +76,12 @@ const EventDependenciesView = ({ onNext, events, depsInput }) => {
                     />
                 </View>
             </View>
-            <View style={styles.horizontalGrid}>
-                <TouchableOpacity 
-                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
-                    onPress={() => onNext(eventDependencies)}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+                style={{ ...styles.button, marginVertical: 0, width: '100%' }}
+                onPress={() => onNext(eventDependencies)}
+            >
+                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+            </TouchableOpacity>
             <AddDependencyModal
                 isVisible={showModal}
                 onClick={ (events, prereqs) => addEventDependency(events, prereqs) }

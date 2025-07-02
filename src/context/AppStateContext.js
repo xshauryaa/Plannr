@@ -17,7 +17,7 @@ export const AppStateContext = createContext();
 export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting = null
-    function schedulerTest1() {
+    function testScheduler() {
         const date1 = new ScheduleDate(27, 6, 2025);
         const date2 = new ScheduleDate(28, 6, 2025);
         const date3 = new ScheduleDate(29, 6, 2025);
@@ -105,7 +105,7 @@ export const AppStateProvider = ({ children }) => {
         return scheduler.createSchedules("Earliest Fit", 800, 1700);
     }
 
-    scheduleForTesting = schedulerTest1();
+    scheduleForTesting = testScheduler();
     
     const [appState, setAppState] = useState({
         name: 'Shaurya',
@@ -118,10 +118,10 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            {name: 'Schedule 1', schedule: scheduleForTesting, active: true},
-            {name: 'Schedule 2', schedule: scheduleForTesting, active: true},
-            {name: 'Schedule 3', schedule: scheduleForTesting, active: true},
-            {name: 'Schedule 4', schedule: scheduleForTesting, active: true},
+            { name: 'Schedule 1', schedule: scheduleForTesting, active: true },
+            { name: 'Schedule 2', schedule: scheduleForTesting, active: false },
+            { name: 'Schedule 3', schedule: scheduleForTesting, active: false },
+            { name: 'Schedule 4', schedule: scheduleForTesting, active: false },
         ],
         activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting, active: true},
         onboarded: false

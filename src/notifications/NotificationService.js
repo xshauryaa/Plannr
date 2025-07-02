@@ -32,7 +32,7 @@ const NotificationService = {
     },
 
     async scheduleTaskReminder(timeBlock, leadMinutes) {
-        // schedule notification X minutes before task.startTime
+        // schedule notification X minutes before timeBlock.startTime
         try{
             const { name, date, startTime } = timeBlock;
 
@@ -48,7 +48,7 @@ const NotificationService = {
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: '⏰ Upcoming Task',
-                    body: `Reminder: ${name} is set to at ${startTime.to12HourString()}`,
+                    body: `Reminder: ${name} is set to begin at ${startTime.to12HourString()}`,
                     sound: true,
                     priority: Notifications.AndroidNotificationPriority.HIGH,
                 },
@@ -59,6 +59,41 @@ const NotificationService = {
             });
 
             console.log(`Notification scheduled for "${name}" → ID: ${notificationId}`);
+            return notificationId;
+        } catch (error) {
+            console.error(`Error scheduling reminder for "${timeBlock.name}":`, error);
+            return null;
+        }
+    },
+
+    async scheduleBreakReminder(timeBlock, leadMinutes) {
+        // schedule notification X minutes before break
+        try{
+            const { date, startTime } = timeBlock;
+
+            const triggerTime24 = startTime.copy();
+            triggerTime24.subtractMinutes(leadMinutes);
+            const notificationTime = combineScheduleDateAndTime24(date, triggerTime24);
+
+            if (notificationTime <= new Date()) {
+                console.warn(`Skipping "Break" reminder — trigger time is in the past.`);
+                return null;
+            }
+
+            const notificationId = await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: '🧘 Get Some Rest',
+                    body: `You have a break starting at ${startTime.to12HourString()}. Take a moment to relax!`,
+                    sound: true,
+                    priority: Notifications.AndroidNotificationPriority.HIGH,
+                },
+                trigger: {
+                    type:'date', 
+                    date: notificationTime
+                },
+            });
+
+            console.log(`Notification scheduled for "Break" ${startTime.to12HourString()} → ID: ${notificationId}`);
             return notificationId;
         } catch (error) {
             console.error(`Error scheduling reminder for "${timeBlock.name}":`, error);
@@ -116,7 +151,7 @@ const NotificationService = {
                 },
             });
 
-            console.log(`[Daily Summary] Scheduled for 11 PM → allComplete=${allTasksCompleted}, ID=${notificationId}`);
+            console.log(`[Daily Summary] Scheduled for 11:00 PM → allComplete=${allTasksCompleted}, ID=${notificationId}`);
             return notificationId;
 
         } catch (error) {

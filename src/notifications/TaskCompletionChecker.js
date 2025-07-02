@@ -25,7 +25,7 @@ const TaskCompletionChecker = () => {
     useEffect(() => {
         if (!appState.activeSchedule.schedule) return;
 
-        const todaysDate = convertDateToScheduleDate(currentTime);
+        const todaysDate = convertDateToScheduleDate(currentTime).getId();
         const todaysTasks = appState.activeSchedule.schedule.getScheduleForDate(todaysDate).getTimeBlocks();
         if (todaysTasks.length === 0) return;
 
@@ -36,7 +36,7 @@ const TaskCompletionChecker = () => {
 
         let allComplete = true;
         for (const task of todaysTasks) {
-            if (!task.completed) {
+            if (task.name != "Break" && !task.completed) {
                 allComplete = false;
                 break;
             }
