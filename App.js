@@ -6,6 +6,7 @@ import NavigationBar from './src/components/NavigationBar.jsx';
 import { AppStateProvider } from './src/context/AppStateContext.js';
 import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
 import NotificationService from './src/notifications/NotificationService.js';
+import 'react-native-gesture-handler';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';

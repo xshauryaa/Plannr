@@ -1,9 +1,11 @@
-import React from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing } from '../design/spacing.js';
 import ActivityType from '../model/ActivityType.js'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
 
 const ActivityTypeColors = {
   [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
@@ -28,64 +30,76 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    const [rowHeight, setRowHeight] = useState(60);
+    const rowHeightShared = useSharedValue(60);
+
     const timeBlocks = schedule.getScheduleForDate(date).getTimeBlocks();
     const start = schedule.startTime.getHour();
     const HOURS = Array.from({ length: 24 - start }, (_, i) => i + start);
 
-    return ((isVisible == true) 
-        ? <ScrollView
-            style={styles.container}
-            contentContainerStyle={{ flexDirection: 'row' }}
-            showsVerticalScrollIndicator={false}
-        >
-            {/* Left column: clock labels */}
-            <View style={styles.timeColumn}>
-                {HOURS.map(hour => (
-                    <View key={hour} style={styles.row}>
-                        <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND }}>
-                            {hour.toString().padStart(2, '0')}:00
-                        </Text>
-                    </View>
-                ))}
-            </View>
-    
-            {/* Right column: horizontal grid lines + time blocks */}
-            <View style={styles.gridColumn}>
-                {HOURS.map(hour => (
-                    <View key={hour} style={styles.row}>
-                        <View style={{ ...styles.gridLine, backgroundColor: theme.FOREGROUND }} />
-                    </View>
-                ))}
-                {timeBlocks.map((block, index) => {
-                    const startHour = block.getStartTime().to12HourString();
-                    const endHour = block.getEndTime().to12HourString();
-                    const duration = block.getDuration();
-                    const OFFSET = (ROW_HEIGHT / 2) + (block.getStartTime().getHour() * 60 + block.getStartTime().getMinute() - (start * 60)) * ROW_HEIGHT / 60;
-                    const blockHeight = ((duration * ROW_HEIGHT / 60) < MIN_HEIGHT) ? MIN_HEIGHT : (duration * ROW_HEIGHT / 60);
-                    const fontSize = (blockHeight > 30) ? 16 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
+    const pinch = Gesture.Pinch()
+        .onUpdate((event) => {
+            const newHeight = Math.max(30, Math.min(200, rowHeightShared.value * event.scale));
+            rowHeightShared.value = newHeight;
+            runOnJS(setRowHeight)(newHeight);
+        });
 
-                    return (
-                        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index} onPress={() => onBlockSelect(block)}>
-                            <View style={{ 
-                                    width: 3, 
-                                    height: '80%', 
-                                    backgroundColor: ActivityTypeColors[block.activityType] || '#FF0000',
-                                    borderRadius: 3,
-                                    marginRight: 8
-                            }}/>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1, fontSize: fontSize }}>
-                                    {block.getName()}
-                                </Text>
-                                <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6, fontSize: fontSize, marginRight: 12 }}>
-                                    {startHour} - {endHour}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-        </ScrollView>
+    return ((isVisible == true) 
+        ? <GestureDetector gesture={pinch}>
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={{ flexDirection: 'row' }}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Left column: clock labels */}
+                <View style={styles.timeColumn}>
+                    {HOURS.map(hour => (
+                        <View key={hour} style={{ ...styles.row, height: rowHeight }}>
+                            <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND }}>
+                                {hour.toString().padStart(2, '0')}:00 { hour < 12 ? 'AM' : 'PM' }
+                            </Text>
+                        </View>
+                    ))}
+                </View>
+        
+                {/* Right column: horizontal grid lines + time blocks */}
+                <View style={styles.gridColumn}>
+                    {HOURS.map(hour => (
+                        <View key={hour} style={{ ...styles.row, height: rowHeight }}>
+                            <View style={{ ...styles.gridLine, backgroundColor: theme.FOREGROUND }} />
+                        </View>
+                    ))}
+                    {timeBlocks.map((block, index) => {
+                        const startHour = block.getStartTime().to12HourString();
+                        const endHour = block.getEndTime().to12HourString();
+                        const duration = block.getDuration();
+                        const OFFSET = (rowHeight / 2) + (block.getStartTime().getHour() * 60 + block.getStartTime().getMinute() - (start * 60)) * rowHeight / 60;
+                        const blockHeight = ((duration * rowHeight / 60) < MIN_HEIGHT) ? MIN_HEIGHT : (duration * rowHeight / 60);
+                        const fontSize = (blockHeight > 30) ? 16 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
+
+                        return (
+                            <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index} onPress={() => onBlockSelect(block)}>
+                                <View style={{ 
+                                        width: 3, 
+                                        height: '80%', 
+                                        backgroundColor: ActivityTypeColors[block.activityType] || '#FF0000',
+                                        borderRadius: 3,
+                                        marginRight: 8
+                                }}/>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 1, fontSize: fontSize }}>
+                                        {block.getName()}
+                                    </Text>
+                                    <Text style={{ ...styles.timeLabel, color: theme.FOREGROUND, opacity: 0.6, fontSize: fontSize, marginRight: 12 }}>
+                                        {startHour} - {endHour}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </ScrollView>
+        </GestureDetector>
         : null
     );
 }
@@ -96,7 +110,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACE,
     },
     timeColumn: {
-        width: 60,
+        width: 80,
         paddingRight: 2,
     },
     gridColumn: {
@@ -104,7 +118,6 @@ const styles = StyleSheet.create({
         paddingLeft: 2,
     },
     row: {
-        height: ROW_HEIGHT,
         justifyContent: 'center',
     },
     timeLabel: {
