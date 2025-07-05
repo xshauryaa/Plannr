@@ -22,6 +22,21 @@ const SchedulingErrorModal = ({ isVisible, action1, action2 }) => {
                     <Text style={{ ...styles.text, color: theme.FOREGROUND }}>
                         There is an error in generating your requested schedule. Would you like to abandon the schedule or recheck the inputs?
                     </Text>
+                    <Text style={{ ...styles.text, color: theme.FOREGROUND, marginBottom: 4 }}>
+                        Try the following:
+                    </Text>
+                    <Text style={{ ...styles.text, color: theme.FOREGROUND, marginBottom: 4 }}>
+                        - Change daily start and end times
+                    </Text>
+                    <Text style={{ ...styles.text, color: theme.FOREGROUND, marginBottom: 4 }}>
+                        - Adjust breaks
+                    </Text>
+                    <Text style={{ ...styles.text, color: theme.FOREGROUND, marginBottom: 4 }}>
+                        - Ensure no rigid events overlap
+                    </Text>
+                    <Text style={{ ...styles.text, color: theme.FOREGROUND, marginBottom: 20 }}>
+                        - Ensure all flexible events have valid time slots
+                    </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-end' }}>
                     <TouchableOpacity 
