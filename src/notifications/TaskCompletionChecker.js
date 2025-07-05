@@ -23,7 +23,7 @@ const TaskCompletionChecker = () => {
     }, []);
 
     useEffect(() => {
-        if (!appState.activeSchedule.schedule) return;
+        if (!appState.activeSchedule) return;
 
         const todaysDate = convertDateToScheduleDate(currentTime).getId();
         if (appState.activeSchedule.schedule.getScheduleForDate(todaysDate) == null) return;

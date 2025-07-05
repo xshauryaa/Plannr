@@ -31,7 +31,7 @@ const SavedSchedulesScreen = ({ navigation }) => {
                         };
                             return (
                                 <TouchableOpacity
-                                    onPress={() => { navigation.navigate("View", { schedule: item }) }}
+                                    onPress={() => { navigation.navigate("View", { schedName: item.name }); }}
                                 >
                                     <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                                         {/* Background Image */}

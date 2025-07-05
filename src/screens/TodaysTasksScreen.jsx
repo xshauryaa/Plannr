@@ -23,7 +23,7 @@ const TodaysTasksScreen = () => {
     let tasks = []
 
     // Check if the user has an active schedule
-    if (appState.activeSchedule.schedule !== null) {
+    if (appState.activeSchedule !== null) {
         const todaysSchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
         if (todaysSchedule !== undefined) {
             tasks = todaysSchedule.getTimeBlocks();

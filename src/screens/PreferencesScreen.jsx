@@ -172,7 +172,7 @@ const PreferencesScreen = () => {
                             thumbColor={'#FFFFFF'}
                             ios_backgroundColor={'#C0C0C0'}
                             onValueChange={() => { 
-                                const currPref = appState.userPreferences.taskRemindersEnabled
+                                const currPref = appState.userPreferences.taskRemindersEnabled;
                                 setAppState({ ...appState, userPreferences: {...appState.userPreferences, taskRemindersEnabled: !currPref }}) }}
                             value={appState.userPreferences.taskRemindersEnabled}
                         />

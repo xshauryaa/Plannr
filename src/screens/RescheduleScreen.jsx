@@ -36,19 +36,19 @@ const RescheduleScreen = ({ route, navigation }) => {
     const [showReschedulingModal, setShowReschedulingModal] = useState(false);
 
     const ReplaceWithRescheduled = (newSchedule) => {
-        if (schedule.active) {
+        if (schedule.isActive) {
             setAppState(prevState => ({
                 ...prevState,
                 activeSchedule: { name: schedule.name, schedule: newSchedule, active: true },
                 savedSchedules: prevState.savedSchedules.map(s => 
-                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, active: true } : s
+                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: true } : s
                 )
             }));
         } else {
             setAppState(prevState => ({
                 ...prevState,
                 savedSchedules: prevState.savedSchedules.map(s => 
-                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, active: false } : s
+                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: false } : s
                 )
             }));
         }
@@ -147,7 +147,7 @@ const RescheduleScreen = ({ route, navigation }) => {
                 onViewSchedule={() => { 
                     setShowReschedulingModal(false) 
                     const toView = appState.savedSchedules.find(s => s.name === schedule.name);
-                    navigation.navigate('View', { schedule: toView });
+                    navigation.navigate('View', { schedName: toView.name });
                 }}
                 reschedule={true}
             />

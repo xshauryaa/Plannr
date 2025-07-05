@@ -2,9 +2,11 @@ import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity  } from 'react-native'
 import Modal from 'react-native-modal';
 import { useAppState } from '../context/AppStateContext'
+import { useNavigation } from '@react-navigation/native';
 
 const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
     const { appState, setAppState } = useAppState();
+    const navigation = useNavigation();
     
     return (
         <Modal 
@@ -23,15 +25,13 @@ const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
                 <View style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-end' }}>
                     <TouchableOpacity 
                         onPress={() => {
-                            let i = 0
-                            for (i = 0; i < appState.savedSchedules.length; i++) {
-                                if (appState.savedSchedules[i].name === toDelete) {
-                                    break
-                                }
-                            }
-                            const updatedSchedules = appState.savedSchedules.filter((_, index) => index !== i)
-                            setAppState({ ...appState, savedSchedules: updatedSchedules })
+                            navigation.navigate('MainTabs');
                             onClose()
+                            const updatedSchedules = appState.savedSchedules.filter((sched) => sched.name !== toDelete)
+                            if (appState.activeSchedule && appState.activeSchedule.name === toDelete) {
+                                setAppState({ ...appState, activeSchedule: null })
+                            }
+                            setAppState({ ...appState, savedSchedules: updatedSchedules })
                         }} 
                         style={{ backgroundColor: '#F00', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 24 }}
                     >

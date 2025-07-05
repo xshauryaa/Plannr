@@ -27,7 +27,7 @@ const UpcomingTasks = ({ onClick }) => {
 
     const loadTodaysTasks = () => {
         // Check if the user has an active schedule
-        if (appState.activeSchedule.schedule !== null) {
+        if (appState.activeSchedule !== null) {
             const todaysSchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
             if (todaysSchedule !== undefined) {
                 todaysTasks = todaysSchedule.getTimeBlocks();

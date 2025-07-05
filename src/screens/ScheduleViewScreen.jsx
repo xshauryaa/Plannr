@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import Indicator from '../../assets/system-icons/Indicator.svg';
 import ScheduleCalendarView from '../components/ScheduleCalendarView.jsx';
 import EventInfoModal from '../modals/EventInfoModal.jsx';
+import DeleteIcon from '../../assets/system-icons/DeleteIcon.svg';
+import DeleteScheduleModal from '../modals/DeleteScheduleModal.jsx';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -15,12 +17,23 @@ const PADDING_HORIZONTAL = ICON_DIM * 5/6;
 const OFFSET = PADDING_HORIZONTAL - ((INDICATOR_DIM - ICON_DIM) / 2);
 
 const ScheduleViewScreen = ({ route }) => {
-    const { appState } = useAppState();
+    const { appState, setAppState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-    const { schedule } = route.params;
+    const { schedName } = route.params;
+    const schedule = appState.savedSchedules.find(sched => sched.name === schedName);
+
+    if (!schedule) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ font: 'AlbertSans', size: 20}}>Schedule not found.</Text>
+            </View>
+        );
+    }
+
     const [selectedDate, setSelectedDate] = useState(schedule.schedule.getFirstDate().getId());
     const [selectedTB, setSelectedTB] = useState(schedule.schedule.getScheduleForDate(schedule.schedule.getFirstDate().getId()).getTimeBlocks()[0]);
-    const [showModal, setShowModal] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const indicatorX = useRef(new Animated.Value(0)).current;
 
@@ -35,16 +48,54 @@ const ScheduleViewScreen = ({ route }) => {
 
     const onSelectTB = (tb) => {
         setSelectedTB(tb);
-        setShowModal(true);
+        setShowInfoModal(true);
     }
 
     const onCloseModal = () => {
-        setShowModal(false);
+        setShowInfoModal(false);
     }
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>{schedule.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.SPACING_16, justifyContent: 'space-between', paddingBottom: SPACE }}>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND, alignSelf: 'center' }}>{schedule.name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'flex-start' }}>
+                    <Switch
+                        trackColor={{ false: '#000000', true: '#4166FB' }}
+                        thumbColor={'#FFFFFF'}
+                        ios_backgroundColor={'#C0C0C0'}
+                        onValueChange={() => { 
+                            (schedule.isActive)
+                            ? setAppState({ ...appState, activeSchedule: null, savedSchedules: appState.savedSchedules.map(sched => {
+                                if (sched.name === schedule.name) {
+                                    return { ...sched, isActive: false };
+                                }
+                                return sched;
+                            }) })
+                            : setAppState({ ...appState, activeSchedule: { name: schedule.name, schedule: schedule.schedule, isActive: true }, savedSchedules: appState.savedSchedules.map(sched => {
+                                if (sched.name === schedule.name) {
+                                    return { ...sched, isActive: true };
+                                }
+                                return {
+                                    name: sched.name,
+                                    schedule: sched.schedule,
+                                    isActive: false
+                                };
+                            }) });
+                        }}
+                        value={schedule.isActive}
+                    />
+                    <TouchableOpacity 
+                        style={{ width: 32, height: 32, marginRight: 8, opacity: (schedule.isActive) ? 0.2 : 1 }} 
+                        disabled={schedule.isActive}
+                        onPress={() => {
+                            setShowDeleteModal(true);
+                        }}
+                    >
+                        <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
+                </View>
+            </View>
             <View style={styles.subContainer}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's what your calendar looks like</Text>
                 {/* Date Selection Carousel */}
@@ -84,7 +135,12 @@ const ScheduleViewScreen = ({ route }) => {
                     })}
                 </View>
             </View>
-            <EventInfoModal isVisible={showModal} tb={selectedTB} onClose={onCloseModal} />
+            <EventInfoModal isVisible={showInfoModal} tb={selectedTB} onClose={onCloseModal} />
+            <DeleteScheduleModal 
+                isVisible={showDeleteModal} 
+                onClose={() => setShowDeleteModal(false)} 
+                toDelete={schedule.name}
+            />
         </View>
     );
 }
@@ -99,9 +155,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontFamily: 'PinkSunset',
-        marginTop: spacing.SPACING_16,
-        marginBottom: SPACE,
+        fontFamily: 'PinkSunset'
     },
     subHeading: {
         fontSize: 18,

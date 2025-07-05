@@ -20,7 +20,7 @@ const Progress = () => {
     useEffect(() => {
         let totalTasks = 0;
         let completedTasks = 0;
-        if (appState.activeSchedule.schedule) {
+        if (appState.activeSchedule) {
             const datesList = appState.activeSchedule.schedule.getAllDatesInOrder();
             
             for (const date of datesList) {

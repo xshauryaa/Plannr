@@ -23,7 +23,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
 
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
                 {
-                (!appState.activeSchedule.schedule)
+                (!appState.activeSchedule)
                     ? <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>You currently have no active schedule.</Text>
                     </View>

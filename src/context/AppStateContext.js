@@ -118,16 +118,15 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            { name: 'Schedule 1', schedule: scheduleForTesting, active: true },
-            { name: 'Schedule 2', schedule: scheduleForTesting, active: false },
-            { name: 'Schedule 3', schedule: scheduleForTesting, active: false },
-            { name: 'Schedule 4', schedule: scheduleForTesting, active: false },
+            { name: 'Schedule 1', schedule: scheduleForTesting, isActive: true },
+            { name: 'Schedule 2', schedule: scheduleForTesting, isActive: false },
+            { name: 'Schedule 3', schedule: scheduleForTesting, isActive: false },
+            { name: 'Schedule 4', schedule: scheduleForTesting, isActive: false },
         ],
-        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting, active: true},
+        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting, isActive: true},
         onboarded: false
     });
     const [storageLoaded, setStorageLoaded] = useState(true);
-
 
     useEffect(() => {
         const loadAppState = async () => {
@@ -152,7 +151,7 @@ export const AppStateProvider = ({ children }) => {
         }
     }, [appState]);
 
-    useScheduleNotificationSync(appState.activeSchedule.schedule, appState.userPreferences);    
+    // useScheduleNotificationSync(appState.activeSchedule?.schedule, appState.userPreferences);    
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>
@@ -169,15 +168,16 @@ const serializeAppState = (appState) => {
         userPreferences: appState.userPreferences,
         savedSchedules: appState.savedSchedules.map(schedule => ({
             name: schedule.name,
-            schedule: serializeSchedule(schedule.schedule)
+            schedule: serializeSchedule(schedule.schedule),
+            isActive: schedule.isActive
         })),
-        activeSchedule: { name: appState.activeSchedule.name, schedule: serializeSchedule(appState.activeSchedule.schedule), active: appState.activeSchedule.active },
+        activeSchedule: appState.activeSchedule ? { name: appState.activeSchedule.name, schedule: serializeSchedule(appState.activeSchedule.schedule), isActive: appState.activeSchedule.active } : null,
         onboarded: appState.onboarded
     };
 }
 
 const parseAppState = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.activeSchedule.schedule == null || rawObj.onboarded == null) {
+    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.onboarded == null) {
         return null;
     }
 
@@ -186,9 +186,10 @@ const parseAppState = (rawObj) => {
         userPreferences: rawObj.userPreferences,
         savedSchedules: rawObj.savedSchedules.map(sched => ({
             name: sched.name,
-            schedule: parseSchedule(sched.schedule)
+            schedule: parseSchedule(sched.schedule),
+            isActive: sched.isActive
         })),
-        activeSchedule: {name: rawObj.activeSchedule.name, schedule: parseSchedule(rawObj.activeSchedule.schedule), active: rawObj.activeSchedule.active},
+        activeSchedule: rawObj.activeSchedule ? {name: rawObj.activeSchedule.name, schedule: parseSchedule(rawObj.activeSchedule.schedule), isActive: rawObj.activeSchedule.active} : null,
         onboarded: rawObj.onboarded
     };
 }

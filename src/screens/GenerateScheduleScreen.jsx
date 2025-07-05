@@ -87,7 +87,7 @@ const GenerateScheduleScreen = () => {
         try {
             const schedule = scheduler.createSchedules(strategy, startTime, endTime);
             setShowGenerationModal(true);
-            setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule }]});
+            setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule, active: false }]});
         } catch {
             setShowErrorModal(true);
             console.error("Error in schedule generation. Please check your inputs.");
