@@ -136,7 +136,7 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
                         setShowWarning(true);
                     } else {
                         setShowWarning(false);
-                        onNext(startT, endT, strategy);
+                        onNext(startT.toInt(), endT.toInt(), strategy);
                     }
                 }}
             >

@@ -15,7 +15,7 @@ import EventDependencies from '../model/EventDependencies.js'
 import GenerationModal from '../modals/GenerationModal.jsx'
 import SchedulingErrorModal from '../modals/SchedulingErrorModal.jsx'
 
-const GenerateScheduleScreen = () => {
+const GenerateScheduleScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -86,6 +86,7 @@ const GenerateScheduleScreen = () => {
                     : null
         try {
             const schedule = scheduler.createSchedules(strategy, startTime, endTime);
+            console.log(schedule);
             setShowGenerationModal(true);
             setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule, active: false }]});
         } catch {
@@ -110,12 +111,12 @@ const GenerateScheduleScreen = () => {
             {views[genStage]}
             <SchedulingErrorModal 
                 isVisible={showErrorModal} 
-                action1={() => { setShowErrorModal(false) }} 
+                action1={() => { navigation.navigate("MainTabs"); setShowErrorModal(false); }} 
                 action2={() => { setShowErrorModal(false); setGenStage(1) }}
             />
             <GenerationModal 
                 isVisible={showGenerationModal} 
-                onViewSchedule={() => { setShowGenerationModal(false) }} 
+                onViewSchedule={() => { navigation.navigate("View", { schedName: name }); setShowGenerationModal(false); }} 
             />
         </View>
     )

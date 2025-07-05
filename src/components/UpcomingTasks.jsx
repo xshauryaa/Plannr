@@ -53,7 +53,7 @@ const UpcomingTasks = ({ onClick }) => {
           }, 1000);
       
         return () => clearInterval(timer);
-        }, [todaysTasks])
+        }, [todaysTasks, appState])
 
     const NoUpcomingTasksView = () => {
         const imageMap = {

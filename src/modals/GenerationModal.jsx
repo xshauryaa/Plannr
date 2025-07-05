@@ -41,8 +41,8 @@ const GenerationModal = ({ isVisible, onViewSchedule, reschedule=false }) => {
                 <Text style={{ ...styles.title, color: theme.FOREGROUND }}>{title}</Text>
                 <LottieView
                     source={animMap[appState.userPreferences.theme]}
-                    autoPlay
                     loop={false}
+                    autoPlay={true}
                     speed={2} 
                     onAnimationFinish={() => onAnimFinish()}
                     style={{ width: 300, height: 250 }}

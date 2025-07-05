@@ -31,7 +31,7 @@ const ScheduleViewScreen = ({ route }) => {
     }
 
     const [selectedDate, setSelectedDate] = useState(schedule.schedule.getFirstDate().getId());
-    const [selectedTB, setSelectedTB] = useState(schedule.schedule.getScheduleForDate(schedule.schedule.getFirstDate().getId()).getTimeBlocks()[0]);
+    const [selectedTB, setSelectedTB] = useState(null);
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 

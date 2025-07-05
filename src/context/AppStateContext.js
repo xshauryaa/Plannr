@@ -16,15 +16,14 @@ export const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
 
-    let scheduleForTesting = null
-    function testScheduler() {
-        const date1 = new ScheduleDate(27, 6, 2025);
-        const date2 = new ScheduleDate(28, 6, 2025);
-        const date3 = new ScheduleDate(29, 6, 2025);
-        const date4 = new ScheduleDate(30, 6, 2025);
-        const date5 = new ScheduleDate(1, 7, 2025);
-        const date6 = new ScheduleDate(2, 7, 2025);
-        const date7 = new ScheduleDate(3, 7, 2025);
+    function testScheduler(firstDate) {
+        const date1 = firstDate;
+        const date2 = date1.getNextDate();
+        const date3 = date2.getNextDate();
+        const date4 = date3.getNextDate();
+        const date5 = date4.getNextDate();
+        const date6 = date5.getNextDate();
+        const date7 = date6.getNextDate();
         const scheduler = new Scheduler(7, date1, 'Saturday', 30, 6);
         
         // --- Rigid Events ---
@@ -105,7 +104,10 @@ export const AppStateProvider = ({ children }) => {
         return scheduler.createSchedules("Earliest Fit", 800, 1700);
     }
 
-    scheduleForTesting = testScheduler();
+    let scheduleForTesting1 = testScheduler(new ScheduleDate(27, 6, 2025));
+    let scheduleForTesting2 = testScheduler(new ScheduleDate(4, 7, 2025));
+    let scheduleForTesting3 = testScheduler(new ScheduleDate(11, 7, 2025));
+    let scheduleForTesting4 = testScheduler(new ScheduleDate(18, 7, 2025));
     
     const [appState, setAppState] = useState({
         name: 'Shaurya',
@@ -118,12 +120,12 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            { name: 'Schedule 1', schedule: scheduleForTesting, isActive: true },
-            { name: 'Schedule 2', schedule: scheduleForTesting, isActive: false },
-            { name: 'Schedule 3', schedule: scheduleForTesting, isActive: false },
-            { name: 'Schedule 4', schedule: scheduleForTesting, isActive: false },
+            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
+            { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
+            { name: 'Schedule 3', schedule: scheduleForTesting3, isActive: false },
+            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
         ],
-        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting, isActive: true},
+        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},
         onboarded: false
     });
     const [storageLoaded, setStorageLoaded] = useState(true);

@@ -20,7 +20,6 @@ const ActivityTypeColors = {
   [ActivityType.BREAK]:        '#95A5A6',  // Light Gray
 };
 
-const ROW_HEIGHT = 60;
 const MIN_HEIGHT = 15;
 
 const { width, height } = Dimensions.get('window');

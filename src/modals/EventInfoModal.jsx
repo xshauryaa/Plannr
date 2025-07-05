@@ -29,6 +29,8 @@ const EventInfoModal = ({ isVisible, tb, onClose }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    if (!tb) return;
+
     const ICON = ActivityTypeIcons[tb.activityType] || Other;
 
     return (
