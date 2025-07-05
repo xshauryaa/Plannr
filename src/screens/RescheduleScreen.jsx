@@ -67,9 +67,9 @@ const RescheduleScreen = ({ route, navigation }) => {
         }
     }
 
-    const BreaksSetup = (breakList, repeated) => {
+    const BreaksSetup = (breakList, repeatedBreakList) => {
         setBreaks(breakList);
-        setRepeatedBreaks(repeated);
+        setRepeatedBreaks(repeatedBreakList);
         setReschedStage(2);
     }
 
@@ -107,7 +107,9 @@ const RescheduleScreen = ({ route, navigation }) => {
         setShowReschedulingModal(true);
     }
 
-    const CompleteStrategySwitch = (strategy) => {
+    const CompleteStrategySwitch = (startT, endT, strategy) => {
+        schedule.schedule.setStartTime(startT);
+        schedule.schedule.setEndTime(endT);
         rescheduled = rescheduler.strategySwitch(schedule.schedule, strategy);
         ReplaceWithRescheduled(rescheduled);
         setShowReschedulingModal(true);
@@ -119,23 +121,23 @@ const RescheduleScreen = ({ route, navigation }) => {
     } else if (method === 1) {
         switch(reschedStage) {
             case 1:
-                currentView = <BreaksView onNext={() => BreaksSetup()} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(0)} breaksInput={breaks} repeatedBreaksInput={repeatedBreaks}/>;
+                currentView = <BreaksView onNext={BreaksSetup} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(0)} breaksInput={breaks} repeatedBreaksInput={repeatedBreaks}/>;
                 break;
             case 2:
-                currentView = <RigidEventsView onNext={() => RigidSetup()} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(1)} eventsInput={rigidEvents}/>;
+                currentView = <RigidEventsView onNext={RigidSetup} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(1)} eventsInput={rigidEvents}/>;
                 break;
             case 3:
-                currentView = <FlexibleEventsView onNext={() => FlexSetup()} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(2)} eventsInput={flexibleEvents}/>;
+                currentView = <FlexibleEventsView onNext={FlexSetup} minDate={schedule.schedule.getFirstDate()} numDays={schedule.schedule.numDays} onBack={() => setReschedStage(2)} eventsInput={flexibleEvents}/>;
                 break;
             case 4:
-                currentView = <EventDependenciesView onNext={() => DepsSetup()} events={events} depsInput={deps}/>;
+                currentView = <EventDependenciesView onNext={DepsSetup} events={events} depsInput={deps}/>;
                 break;
             case 5:
-                currentView = <FinalCheckView onNext={() => CompleteAddBlocks()} buttonText="Reschedule"/>;
+                currentView = <FinalCheckView onNext={CompleteAddBlocks} includeTimes={true} buttonText="Reschedule"/>;
                 break;
         }
     } else if (method === 2) {
-        currentView = <FinalCheckView includeTimes={false} buttonText="Reschedule" onNext={() => CompleteStrategySwitch()}/>;
+        currentView = <FinalCheckView buttonText="Reschedule" includeTimes={true} onNext={CompleteStrategySwitch}/>;
     }
 
     return (

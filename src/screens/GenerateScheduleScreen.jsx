@@ -87,6 +87,24 @@ const GenerateScheduleScreen = ({ navigation }) => {
         try {
             const schedule = scheduler.createSchedules(strategy, startTime, endTime);
             console.log(schedule);
+            
+            // Validation: Check if the generated schedule has the expected number of time blocks
+            const expectedTimeBlocks = breaks.length + (repeatedBreaks.length * scheduler.numDays) + rigidEvents.length + flexibleEvents.length;
+            let actualTimeBlocks = 0;
+            
+            // Count time blocks across all days in the schedule
+            const datesList = schedule.getAllDatesInOrder();
+            for (const date of datesList) {
+                const dailySchedule = schedule.getScheduleForDate(date);
+                actualTimeBlocks += dailySchedule.getTimeBlocks().length;
+            }
+            
+            console.log(`Expected time blocks: ${expectedTimeBlocks}, Actual time blocks: ${actualTimeBlocks}`);
+            
+            if (actualTimeBlocks !== expectedTimeBlocks) {
+                throw new Error(`Schedule validation failed: Expected ${expectedTimeBlocks} time blocks but got ${actualTimeBlocks}`);
+            }
+            
             setShowGenerationModal(true);
             setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule, active: false }]});
         } catch {

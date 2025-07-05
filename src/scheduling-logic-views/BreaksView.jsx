@@ -92,20 +92,12 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
                     />
                 </View>
             </View>
-            <View style={styles.horizontalGrid}>
-                <TouchableOpacity 
-                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
-                    onPress={() => onBack()}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={{ ...styles.button, marginVertical: 0, width: '48%' }}
-                    onPress={() => onNext(breaks, repBreaks)}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+                style={{ ...styles.button, marginVertical: 0 }}
+                onPress={() => onNext(breaks, repBreaks)}
+            >
+                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+            </TouchableOpacity>
             <AddBreaksModal
                 isVisible={showModal}
                 onClick={addBreak}
