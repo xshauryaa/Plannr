@@ -32,7 +32,9 @@ const TodaysTasksScreen = () => {
         }
     }
 
-    loadTodaysTask();
+    useEffect(() => {
+        loadTodaysTask();
+    }, [appState.activeSchedule]);
 
     const [taskData, setTaskData] = useState(tasks)
     const [allCompleted, setAllComplete] = useState(false)
