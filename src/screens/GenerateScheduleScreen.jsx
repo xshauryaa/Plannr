@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 
+import ScheduleDate from '../model/ScheduleDate.js';
 import InfoView from '../scheduling-logic-views/InfoView.jsx'
 import BreaksView from '../scheduling-logic-views/BreaksView.jsx'
 import RigidEventsView from '../scheduling-logic-views/RigidEventsView.jsx'
@@ -20,7 +21,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [genStage, setGenStage] = useState(0);
-    const [scheduler, setScheduler] = useState(new Scheduler(new Date(), 'Sunday', 15, 8));
+    const [scheduler, setScheduler] = useState(new Scheduler(new ScheduleDate(1, 1, 1970), 'Sunday', 15, 8));
     const [name, setName] = useState('');
     const [breaks, setBreaks] = useState([]);
     const [repeatedBreaks, setRepeatedBreaks] = useState([]);
@@ -42,10 +43,20 @@ const GenerateScheduleScreen = ({ navigation }) => {
         const maxHours = parseInt(workingLimit)
 
         setName(name);
-        setScheduler(new Scheduler(numDays, startDate, dayString, minGap, maxHours))
-        setGenStage(1)
+        setScheduler(new Scheduler(numDaysInt, startDate, dayString, minGap, maxHours));
+        setGenStage(1);
 
-        setFirstDate(date)
+        setFirstDate(date);
+        
+        console.log('SchedulerInitialization completed:', {
+            name,
+            numDays: numDaysInt,
+            startDate,
+            dayString,
+            minGap,
+            maxHours,
+            firstDate: date
+        });
     }
 
     const BreaksSetup = (breakList, repeatedBreakList) => {
@@ -54,6 +65,14 @@ const GenerateScheduleScreen = ({ navigation }) => {
         scheduler.setBreaks(breakList)
         scheduler.setRepeatedBreaks(repeatedBreakList)
         setGenStage(2)
+        
+        console.log('BreaksSetup completed:', {
+            breaks: breakList,
+            repeatedBreaks: repeatedBreakList,
+            breaksCount: breakList.length,
+            repeatedBreaksCount: repeatedBreakList.length,
+            totalExpectedBreaksInSchedule: breakList.length + (repeatedBreakList.length * scheduler.numDays)
+        });
     }
 
     const RigidEventsSetup = (eventsList) => {
@@ -61,6 +80,13 @@ const GenerateScheduleScreen = ({ navigation }) => {
         scheduler.setRigidEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(3);
+        
+        console.log('RigidEventsSetup completed:', {
+            rigidEvents: eventsList,
+            rigidEventsCount: eventsList.length,
+            totalEventsAfterRigid: [...events, ...eventsList].length,
+            allEvents: [...events, ...eventsList]
+        });
     }
 
     const FlexibleEventsSetup = (eventsList) => {
@@ -68,12 +94,28 @@ const GenerateScheduleScreen = ({ navigation }) => {
         scheduler.setFlexibleEvents(eventsList);
         setEvents([...events, ...eventsList]);
         setGenStage(4);
+        
+        console.log('FlexibleEventsSetup completed:', {
+            flexibleEvents: eventsList,
+            flexibleEventsCount: eventsList.length,
+            currentEvents: events,
+            currentEventsCount: events.length,
+            totalEventsAfterFlexible: [...events, ...eventsList].length,
+            allEventsAfterFlexible: [...events, ...eventsList]
+        });
     }
 
     const EventDepsSetup = (eventDeps) => {
         setDeps(eventDeps)
         scheduler.setEventDependencies(eventDeps)
         setGenStage(5)
+        
+        console.log('EventDepsSetup completed:', {
+            eventDependencies: eventDeps,
+            dependenciesCount: eventDeps ? Object.keys(eventDeps.dependencies || {}).length : 0,
+            allEventsSoFar: events,
+            totalEventsCount: events.length
+        });
     }
 
     const Generation = (startTime, endTime, strategy) => {
@@ -84,6 +126,21 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 : (strategy == 'deadline-oriented')
                     ? strategy = "Deadline Oriented"
                     : null
+                    
+        console.log('Generation starting with:', {
+            startTime,
+            endTime,
+            strategy,
+            schedulerNumDays: scheduler.numDays,
+            breaks: breaks,
+            repeatedBreaks: repeatedBreaks,
+            rigidEvents: rigidEvents,
+            flexibleEvents: flexibleEvents,
+            deps: deps,
+            totalBreaksExpected: breaks.length + (repeatedBreaks.length * scheduler.numDays),
+            totalEventsExpected: rigidEvents.length + flexibleEvents.length
+        });
+        
         try {
             const schedule = scheduler.createSchedules(strategy, startTime, endTime);
             console.log(schedule);
@@ -107,9 +164,9 @@ const GenerateScheduleScreen = ({ navigation }) => {
             
             setShowGenerationModal(true);
             setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, { name: name, schedule: schedule, active: false }]});
-        } catch {
+        } catch (error) {
             setShowErrorModal(true);
-            console.error("Error in schedule generation. Please check your inputs.");
+            console.error(error);
             return;
         }
     }

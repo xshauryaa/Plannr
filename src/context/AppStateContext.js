@@ -106,7 +106,7 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting1 = testScheduler(new ScheduleDate(27, 6, 2025));
     let scheduleForTesting2 = testScheduler(new ScheduleDate(4, 7, 2025));
-    let scheduleForTesting3 = testScheduler(new ScheduleDate(11, 7, 2025));
+    let scheduleForTesting3 = testScheduler(new ScheduleDate(17, 7, 2025));
     let scheduleForTesting4 = testScheduler(new ScheduleDate(18, 7, 2025));
     
     const [appState, setAppState] = useState({
@@ -122,7 +122,7 @@ export const AppStateProvider = ({ children }) => {
         savedSchedules: [
             { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
             { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
-            { name: 'Schedule 3', schedule: scheduleForTesting3, isActive: false },
+            { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
             { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
         ],
         activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},

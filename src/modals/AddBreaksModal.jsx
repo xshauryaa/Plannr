@@ -4,6 +4,8 @@ import Modal from 'react-native-modal'
 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion.js'
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
+import Time24 from '../model/Time24.js';
 
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -17,7 +19,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
 
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
-    const [dateOfBreak, setDateOfBreak] = useState(new Date())
+    const [dateOfBreak, setDateOfBreak] = useState(minDate);
     const [repeated, setRepeated] = useState(false)
     const [showStartPicker, setShowStartPicker] = useState(false)
     const [showEndPicker, setShowEndPicker] = useState(false)
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
         padding: 24,
     },
     subHeading: {
-        fontSize: 20,
+        fontSize: 16,
         fontFamily: 'AlbertSans',
         marginBottom: 8
     },

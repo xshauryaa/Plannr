@@ -17,7 +17,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [type, setType] = useState(ActivityType.PERSONAL)
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
-    const [dateOfEvent, setDateOfEvent] = useState(new Date())
+    const [dateOfEvent, setDateOfEvent] = useState(minDate)
     const [showStartPicker, setShowStartPicker] = useState(false)
     const [showEndPicker, setShowEndPicker] = useState(false)
     const [showDatePicker, setShowDatePicker] = useState(false)
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
         padding: 24,
     },
     subHeading: {
-        fontSize: 20,
+        fontSize: 16,
         fontFamily: 'AlbertSans',
         marginBottom: 8
     },
