@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacit
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const InfoView = ({ onNext }) => {
     const { appState } = useAppState();
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
         gap: 12
     },
     warning: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginTop: 8,
         color: '#FF0000',

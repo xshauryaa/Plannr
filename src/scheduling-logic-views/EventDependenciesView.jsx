@@ -7,7 +7,7 @@ import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
 import { useAppState } from '../context/AppStateContext';
 import { lightColor, darkColor } from '../design/colors';
-
+import { typography } from '../design/typography.js';
 
 const EventDependenciesView = ({ onNext, events, depsInput }) => {
     const { appState } = useAppState();
@@ -40,8 +40,8 @@ const EventDependenciesView = ({ onNext, events, depsInput }) => {
 
         return (
             <View style={{  ...styles.depCard, backgroundColor: theme.INPUT }}>
-                <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{dependentEvent.name}  </Text>
-                <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{listOfDeps}</Text>
+                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{dependentEvent.name}  </Text>
+                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{listOfDeps}</Text>
                 <TouchableOpacity onPress={() => { 
                     const deps = eventDependencies.getDependenciesForEvent(dependentEvent);
                     for (const dep of deps) {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },

@@ -4,6 +4,7 @@ import { useAppState } from '../context/AppStateContext';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertTimeToTime24 from '../utils/timeConversion';
 import { lightColor, darkColor } from '../design/colors';
+import { typography } from '../design/typography.js'
 
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
@@ -104,7 +105,7 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('earliest-fit') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -113,7 +114,7 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('balanced-work') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -122,7 +123,7 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
                             style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => { setStrategy('deadline-oriented') }}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -145,7 +146,7 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
                         {buttonText}
                     </Text> 
                     : <View style={{ flexDirection: 'row', gap: 12 }}>
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Reschedule</Text>
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: typography.subHeadingSize }}>Reschedule</Text>
                         <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
                     </View>}
             </TouchableOpacity>
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     warning: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginBottom: 4,
         color: '#FF0000',

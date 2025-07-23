@@ -4,8 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GoIcon from '../../assets/system-icons/GoIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
-
 import { spacing, padding } from '../design/spacing.js'
+import { typography } from '../design/typography.js';
 import { Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -28,15 +28,18 @@ const Progress = () => {
                 totalTasks += schedule.timeBlocks.length;
                 completedTasks += schedule.timeBlocks.filter(tb => tb.completed).length;
             }
+        } else {
+            setProgress(null);
+            return;
         }
         const newProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
         setProgress(newProgress);
-    }, [appState]);
+    }, [appState.activeSchedule]);
 
     const NoScheduleView = () => {
         return (
             <View style={{ ...styles.card, justifyContent: 'center', backgroundColor: theme.COMP_COLOR }}>
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>No schedule to track progress.</Text>
+                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>No schedule to track progress.</Text>
             </View>
         )
     }
@@ -79,7 +82,8 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 24,
-        padding: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         marginBottom: SPACE
     },
     topText: {

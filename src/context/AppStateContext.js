@@ -110,7 +110,7 @@ export const AppStateProvider = ({ children }) => {
     let scheduleForTesting4 = testScheduler(new ScheduleDate(18, 7, 2025));
     
     const [appState, setAppState] = useState({
-        name: 'Shaurya',
+        name: 'Vardaan',
         userPreferences: {
             theme: 'light',
             defaultStrategy: 'earliest-fit',
@@ -120,12 +120,12 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
-            { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
-            { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
-            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
+            // { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
+            // { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
+            // { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
+            // { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
         ],
-        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},
+        activeSchedule: null, // {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true}
         onboarded: false
     });
     const [storageLoaded, setStorageLoaded] = useState(true);
@@ -153,7 +153,7 @@ export const AppStateProvider = ({ children }) => {
         }
     }, [appState]);
 
-    // useScheduleNotificationSync(appState.activeSchedule?.schedule, appState.userPreferences);    
+    useScheduleNotificationSync(appState.activeSchedule?.schedule, appState.userPreferences);    
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>

@@ -4,6 +4,7 @@ import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 import Break from '../model/Break'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
@@ -40,7 +41,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
         return (
             <View style={{ ...styles.breakCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
@@ -53,7 +54,7 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
         return (
             <View style={{ ...styles.breakCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>Break  |  Everyday |  {breakObj.startTime.to12HourString()} - {breakObj.endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>Break  |  Everyday |  {breakObj.startTime.to12HourString()} - {breakObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRepBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     subHeading: {
-        fontSize: 20,
+        fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },

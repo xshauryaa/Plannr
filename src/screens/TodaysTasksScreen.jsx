@@ -7,8 +7,8 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
 import Other from '../../assets/type-icons/Other.svg'
 import { lightColor, darkColor } from '../design/colors.js';
-
 import { spacing, padding } from '../design/spacing.js'
+import { typography } from '../design/typography.js'
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
@@ -200,13 +200,13 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginBottom: SPACE
     },
@@ -221,12 +221,12 @@ const styles = StyleSheet.create({
         marginBottom: 32
     },
     taskName: {
-        fontSize: 16,
+        fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginBottom: 8,
     },
     time: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         opacity: 0.5
     },

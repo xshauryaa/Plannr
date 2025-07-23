@@ -3,6 +3,7 @@ import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, Scroll
 import { spacing } from '../design/spacing.js';
 import { useAppState } from '../context/AppStateContext.js';
 import { useNavigation } from '@react-navigation/native';
+import { typography } from '../design/typography.js';
 import RightArrowIcon from '../../assets/system-icons/RightArrowIcon.svg';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -110,8 +111,8 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
             }}
             >
                 <View style={{ height: 8, width: 40, backgroundColor: theme.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
-                <Text style={{ fontSize: 20, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE, alignSelf: 'center' }}>Pick a schedule to reschedule</Text>
-            </View>
+                    <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE, alignSelf: 'center' }}>Pick a schedule to reschedule</Text>
+                </View>
             <ScrollView style={{ borderRadius: 12 }}>
                 {appState.savedSchedules.map(schedule => (
                     <TouchableOpacity
@@ -122,7 +123,7 @@ const RescheduleBottomSheet = forwardRef(({ children, theme }, ref) => {
                         }}
                         style={{ ...styles.button, backgroundColor: theme.INPUT, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
                     >
-                        <Text style={{ color: theme.FOREGROUND }}>{schedule.name}</Text>
+                        <Text style={{ color: theme.FOREGROUND, fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans' }}>{schedule.name}</Text>
                         <RightArrowIcon width={16} height={16} color={theme.FOREGROUND}/>
                     </TouchableOpacity>
                 ))}

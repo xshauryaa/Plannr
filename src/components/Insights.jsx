@@ -10,6 +10,7 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 
 const { width, height } = Dimensions.get('window');
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     subHeading: {
-        fontSize: 18,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginBottom: SPACE,
     },

@@ -40,6 +40,7 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
   /** @private */
   _scheduleBreaks() {
     for (const [date, breakTime] of this.breaks) {
+      console.log(`Scheduling break on ${date.getDateString()} from ${breakTime.startTime.to12HourString()} to ${breakTime.endTime.to12HourString()}`);
       this.deadlineOrientedSchedule.addBreak(date, breakTime);
     }
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 import ActivityType from '../model/ActivityType.js'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
@@ -74,7 +75,7 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
                         const duration = block.getDuration();
                         const OFFSET = (rowHeight / 2) + (block.getStartTime().getHour() * 60 + block.getStartTime().getMinute() - (start * 60)) * rowHeight / 60;
                         const blockHeight = ((duration * rowHeight / 60) < MIN_HEIGHT) ? MIN_HEIGHT : (duration * rowHeight / 60);
-                        const fontSize = (blockHeight > 30) ? 16 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
+                        const fontSize = (blockHeight > 30) ? 14 : (blockHeight > 20) ? 12 : (blockHeight > 10) ? 10 : 4;
 
                         return (
                             <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, height: blockHeight, top: OFFSET }} key={index} onPress={() => onBlockSelect(block)}>

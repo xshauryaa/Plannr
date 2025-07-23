@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 import { Picker } from '@react-native-picker/picker'
 import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
 
@@ -60,7 +61,7 @@ const RescheduleStartView = ({ onNext, schedule }) => {
                             </TouchableOpacity>
                         </View>
                     )}
-                    <Text style={{ color: theme.FOREGROUND, fontFamily: 'AlbertSans', fontSize: 16, marginTop: 16, paddingHorizontal: 2 }}>{description}</Text>
+                    <Text style={{ color: theme.FOREGROUND, fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize, marginTop: 16, paddingHorizontal: 2 }}>{description}</Text>
                 </View>
             </View>
             <TouchableOpacity 
@@ -69,10 +70,10 @@ const RescheduleStartView = ({ onNext, schedule }) => {
             >
                 {(rescheduleMethod === 'Missed Task Shifting') 
                     ? <View style={{ flexDirection: 'row', gap: 12 }}>
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Reschedule</Text>
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: typography.subHeadingSize }}>Reschedule</Text>
                         <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
                     </View>
-                    : <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Next</Text>
+                    : <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: typography.subHeadingSize }}>Next</Text>
                 }
             </TouchableOpacity>
         </View>
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,

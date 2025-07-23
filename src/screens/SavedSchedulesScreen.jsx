@@ -1,8 +1,9 @@
 import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
-import { useAppState } from '../context/AppStateContext'
+import { useAppState } from '../context/AppStateContext.js'
 import EditIcon from '../../assets/system-icons/EditIcon.svg'
-import { lightColor, darkColor } from '../design/colors'
+import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const SavedSchedulesScreen = ({ navigation }) => {
     const { appState } = useAppState();
@@ -15,7 +16,7 @@ const SavedSchedulesScreen = ({ navigation }) => {
                 {
                     appState.savedSchedules.length === 0 
                     ? <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', marginVertical: 16, color: theme.FOREGROUND }}>You have no saved schedules.</Text>
+                        <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', marginVertical: 16, color: theme.FOREGROUND }}>You have no saved schedules.</Text>
                     </View> 
                     : null
                 }
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         height: '90%',
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: 16,
         marginBottom: 8
@@ -107,12 +108,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     heading: { 
-        fontSize: 24, 
+        fontSize: typography.headingSize, 
         fontFamily: 'PinkSunset',
         marginBottom: 8,
     },
     subHeading: { 
-        fontSize: 16, 
+        fontSize: typography.subHeadingSize, 
         fontFamily: 'AlbertSans',
         marginBottom: 12,
     },

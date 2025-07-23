@@ -4,6 +4,7 @@ import LottieView from 'lottie-react-native';
 import GoToIcon from '../../assets/system-icons/GoToIcon.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 import Modal from 'react-native-modal'
 
 const GenerationModal = ({ isVisible, onViewSchedule, reschedule=false }) => {
@@ -83,13 +84,13 @@ const styles = StyleSheet.create({
         alignItems:'center'
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginBottom: 16,
         alignSelf: 'center'
     },
     subHeading: {
-        fontSize: 20,
+        fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8,
         textAlign: 'center'

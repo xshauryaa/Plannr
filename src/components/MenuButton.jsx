@@ -8,8 +8,8 @@ import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
 import { useAppState } from '../context/AppStateContext.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
-
 import { spacing, padding } from '../design/spacing.js'
+import { typography } from '../design/typography.js'
 import { Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
     text: { 
         width: 120,
         fontFamily: 'AlbertSans', 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         position: 'absolute',
-        left: 16,
-        bottom: 16,
+        left: (width > 400) ? padding.PADDING_4 : (width > 350) ? padding.PADDING_3 : padding.PADDING_2,
+        bottom: (width > 400) ? padding.PADDING_4 : (width > 350) ? padding.PADDING_3 : padding.PADDING_2,
     }
 })
 

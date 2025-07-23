@@ -7,6 +7,7 @@ import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const { appState } = useAppState();
@@ -27,7 +28,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
         return (
             <View style={{ ...styles.eventCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: 12, color: theme.FOREGROUND }}>{eventObj.name}  |  {eventObj.duration} mins  |  Before {eventObj.deadline.getDateString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{eventObj.name}  |  {eventObj.duration} mins  |  Before {eventObj.deadline.getDateString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setFlexibleEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginVertical: 8
     },

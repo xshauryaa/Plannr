@@ -9,6 +9,7 @@ import Priority from '../model/Priority.js'
 
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const { appState } = useAppState();
@@ -266,14 +267,14 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginBottom: 8
     },
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     warning: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginBottom: 12,
         color: '#FF0000',

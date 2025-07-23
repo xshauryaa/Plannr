@@ -3,6 +3,7 @@ import { View, Image, Text, StyleSheet, TouchableOpacity  } from 'react-native'
 import Modal from 'react-native-modal';
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const SchedulingErrorModal = ({ isVisible, action1, action2 }) => {
     const { appState, setAppState } = useAppState();
@@ -74,12 +75,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     heading: { 
-        fontSize: 32, 
+        fontSize: typography.titleSize, 
         fontFamily: 'PinkSunset', 
         marginBottom: 16 
     },
     text: { 
-        fontSize: 16, 
+        fontSize: typography.subHeadingSize, 
         fontFamily: 'AlbertSans', 
         marginBottom: 24 
     }

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 import MenuButton from '../components/MenuButton.jsx';
 import Insights from '../components/Insights.jsx';
 import RescheduleBottomSheet from '../components/RescheduleBottomSheet.jsx';
@@ -71,13 +72,13 @@ const styles = StyleSheet.create({
         height: '90%',
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
     },
     subHeading: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginBottom: SPACE,
     },

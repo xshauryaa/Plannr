@@ -4,6 +4,7 @@ import Checkbox from './Checkbox';
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
+import { typography } from '../design/typography.js';
 
 const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
     const { appState } = useAppState();
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
         width: 300,
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,

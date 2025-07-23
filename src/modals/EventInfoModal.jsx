@@ -8,6 +8,7 @@ import Modal from "react-native-modal";
 import { lightColor, darkColor } from "../design/colors.js";
 import { spacing } from "../design/spacing.js";
 import ActivityType from "../model/ActivityType.js";
+import { typography } from '../design/typography.js'
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -83,11 +84,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     heading: { 
-        fontSize: 24, 
+        fontSize: typography.titleSize, 
         fontFamily: 'PinkSunset',
     },
     text: { 
-        fontSize: 16, 
+        fontSize: typography.subHeadingSize, 
         fontFamily: 'AlbertSans', 
         marginTop: 16 
     }

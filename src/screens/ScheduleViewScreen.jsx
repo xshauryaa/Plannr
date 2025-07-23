@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpac
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 import Indicator from '../../assets/system-icons/Indicator.svg';
 import ScheduleCalendarView from '../components/ScheduleCalendarView.jsx';
 import EventInfoModal from '../modals/EventInfoModal.jsx';
@@ -154,11 +155,11 @@ const styles = StyleSheet.create({
         height: '80%',
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset'
     },
     subHeading: {
-        fontSize: 18,
+        fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginBottom: SPACE,
     },

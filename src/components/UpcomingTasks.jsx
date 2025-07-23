@@ -8,8 +8,8 @@ import useCurrentTime from '../utils/useCurrentTime.js'
 import Expand from '../../assets/system-icons/Expand.svg'
 import Other from '../../assets/type-icons/Other.svg'
 import { lightColor, darkColor } from '../design/colors.js'
-
 import { spacing, padding } from '../design/spacing.js'
+import { typography } from '../design/typography.js';
 import { Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -64,7 +64,7 @@ const UpcomingTasks = ({ onClick }) => {
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
                 <Image source={imageMap[appState.userPreferences.theme]} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no upcoming tasks for today!</Text>
+                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no upcoming tasks for today!</Text>
             </View>
         )
     }
@@ -78,7 +78,7 @@ const UpcomingTasks = ({ onClick }) => {
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center' }}>
                 <Image source={imageMap[appState.userPreferences.theme]} style={{ width: 192, height: 192, alignSelf: 'center' }} />
-                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no tasks due for today!</Text>
+                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', alignSelf: 'center', color: theme.FOREGROUND }}>You have no tasks due for today!</Text>
             </View>
         )
     }
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     taskName: {
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         marginBottom: 4,
     },
@@ -179,12 +179,6 @@ const styles = StyleSheet.create({
         opacity: 0.15,
         marginVertical: 8,
     },
-    centralText: {
-        fontSize: 20,
-        fontFamily: 'PinkSunset',
-        textAlign: 'center',
-        marginTop: 16,
-    }
 })
 
 export default UpcomingTasks

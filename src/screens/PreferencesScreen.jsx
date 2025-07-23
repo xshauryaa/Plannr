@@ -7,6 +7,7 @@ import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIc
 import LightMode from '../../assets/system-icons/LightMode.svg'
 import DarkMode from '../../assets/system-icons/DarkMode.svg'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
@@ -85,7 +86,7 @@ const PreferencesScreen = () => {
                         >
                             <View>
                                 <LightMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'light') ? '#E3CD00' : theme.FOREGROUND}/>
-                                <Text style={{ fontFamily: 'AlbertSans', color: theme.FOREGROUND }}>Light</Text>
+                                <Text style={{ fontFamily: 'AlbertSans', color: theme.FOREGROUND, fontSize: typography.subHeadingSize }}>Light</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity 
@@ -94,7 +95,7 @@ const PreferencesScreen = () => {
                         >
                             <View>
                                 <DarkMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'dark') ? '#8C84E5' : theme.FOREGROUND }/>
-                                <Text style={{ fontFamily: 'AlbertSans', color: theme.FOREGROUND }}>Dark</Text>
+                                <Text style={{ fontFamily: 'AlbertSans', color: theme.FOREGROUND, fontSize: typography.subHeadingSize }}>Dark</Text>
                             </View>
                         </TouchableOpacity>
                 </View>
@@ -106,7 +107,7 @@ const PreferencesScreen = () => {
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'earliest-fit' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Earliest Fit</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Earliest Fit</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -115,7 +116,7 @@ const PreferencesScreen = () => {
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTION : theme.INPUT }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'balanced-work' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Balanced Work</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Balanced Work</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -124,7 +125,7 @@ const PreferencesScreen = () => {
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT }}
                             onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' }})}}
                         >
-                                <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Deadline Oriented</Text>
+                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Deadline Oriented</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -166,7 +167,7 @@ const PreferencesScreen = () => {
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Task Reminders</Text>
                 <View style={{ ...styles.card, gap: 16, backgroundColor: theme.COMP_COLOR }}>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <Text style={{ fontSize: 16, fontFamily: 'AlbertSans', color: theme.FOREGROUND, opacity: 0.5 }}>{(appState.userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
+                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, opacity: 0.5 }}>{(appState.userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
                         <Switch
                             trackColor={{ false: '#000000', true: '#4166FB' }}
                             thumbColor={'#FFFFFF'}
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
         paddingBottom: 32
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: 64,
         marginBottom: 8
@@ -225,8 +226,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
-        width: 0,
-        height: 0,
+            width: 0,
+            height: 0,
         },
         shadowOpacity: 0.1,
         shadowRadius: 6,
@@ -237,20 +238,15 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
     },
-    heading: { 
-        fontSize: 24, 
-        fontFamily: 'PinkSunset',
-        marginBottom: 8,
-    },
     subHeading: { 
-        fontSize: 16, 
+        fontSize: typography.subHeadingSize, 
         fontFamily: 'AlbertSans',
         marginTop: 16,
     },
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -292,7 +288,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     warning: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginTop: 8,
         color: '#FF0000',

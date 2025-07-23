@@ -6,6 +6,7 @@ import MultiSelect from '../components/MultiSelect.jsx';
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
+import { typography } from '../design/typography.js'
 
 const AddDependencyModal = ({ isVisible, onClick, events }) => {
     const { appState } = useAppState();
@@ -32,7 +33,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
             <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Select an event</Text>
                 <Pressable style={{ ...styles.input, backgroundColor: theme.INPUT }} onPress={() => setShowSelectedEventPicker(true)}>
-                    <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>
+                    <Text style={{ fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize, color: theme.FOREGROUND }}>
                         {selectedEvent ? selectedEvent.name : 'Choose an event'}
                     </Text>
                 </Pressable>
@@ -72,7 +73,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View style={{ ...styles.chip, backgroundColor: theme.INPUT }}>
-                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>{item.name}</Text>
+                                <Text style={{ fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize, color: theme.FOREGROUND }}>{item.name}</Text>
                                 <TouchableOpacity onPress={() => setPrerequisiteEvents(prev => prev.filter(e => e.id !== item.id))}>
                                     <CrossIcon width={24} height={24} color={theme.FOREGROUND}/>
                                 </TouchableOpacity>
@@ -108,14 +109,14 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     subHeading: {
-        fontSize: 20,
+        fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginBottom: 8
     },
     input: {
         height: 40,
         borderRadius: 12, 
-        fontSize: 16,
+        fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     warning: {
-        fontSize: 12,
+        fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginBottom: 12,
         color: '#FF0000',

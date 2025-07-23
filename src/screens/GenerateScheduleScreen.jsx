@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
+import { typography } from '../design/typography.js'
 
 import ScheduleDate from '../model/ScheduleDate.js';
 import InfoView from '../scheduling-logic-views/InfoView.jsx'
@@ -45,7 +46,6 @@ const GenerateScheduleScreen = ({ navigation }) => {
         setName(name);
         setScheduler(new Scheduler(numDaysInt, startDate, dayString, minGap, maxHours));
         setGenStage(1);
-
         setFirstDate(date);
         
         console.log('SchedulerInitialization completed:', {
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: 64,
         marginBottom: 8
