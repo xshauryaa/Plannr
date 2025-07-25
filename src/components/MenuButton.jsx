@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACE
     },
     text: { 
-        width: 120,
+        width: 130,
         fontFamily: 'AlbertSans', 
         fontSize: typography.subHeadingSize,
         position: 'absolute',

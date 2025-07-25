@@ -120,12 +120,12 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            // { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
-            // { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
-            // { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
-            // { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
+            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
+            { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
+            { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
+            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
         ],
-        activeSchedule: null, // {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true}
+        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},
         onboarded: false
     });
     const [storageLoaded, setStorageLoaded] = useState(true);

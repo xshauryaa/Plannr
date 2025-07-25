@@ -104,7 +104,7 @@ const ScheduleViewScreen = ({ route }) => {
                     <ScrollView 
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', contentContainerStyle: { justifyContent: 'center', alignItems: 'center' } }}
                     >
                         <Animated.View
                             style={[
@@ -119,7 +119,7 @@ const ScheduleViewScreen = ({ route }) => {
 
                             return (
                                 <TouchableOpacity style={{ width: ICON_DIM, margin: PADDING_HORIZONTAL, alignItems: 'center' }} key={index} onPress={() => setSelectedDate(date)}>
-                                    <Text style={{ ...styles.subHeading, color: (date === selectedDate) ? theme.ACCENT : theme.FOREGROUND }}>{dateString}</Text>
+                                    <Text style={{ ...styles.bodySize, color: (date === selectedDate) ? theme.ACCENT : theme.FOREGROUND }}>{dateString}</Text>
                                 </TouchableOpacity>
                             )
                         })}

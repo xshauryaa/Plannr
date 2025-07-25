@@ -6,8 +6,6 @@ import { typography } from '../design/typography.js'
 
 import RigidEvent from '../model/RigidEvent'
 import AddRigidEventsModal from '../modals/AddRigidEventsModal'
-import convertDateToScheduleDate from '../utils/dateConversion.js'
-import convertTimeToTime24 from '../utils/timeConversion.js'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
 
@@ -19,13 +17,11 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const [showModal, setShowModal] = useState(false)
 
     const addRigidEvent = (name, type, date, startTime, endTime) => {
-        const eventDate = convertDateToScheduleDate(date)
-        const start = convertTimeToTime24(startTime)
-        const end = convertTimeToTime24(endTime)
-        const duration = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
-        const newEvent = new RigidEvent(name, type, duration, eventDate, start.toInt(), end.toInt())
+        const duration = (endTime.hour * 60 + endTime.minute) - (startTime.hour * 60 + startTime.minute);
+        const newEvent = new RigidEvent(name, type, duration, date, startTime.toInt(), endTime.toInt())
 
         setRigidEvents([...rigidEvents, newEvent])
+        onNext([...rigidEvents, newEvent], false)
         setShowModal(false)
     }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform } from 'react-native' 
 import { useAppState } from '../context/AppStateContext';
-import DateTimePicker from '@react-native-community/datetimepicker'
+import TimePicker from '../components/TimePicker.jsx';
 import convertTimeToTime24 from '../utils/timeConversion';
 import { lightColor, darkColor } from '../design/colors';
 import { typography } from '../design/typography.js'
@@ -11,13 +11,11 @@ import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
 import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg';
 
-const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Schedule' }) => {
+const FinalCheckView = ({ onNext, buttonText = 'Generate Schedule' }) => {
     const { appState } = useAppState();
-    const [startTime, setStartTime] = useState(new Date());
-    const [endTime, setEndTime] = useState(new Date());
+    const [startTime, setStartTime] = useState(convertTimeToTime24(new Date()));
+    const [endTime, setEndTime] = useState(convertTimeToTime24(new Date()));
     const [strategy, setStrategy] = useState(appState.userPreferences.defaultStrategy);
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
     const warning = "End time must be after start time";
 
@@ -27,76 +25,18 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
         <View style={styles.subContainer}>
             <View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - some final preferences</Text>
-                {includeTimes && 
-                    <>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start & End Time</Text>
-                        <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
-                                    <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); }}>
-                                        <TextInput
-                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                                            pointerEvents="none"
-                                            value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            editable={false}
-                                        />
-                                    </Pressable>
-                                </View>
-                                <View style={{ width: '50%' }}>
-                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
-                                    <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); }}>
-                                        <TextInput
-                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                                            pointerEvents="none"
-                                            value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            editable={false}
-                                        />
-                                    </Pressable>
-                                </View>
-                            </View>
-                            {showStartPicker && (
-                                <View>
-                                    <DateTimePicker
-                                        value={startTime}
-                                        mode="time"
-                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                        onChange={(event, time) => {
-                                            if (time) setStartTime(time);
-                                        }}
-                                        themeVariant={appState.userPreferences.theme}
-                                    />
-                                    <TouchableOpacity 
-                                        style={styles.button}
-                                        onPress={() => setShowStartPicker(false)}
-                                    >
-                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                            {showEndPicker && (
-                                <View>
-                                    <DateTimePicker
-                                        value={endTime}
-                                        mode="time"
-                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                        onChange={(event, time) => {
-                                            if (time) setEndTime(time);
-                                        }}
-                                        themeVariant={appState.userPreferences.theme}
-                                    />
-                                    <TouchableOpacity 
-                                        style={styles.button}
-                                        onPress={() => setShowEndPicker(false)}
-                                    >
-                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                            {showWarning && <Text style={styles.warning}>{warning}</Text>}
-                        </View>
-                    </>
-                }
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start Time</Text>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                        <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                        <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
+                    </View>
+                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
+                </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Scheduling Strategy</Text>
                 <View style={{ ...styles.card, gap: 12, backgroundColor: theme.COMP_COLOR }}>
                     <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -131,13 +71,11 @@ const FinalCheckView = ({ onNext, includeTimes = true, buttonText = 'Generate Sc
             <TouchableOpacity 
                 style={styles.button}
                 onPress={() => {
-                    const startT = convertTimeToTime24(startTime);
-                    const endT = convertTimeToTime24(endTime);
-                    if (endT.isBefore(startT) || endT.equals(startT)) {
+                    if (endTime.isBefore(startTime) || endTime.equals(startTime)) {
                         setShowWarning(true);
                     } else {
                         setShowWarning(false);
-                        onNext(startT.toInt(), endT.toInt(), strategy);
+                        onNext(startTime.toInt(), endTime.toInt(), strategy);
                     }
                 }}
             >

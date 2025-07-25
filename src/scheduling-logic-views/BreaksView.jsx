@@ -15,7 +15,7 @@ import { Dimensions} from 'react-native';
 const { width, height } = Dimensions.get('window');
 const CARDHEIGHT = (height > 900) ? 180 : (height > 800) ? 150 : 120;
 
-const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBreaksInput }) => {
+const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     
@@ -24,15 +24,16 @@ const BreaksView = ({ onNext, minDate, numDays, onBack, breaksInput, repeatedBre
     const [showModal, setShowModal] = useState(false)
 
     const addBreak = (startTime, endTime, repeated, date) => {
-        const start = convertTimeToTime24(startTime)
-        const end = convertTimeToTime24(endTime)
-        const breakDate = convertDateToScheduleDate(date)
-        const duration = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
-        const newBreak = new Break(duration, start.toInt(), end.toInt())
+        const duration = (endTime.hour * 60 + endTime.minute) - (startTime.hour * 60 + startTime.minute);
+        const newBreak = new Break(duration, startTime.toInt(), endTime.toInt())
 
         { (repeated)
         ? setRepBreaks([ ...repBreaks, newBreak]) 
-        : setBreaks([ ...breaks, [breakDate, newBreak]])}
+        : setBreaks([ ...breaks, [date, newBreak]])}
+
+        { (repeated)
+        ? onNext(breaks, [ ...repBreaks, newBreak], false) 
+        : onNext([ ...breaks, [date, newBreak]], repBreaks, false) }
 
         setShowModal(false)
     }

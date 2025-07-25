@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
-import DateTimePicker from '@react-native-community/datetimepicker'
+import DatePicker from '../components/DatePicker.jsx'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 
 const InfoView = ({ onNext }) => {
     const { appState } = useAppState();
     const [showPicker, setShowPicker] = useState(false);
     const [name, setName] = useState('');
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(convertDateToScheduleDate(new Date()));
     const [numDays, setNumDays] = useState('1');
     const [minGap, setMinGap] = useState(appState.userPreferences.defaultMinGap);
     const [maxHours, setMaxHours] = useState(appState.userPreferences.defaultMaxWorkingHours);
@@ -43,22 +44,19 @@ const InfoView = ({ onNext }) => {
                         <TextInput
                             style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
-                            value={startDate.toLocaleDateString()}
+                            value={startDate.getDateString()}
                             editable={false}
                         />
                     </Pressable>
                     {showPicker && (
                         <View>
-                            <DateTimePicker
-                                value={startDate}
+                            <DatePicker
                                 mode="date"
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={(event, date) => {
+                                onChange={(date) => {
                                     setShowPicker(Platform.OS === 'ios'); // keep open for iOS
-                                    if (date) setStartDate(date);
+                                    setStartDate(date);
                                 }}
-                                minimumDate={new Date()}
-                                themeVariant={appState.userPreferences.theme}
+                                minimumDate={convertDateToScheduleDate(new Date())}
                             />
                             <TouchableOpacity 
                                 style={styles.button}

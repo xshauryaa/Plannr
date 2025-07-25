@@ -12,10 +12,12 @@ import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx
 import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx'
 import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import Scheduler from '../model/Scheduler'
 import EventDependencies from '../model/EventDependencies.js'
 import GenerationModal from '../modals/GenerationModal.jsx'
 import SchedulingErrorModal from '../modals/SchedulingErrorModal.jsx'
+import Time24 from '../model/Time24.js'
 
 const GenerateScheduleScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
@@ -30,21 +32,21 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const [flexibleEvents, setFlexibleEvents] = useState([]);
     const [events, setEvents] = useState([]);
     const [deps, setDeps] = useState(new EventDependencies());
-    const [firstDate, setFirstDate] = useState(new Date());
+    const [firstDate, setFirstDate] = useState(convertDateToScheduleDate(new Date()));
     const [showGenerationModal, setShowGenerationModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
 
     const SchedulerInitialization = (name, numDays, date, gap, workingLimit) => {
-        const startDate = convertDateToScheduleDate(date)
-        const dayString = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const startDate = combineScheduleDateAndTime24(date, new Time24(0, 0)); // convertDateToScheduleDate(date)
+        const dayString = startDate.toLocaleDateString('en-US', { weekday: 'long' });
         const numDaysInt = parseInt(numDays)
         const minGap = parseInt(gap)
         const maxHours = parseInt(workingLimit)
 
         setName(name);
-        setScheduler(new Scheduler(numDaysInt, startDate, dayString, minGap, maxHours));
+        setScheduler(new Scheduler(numDaysInt, date, dayString, minGap, maxHours));
         setGenStage(1);
         setFirstDate(date);
         
@@ -59,12 +61,12 @@ const GenerateScheduleScreen = ({ navigation }) => {
         });
     }
 
-    const BreaksSetup = (breakList, repeatedBreakList) => {
+    const BreaksSetup = (breakList, repeatedBreakList, changeView=true) => {
         setBreaks([...breakList])
         setRepeatedBreaks([...repeatedBreakList])
         scheduler.setBreaks(breakList)
         scheduler.setRepeatedBreaks(repeatedBreakList)
-        setGenStage(2)
+        if (changeView) setGenStage(2);
         
         console.log('BreaksSetup completed:', {
             breaks: breakList,
@@ -75,12 +77,12 @@ const GenerateScheduleScreen = ({ navigation }) => {
         });
     }
 
-    const RigidEventsSetup = (eventsList) => {
+    const RigidEventsSetup = (eventsList, changeView=true) => {
         setRigidEvents([...eventsList])
         scheduler.setRigidEvents(eventsList);
-        setEvents([...events, ...eventsList]);
-        setGenStage(3);
-        
+        setEvents([...flexibleEvents, ...eventsList]);
+        if (changeView) setGenStage(3);
+
         console.log('RigidEventsSetup completed:', {
             rigidEvents: eventsList,
             rigidEventsCount: eventsList.length,
@@ -89,12 +91,12 @@ const GenerateScheduleScreen = ({ navigation }) => {
         });
     }
 
-    const FlexibleEventsSetup = (eventsList) => {
+    const FlexibleEventsSetup = (eventsList, changeView=true) => {
         setFlexibleEvents([...eventsList])
         scheduler.setFlexibleEvents(eventsList);
-        setEvents([...events, ...eventsList]);
-        setGenStage(4);
-        
+        setEvents([...rigidEvents, ...eventsList]);
+        if (changeView) setGenStage(4);
+
         console.log('FlexibleEventsSetup completed:', {
             flexibleEvents: eventsList,
             flexibleEventsCount: eventsList.length,

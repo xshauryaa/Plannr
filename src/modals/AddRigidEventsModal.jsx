@@ -2,13 +2,16 @@ import React, { useState } from 'react'
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
 import Modal from 'react-native-modal'
 
-import DateTimePicker from '@react-native-community/datetimepicker'
+import DatePicker from '../components/DatePicker.jsx'
+import TimePicker from '../components/TimePicker.jsx'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
+import ScheduleDate from '../model/ScheduleDate.js'
 
 const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const { appState } = useAppState();
@@ -16,18 +19,18 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
-    const [startTime, setStartTime] = useState(new Date())
-    const [endTime, setEndTime] = useState(new Date())
+    const [startTime, setStartTime] = useState(convertTimeToTime24(new Date()))
+    const [endTime, setEndTime] = useState(convertTimeToTime24(new Date()))
     const [dateOfEvent, setDateOfEvent] = useState(minDate)
-    const [showStartPicker, setShowStartPicker] = useState(false)
-    const [showEndPicker, setShowEndPicker] = useState(false)
-    const [showDatePicker, setShowDatePicker] = useState(false)
     const [showTypePicker, setShowTypePicker] = useState(false)
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [warning, setWarning] = useState('')
     const [showWarning, setShowWarning] = useState(false)
 
-    const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + (numDays - 1))
+    let maxDate = minDate;
+    for (let i = 0; i < numDays; i++) {
+        maxDate = maxDate.getNextDate();
+    }
 
     const getActivityLabel = (activityType) => {
         const labelMap = {
@@ -79,28 +82,14 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     {/* Start Time & End Time inputs + their respective time pickers */}
     const Panel2 = () => {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ width: '50%' }}>
+            <View style={{ gap: 12, marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
-                    <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(true); setShowDatePicker(false); }}>
-                        <TextInput
-                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                            pointerEvents="none"
-                            value={startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            editable={false}
-                        />
-                    </Pressable>
+                    <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                 </View>
-                <View style={{ width: '50%' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
-                    <Pressable onPress={() => { setShowEndPicker(true); setShowStartPicker(false); setShowDatePicker(false); }}>
-                        <TextInput
-                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                            pointerEvents="none"
-                            value={endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            editable={false}
-                        />
-                    </Pressable>
+                    <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                 </View>
             </View>
         )
@@ -109,12 +98,9 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const setToDefaults = () => {
         setName('')
         setType(ActivityType.PERSONAL)
-        setStartTime(new Date())
-        setEndTime(new Date())
-        setDateOfEvent(new Date())
-        setShowStartPicker(false)
-        setShowEndPicker(false)
-        setShowDatePicker(false)
+        setStartTime(convertTimeToTime24(new Date()))
+        setEndTime(convertTimeToTime24(new Date()))
+        setDateOfEvent(minDate)
         setShowTypePicker(false)
         setWarning('')
         setShowWarning(false)
@@ -127,84 +113,9 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, width: '90%' }}>
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                 {/* Panel 1 - Name + Activity Type */}
                 {Panel1()}
-
-                {/* Panel 2 - Start Time + End Time */}
-                {Panel2()}
-                {showStartPicker && (
-                    <View>
-                        <DateTimePicker
-                            value={startTime}
-                            mode="time"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={(event, time) => {
-                                if (time) setStartTime(time);
-                            }}
-                            themeVariant={appState.userPreferences.theme}
-                        />
-                        <TouchableOpacity 
-                            style={styles.button}
-                            onPress={() => setShowStartPicker(false)}
-                        >
-                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-                {showEndPicker && (
-                    <View>
-                        <DateTimePicker
-                            value={endTime}
-                            mode="time"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={(event, time) => {
-                                if (time) setEndTime(time);
-                            }}
-                            themeVariant={appState.userPreferences.theme}
-                        />
-                        <TouchableOpacity 
-                            style={styles.button}
-                            onPress={() => setShowEndPicker(false)}
-                        >
-                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {/* Panel 3 - Date Picker */}
-                <View>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowEndPicker(false); setShowStartPicker(false); setShowDatePicker(true); }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                            pointerEvents="none"
-                            value={dateOfEvent.toLocaleDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
-                    {showDatePicker && (
-                        <View>
-                            <DateTimePicker
-                                value={dateOfEvent}
-                                mode="date"
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={(event, date) => {
-                                    if (date) setDateOfEvent(date);
-                                }}
-                                minimumDate={minDate}
-                                maximumDate={maxDate}
-                                themeVariant={appState.userPreferences.theme}
-                            />
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowDatePicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
 
                 {/* Activity Type Picker */}
                 {showTypePicker && 
@@ -233,18 +144,51 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     </View>
                 }
 
+                {/* Panel 2 - Time Inputs */}
+                {Panel2()}
+
+                {/* Panel 3 - Date Picker */}
+                <View>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                    <Pressable onPress={() => { setShowDatePicker(true) }}>
+                        <TextInput
+                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
+                            pointerEvents="none"
+                            value={dateOfEvent.getDateString()}
+                            editable={false}
+                        />
+                    </Pressable>
+                    {showDatePicker && (
+                        <View>
+                            <DatePicker
+                                mode="date"
+                                onChange={(date) => {
+                                    setDateOfEvent(date);
+                                }}
+                                minimumDate={minDate}
+                                maximumDate={maxDate}
+                            />
+                            <TouchableOpacity 
+                                style={styles.button}
+                                onPress={() => setShowDatePicker(false)}
+                            >
+                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
+
                 {showWarning && <Text style={styles.warning}>{warning}</Text>}
 
                 { /* Add Rigid Event Button */ }
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => {
-                        const endT = convertTimeToTime24(endTime)
-                        const startT = convertTimeToTime24(startTime)
                         if (name.length == 0) {
                             setWarning("Name of event cannot be empty")
                             setShowWarning(true)
-                        } else if ((endT.isBefore(startT)) || endT.equals(startT)) {
+                        } else if ((endTime.isBefore(startTime)) || endTime.equals(startTime)) {
                             setWarning("End time must be after start time")
                             setShowWarning(true)
                         } else {
@@ -263,6 +207,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 
 const styles = StyleSheet.create({
     card: {
+        width: '99%',
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -270,9 +215,13 @@ const styles = StyleSheet.create({
         height: 0,
         },
         shadowOpacity: 0.1,
-        shadowRadius: 24,
-        marginVertical: 16,
-        padding: 24,
+        shadowRadius: 6,
+        padding: 16,
+        marginTop: 4,
+        marginBottom: 16,
+        alignSelf: 'center',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
     },
     subHeading: {
         fontSize: typography.subHeadingSize,

@@ -17,10 +17,10 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
     const [showModal, setShowModal] = useState(false);
 
     const addFlexibleEvent = (name, type, duration, priority, deadline) => {
-        const eventDeadline = convertDateToScheduleDate(deadline)
-        const newEvent = new FlexibleEvent(name, type, duration, priority, eventDeadline)
+        const newEvent = new FlexibleEvent(name, type, duration, priority, deadline)
 
         setFlexibleEvents([...flexibleEvents, newEvent])
+        onNext([...flexibleEvents, newEvent], false)
         setShowModal(false)
     }
 

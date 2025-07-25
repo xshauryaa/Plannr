@@ -1,11 +1,13 @@
 import React, { useState } from 'react' 
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
 import Modal from 'react-native-modal'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker'
 
 import ActivityType from '../model/ActivityType.js'
 import Priority from '../model/Priority.js'
+import ScheduleDate from '../model/ScheduleDate.js'
+import DatePicker from '../components/DatePicker.jsx'
+import convertDateToScheduleDate from '../utils/dateConversion.js'
 
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -15,17 +17,19 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + (numDays - 1))
+    let maxDate = minDate;
+    for (let i = 0; i < numDays; i++) {
+        maxDate = maxDate.getNextDate();
+    }
     
     const [name, setName] = useState('')
     const [type, setType] = useState(ActivityType.PERSONAL)
     const [duration, setDuration] = useState('0')
     const [priority, setPriority] = useState(Priority.MEDIUM)
-    const [deadline, setDeadline] = useState(maxDate)
-    const [showDatePicker, setShowDatePicker] = useState(false)
+    const [deadline, setDeadline] = useState(minDate)
     const [showTypePicker, setShowTypePicker] = useState(false)
     const [showPriorityPicker, setShowPriorityPicker] = useState(false)
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [warning, setWarning] = useState('')
     const [showWarning, setShowWarning] = useState(false)
 
@@ -66,14 +70,12 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                         value={name}
                         autoCorrect={false}
                         autoCapitalize='words'
-                        onChange={ ({ nativeEvent }) => { 
-                            setName(nativeEvent.text)
-                        } }
+                        onChangeText={(text) => setName(text)}
                     />
                 </View>
                 <View style={{ width: '50%' }}>
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Type</Text>
-                    <Pressable onPress={() => { setShowTypePicker(true); setShowPriorityPicker(false); setShowDatePicker(false); }}>
+                    <Pressable onPress={() => { setShowTypePicker(true); setShowPriorityPicker(false); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
@@ -91,20 +93,18 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est.)</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est. mins)</Text>
                     <TextInput
                         style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                         value={duration}
                         autoCorrect={false}
                         autoCapitalize='words'
-                        onChange={ ({ nativeEvent }) => { 
-                            setDuration(nativeEvent.text)
-                        } }
+                        onChangeText={(text) => setDuration(text)}
                     />
                 </View>
                 <View style={{ width: '50%' }}>
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Priority</Text>
-                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(true); setShowDatePicker(false); }}>
+                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(true); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
@@ -123,7 +123,6 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         setDuration('0')
         setPriority(Priority.MEDIUM)
         setDeadline(maxDate)
-        setShowDatePicker(false)
         setShowTypePicker(false)
         setShowPriorityPicker(false)
         setWarning('')
@@ -140,43 +139,6 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                 {/* Panel 1 - Name + Activity Type */}
                 {Panel1()}
-
-                {/* Panel 2 - Duration + Priority */}
-                {Panel2()}
-
-                {/* Panel 3 - Date Picker */}
-                <View>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(false); setShowDatePicker(true); }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                            pointerEvents="none"
-                            value={deadline.toLocaleDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
-                    {showDatePicker && (
-                        <View>
-                            <DateTimePicker
-                                value={deadline}
-                                mode="date"
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={(event, date) => {
-                                    if (date) setDeadline(date);
-                                }}
-                                minimumDate={minDate}
-                                maximumDate={maxDate}
-                                themeVariant={appState.userPreferences.theme}
-                            />
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowDatePicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
 
                 {/* Activity Type Picker */}
                 {showTypePicker && 
@@ -205,6 +167,9 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     </View>
                 }
 
+                {/* Panel 2 - Duration + Priority */}
+                {Panel2()}
+
                 {/* Priority Picker */}
                 {showPriorityPicker && 
                     <View>
@@ -226,9 +191,40 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     </View>
                 }
 
+                {/* Panel 3 - Deadline Picker */}
+                <View>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                    <Pressable onPress={() => { setShowDatePicker(true) }}>
+                        <TextInput
+                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
+                            pointerEvents="none"
+                            value={deadline.getDateString()}
+                            editable={false}
+                        />
+                    </Pressable>
+                    {showDatePicker && (
+                        <View>
+                            <DatePicker
+                                mode="date"
+                                onChange={(date) => {
+                                    setDeadline(date);
+                                }}
+                                minimumDate={minDate}
+                                maximumDate={maxDate}
+                            />
+                            <TouchableOpacity 
+                                style={styles.button}
+                                onPress={() => setShowDatePicker(false)}
+                            >
+                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
                 {showWarning && <Text style={styles.warning}>{warning}</Text>}
 
-                { /* Add Rigid Event Button */ }
+                { /* Add Flexible Event Button */ }
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => {
@@ -254,17 +250,19 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: 12,
-        backgroundColor: '#FFFFFF',
+        width: '99%',
+        borderRadius: 20,
         shadowColor: '#000',
         shadowOffset: {
-        width: 0,
-        height: 0,
+            width: 0,
+            height: 0,
         },
         shadowOpacity: 0.1,
         shadowRadius: 24,
+        elevation: 10,
         marginVertical: 16,
-        padding: 16,
+        paddingHorizontal: 20,
+        paddingVertical: 24,
     },
     subHeading: {
         fontSize: typography.subHeadingSize,
@@ -272,21 +270,22 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     input: {
-        height: 40,
+        height: 48,
         borderRadius: 12, 
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingVertical: 12,
         backgroundColor: '#F0F0F0',
         marginBottom: 16
     },
     button: {
-        width: '92%',
-        borderRadius: 12,
+        width: '100%',
+        borderRadius: 16,
         backgroundColor: '#000' ,
-        paddingVertical: 12,
+        paddingVertical: 16,
         paddingHorizontal: 16,
+        marginTop: 8,
         marginBottom: 8,
         alignSelf: 'center'
     },
