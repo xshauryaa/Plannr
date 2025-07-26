@@ -91,11 +91,11 @@ export const AppStateProvider = ({ children }) => {
         
         try {
             for (const [dependent, prerequisite] of depList) {
-            deps.addDependency(nameToEvent[dependent], nameToEvent[prerequisite]);
+                deps.addDependency(nameToEvent[dependent], nameToEvent[prerequisite]);
             }
         } catch (e) {
             if (e instanceof CircularDependencyError) {
-            console.error(e.message);
+                console.error(e.message);
             }
         }
         scheduler.setEventDependencies(deps);
@@ -120,13 +120,14 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
-            { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
-            { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
-            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
+            // { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
+            // { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
+            // { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
+            // { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
         ],
-        activeSchedule: {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},
-        onboarded: false
+        activeSchedule: null, // {name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true},
+        onboarded: false,
+        firstLaunch: true
     });
     const [storageLoaded, setStorageLoaded] = useState(true);
 
@@ -136,7 +137,17 @@ export const AppStateProvider = ({ children }) => {
             try {
                 const raw = await AsyncStorage.getItem('appState');
                 const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-                setAppState(parsed);
+                if (parsed !== null) {
+                    setAppState(parsed);
+                } else if (parsed == null) {
+                    if (appState.firstLaunch) {
+                        console.log("First launch detected, initializing app state");
+                        setAppState({
+                            ...appState,
+                            firstLaunch: false
+                        });
+                    }
+                }
             } catch (e) {
                 console.error('Failed to load app state from storage', e);
             } finally {
@@ -174,12 +185,13 @@ const serializeAppState = (appState) => {
             isActive: schedule.isActive
         })),
         activeSchedule: appState.activeSchedule ? { name: appState.activeSchedule.name, schedule: serializeSchedule(appState.activeSchedule.schedule), isActive: appState.activeSchedule.active } : null,
-        onboarded: appState.onboarded
+        onboarded: appState.onboarded,
+        firstLaunch: appState.firstLaunch
     };
 }
 
 const parseAppState = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.onboarded == null) {
+    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.onboarded == null || rawObj.firstLaunch == null) {
         return null;
     }
 
@@ -192,7 +204,8 @@ const parseAppState = (rawObj) => {
             isActive: sched.isActive
         })),
         activeSchedule: rawObj.activeSchedule ? {name: rawObj.activeSchedule.name, schedule: parseSchedule(rawObj.activeSchedule.schedule), isActive: rawObj.activeSchedule.active} : null,
-        onboarded: rawObj.onboarded
+        onboarded: rawObj.onboarded,
+        firstLaunch: rawObj.firstLaunch
     };
 }
 

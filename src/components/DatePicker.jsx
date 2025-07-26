@@ -18,9 +18,9 @@ const DatePicker = ({onChange, minimumDate = null, maximumDate = null, deadlineM
         const validMinimumDate = minimumDate || convertDateToScheduleDate(new Date());
 
         // Ensure initial values respect minimum date
-        const initialDate = (deadlineMode) ? validMinimumDate.getDate() : maximumDate.getDate();
-        const initialMonth = (deadlineMode) ? validMinimumDate.getMonth() : maximumDate.getMonth();
-        const initialYear = (deadlineMode) ? validMinimumDate.getYear() : maximumDate.getYear();
+        const initialDate = validMinimumDate.getDate();
+        const initialMonth = validMinimumDate.getMonth();
+        const initialYear = validMinimumDate.getYear();
 
         const [selectedDate, setSelectedDate] = useState(initialDate);
         const [selectedMonth, setSelectedMonth] = useState(initialMonth);
