@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
-import DatePicker from '../components/DatePicker.jsx'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
+import Time24 from '../model/Time24.js';
 
 const InfoView = ({ onNext }) => {
     const { appState } = useAppState();
@@ -18,6 +20,7 @@ const InfoView = ({ onNext }) => {
     const [showNumDaysWarning, setShowNumDaysWarning] = useState(false);
     const [showMinGapWarning, setShowMinGapWarning] = useState(false);
     const [showMaxHoursWarning, setShowMaxHoursWarning] = useState(false);
+    const [nameWarningType, setNameWarningType] = useState(1); // 1 for empty name, 2 for duplicate name
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -36,7 +39,8 @@ const InfoView = ({ onNext }) => {
                             setName(nativeEvent.text)
                         } }
                     />
-                    {showNameWarning && <Text style={styles.warning}>Please enter a schedule name</Text>}
+                    {showNameWarning && <Text style={styles.warning}>
+                        {nameWarningType === 1 ? "Please enter a schedule name" : "Schedule name already exists"}</Text>}
                 </View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What date would you like to schedule from?</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -50,13 +54,16 @@ const InfoView = ({ onNext }) => {
                     </Pressable>
                     {showPicker && (
                         <View>
-                            <DatePicker
+                            <DateTimePicker
+                                value={combineScheduleDateAndTime24(startDate, new Time24(0, 0))}
                                 mode="date"
-                                onChange={(date) => {
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onChange={(event, date) => {
                                     setShowPicker(Platform.OS === 'ios'); // keep open for iOS
-                                    setStartDate(date);
+                                    if (date) setStartDate(convertDateToScheduleDate(date));
                                 }}
-                                minimumDate={convertDateToScheduleDate(new Date())}
+                                minimumDate={new Date()}
+                                themeVariant={appState.userPreferences.theme}
                             />
                             <TouchableOpacity 
                                 style={styles.button}
@@ -125,6 +132,14 @@ const InfoView = ({ onNext }) => {
                     if (!name.trim()) {
                         setShowNameWarning(true);
                         hasError = true;
+                    }
+
+                    if (appState.schedules.some(schedule => schedule.name === name)) {
+                        setNameWarningType(2);
+                        setShowNameWarning(true);
+                        hasError = true;
+                    } else {
+                        setNameWarningType(1); // Reset to empty name warning type
                     }
                     
                     const numDaysInt = parseInt(numDays);

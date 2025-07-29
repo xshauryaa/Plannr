@@ -67,7 +67,7 @@ const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.subHeadingSize }}>Tell us the times where you'd like absolutely nothing scheduled!</Text>
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => setShowModal(true)}
@@ -80,7 +80,7 @@ const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput
                     <FlatList
                         data={repBreaks}
                         showsVerticalScrollIndicator={false}
-                        keyExtractor={({ item, index }) => index}
+                        keyExtractor={({ item, index }) => index+'rep'}
                         renderItem={({ item, index }) => repBreakCardRender(item, index)}
                     />
                 </View>
@@ -89,13 +89,13 @@ const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput
                     <FlatList
                         data={breaks}
                         showsVerticalScrollIndicator={false}
-                        keyExtractor={({ item, index }) => index}
+                        keyExtractor={({ item, index }) => index+'non-rep'}
                         renderItem={({ item, index }) => breakCardRender(item, index)}
                     />
                 </View>
             </View>
             <TouchableOpacity 
-                style={{ ...styles.button, marginVertical: 0 }}
+                style={{ ...styles.button, marginVertical: 16 }}
                 onPress={() => onNext(breaks, repBreaks)}
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>

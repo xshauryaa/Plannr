@@ -188,12 +188,12 @@ const GenerateScheduleScreen = ({ navigation }) => {
             {views[genStage]}
             <SchedulingErrorModal 
                 isVisible={showErrorModal} 
-                action1={() => { navigation.navigate("MainTabs"); setShowErrorModal(false); }} 
+                action1={() => { navigation.replace("MainTabs"); setShowErrorModal(false); }} 
                 action2={() => { setShowErrorModal(false); setGenStage(1) }}
             />
             <GenerationModal 
                 isVisible={showGenerationModal} 
-                onViewSchedule={() => { navigation.navigate("View", { schedName: name }); setShowGenerationModal(false); }} 
+                onViewSchedule={() => { navigation.replace("View", { schedName: name }); setShowGenerationModal(false); }} 
             />
         </View>
     )

@@ -7,6 +7,7 @@ import { AppStateProvider } from './src/context/AppStateContext.js';
 import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
 import NotificationService from './src/notifications/NotificationService.js';
 import 'react-native-gesture-handler';
+import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TodaysTasksScreen from './src/screens/TodaysTasksScreen';
@@ -16,6 +17,12 @@ import SchedulingCenterScreen from './src/screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from './src/screens/GenerateScheduleScreen.jsx';
 import RescheduleScreen from './src/screens/RescheduleScreen.jsx';
 import ScheduleViewScreen from './src/screens/ScheduleViewScreen.jsx';
+
+const DismissKeyboardWrapper = ({ children }) => (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <View style={{ flex: 1 }}>{children}</View>
+  </TouchableWithoutFeedback>
+);
 
 const AppStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -36,21 +43,25 @@ const MainTabs = () => {
 
 export default function App() {
     NotificationService.requestPermissions();
-    
+
     return (
-        <AppStateProvider>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={{ flex: 1 }}>
+            <AppStateProvider>
             <TaskCompletionChecker />
             <SafeAreaProvider>
                 <NavigationContainer>
-                    <AppStack.Navigator screenOptions={{ headerShown: false }}>
-                        <AppStack.Screen name="MainTabs" component={MainTabs} />
-                        <AppStack.Screen name="View" component={ScheduleViewScreen} />
-                        <AppStack.Screen name="Generate" component={GenerateScheduleScreen} />
-                        <AppStack.Screen name="Reschedule" component={RescheduleScreen} />
-                    </AppStack.Navigator>
+                <AppStack.Navigator screenOptions={{ headerShown: false }}>
+                    <AppStack.Screen name="MainTabs" component={MainTabs} />
+                    <AppStack.Screen name="View" component={ScheduleViewScreen} />
+                    <AppStack.Screen name="Generate" component={GenerateScheduleScreen} />
+                    <AppStack.Screen name="Reschedule" component={RescheduleScreen} />
+                </AppStack.Navigator>
                 </NavigationContainer>
             </SafeAreaProvider>
-        </AppStateProvider>
+            </AppStateProvider>
+        </View>
+        </TouchableWithoutFeedback>
     );
-  }
+}
   

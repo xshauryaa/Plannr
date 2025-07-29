@@ -1,11 +1,13 @@
 import React, { useState } from 'react' 
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import Modal from 'react-native-modal'
 
-import DatePicker from '../components/DatePicker.jsx'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import TimePicker from '../components/TimePicker.jsx'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import Time24 from '../model/Time24.js'
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -25,9 +27,10 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
 
-    let maxDate = new Date()
-    maxDate.setDate(minDate.getDate() + (numDays - 1))
-    maxDate = convertDateToScheduleDate(maxDate);
+    let maxDate = minDate;
+    for (let i = 0; i < numDays - 1; i++) {
+        maxDate = maxDate.getNextDate();
+    }
 
     const warning = "End time must be after start time"
 
@@ -46,85 +49,86 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
-                {/* Time Inputs */}
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
+                    {/* Time Inputs */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
                         <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
                         <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                     </View>
-                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
-                </View>
 
-                {/* Date input */}
-                {(!repeated)  
-                ? <View>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowDatePicker(true) }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
-                            pointerEvents="none"
-                            value={dateOfBreak.getDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
-                    {showDatePicker && (
-                        <View>
-                            <DatePicker
-                                mode="date"
-                                onChange={(date) => {
-                                    setDateOfBreak(date);
-                                }}
-                                minimumDate={minDate}
-                                maximumDate={maxDate}
+                    {/* Date input */}
+                    {(!repeated)  
+                    ? <View>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                        <Pressable onPress={() => { setShowDatePicker(true) }}>
+                            <TextInput
+                                style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
+                                pointerEvents="none"
+                                value={dateOfBreak.getDateString()}
+                                editable={false}
                             />
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowDatePicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-                : null
-                }
+                        </Pressable>
+                        {showDatePicker && (
+                            <View>
+                                <DateTimePicker
+                                    value={combineScheduleDateAndTime24(dateOfBreak, new Time24(0, 0))}
+                                    mode="date"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={(event, date) => {
+                                        if (date) setDateOfBreak(convertDateToScheduleDate(date));
+                                    }}
+                                    minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}
+                                    maximumDate={combineScheduleDateAndTime24(maxDate, new Time24(23, 59))}
+                                    themeVariant={appState.userPreferences.theme}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.button}
+                                    onPress={() => setShowDatePicker(false)}
+                                >
+                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                    : null
+                    }
 
-                {/* Checkbox for repeated */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
-                    <TouchableOpacity style={styles.checkbox} onPress={() => setRepeated(!repeated)}>
-                        { repeated 
-                            ? <Checked width={24} height={24} color={theme.FOREGROUND} /> 
-                            : <Unchecked width={24} height={24}color={theme.FOREGROUND} />
-                        }
+                    {/* Checkbox for repeated */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
+                        <TouchableOpacity style={styles.checkbox} onPress={() => setRepeated(!repeated)}>
+                            { repeated 
+                                ? <Checked width={24} height={24} color={theme.FOREGROUND} /> 
+                                : <Unchecked width={24} height={24}color={theme.FOREGROUND} />
+                            }
+                        </TouchableOpacity>
+                        <Text style={{ ...styles.subHeading, marginBottom: 0, color: theme.FOREGROUND }}>Check this box to add this break on all days</Text>
+                    </View>
+
+                    {/* Warning message */}
+                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
+
+                    { /* Add Break Button */ }
+                    <TouchableOpacity 
+                        style={styles.button}
+                        onPress={() => {
+                            if ((endTime.isBefore(startTime)) || endTime.equals(startTime)) {
+                                setShowWarning(true)
+                            } else {
+                                setShowWarning(false)
+                                onClick(startTime, endTime, repeated, dateOfBreak)
+                                setToDefaults();
+                            }
+                        }}
+                    >
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
                     </TouchableOpacity>
-                    <Text style={{ ...styles.subHeading, marginBottom: 0, color: theme.FOREGROUND }}>Check this box to add this break on all days</Text>
                 </View>
-
-                {/* Warning message */}
-                {showWarning && <Text style={styles.warning}>{warning}</Text>}
-
-                { /* Add Break Button */ }
-                <TouchableOpacity 
-                    style={styles.button}
-                    onPress={() => {
-                        console.log(`Adding break from ${startTime.to12HourString()} to ${endTime.to12HourString()} on ${dateOfBreak.getDateString()}`);
-                        if ((endTime.isBefore(startTime)) || endTime.equals(startTime)) {
-                            setShowWarning(true)
-                        } else {
-                            setShowWarning(false)
-                            onClick(startTime, endTime, repeated, dateOfBreak)
-                            setToDefaults();
-                        }
-                    }}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
-                </TouchableOpacity>
-            </View>
+            </TouchableWithoutFeedback>
         </Modal>
     )
 }

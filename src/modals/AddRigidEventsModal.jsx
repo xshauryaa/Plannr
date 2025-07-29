@@ -1,17 +1,18 @@
 import React, { useState } from 'react' 
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform } from 'react-native'
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native'
 import Modal from 'react-native-modal'
 
-import DatePicker from '../components/DatePicker.jsx'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import TimePicker from '../components/TimePicker.jsx'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import convertTimeToTime24 from '../utils/timeConversion.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
+import Time24 from '../model/Time24.js'
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
-import ScheduleDate from '../model/ScheduleDate.js'
 
 const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const { appState } = useAppState();
@@ -28,7 +29,7 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [showWarning, setShowWarning] = useState(false)
 
     let maxDate = minDate;
-    for (let i = 0; i < numDays; i++) {
+    for (let i = 0; i < numDays - 1; i++) {
         maxDate = maxDate.getNextDate();
     }
 
@@ -113,94 +114,99 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                {/* Panel 1 - Name + Activity Type */}
-                {Panel1()}
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+                    {/* Panel 1 - Name + Activity Type */}
+                    {Panel1()}
 
-                {/* Activity Type Picker */}
-                {showTypePicker && 
-                    <View>
-                        <Picker
-                            selectedValue={type}
-                            onValueChange={(itemValue) => setType(itemValue)}
-                            themeVariant={appState.userPreferences.theme}
-                        >
-                            <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
-                            <Picker.Item label="Meeting" value={ActivityType.MEETING} />
-                            <Picker.Item label="Work" value={ActivityType.WORK} />
-                            <Picker.Item label="Event" value={ActivityType.EVENT} />
-                            <Picker.Item label="Education" value={ActivityType.EDUCATION} />
-                            <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
-                            <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
-                            <Picker.Item label="Errand" value={ActivityType.ERRAND} />
-                            <Picker.Item label="Other" value={ActivityType.OTHER} />
-                        </Picker>
-                        <TouchableOpacity 
-                            style={styles.button}
-                            onPress={() => setShowTypePicker(false)}
-                        >
-                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                        </TouchableOpacity>
-                    </View>
-                }
-
-                {/* Panel 2 - Time Inputs */}
-                {Panel2()}
-
-                {/* Panel 3 - Date Picker */}
-                <View>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowDatePicker(true) }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
-                            pointerEvents="none"
-                            value={dateOfEvent.getDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
-                    {showDatePicker && (
+                    {/* Activity Type Picker */}
+                    {showTypePicker && 
                         <View>
-                            <DatePicker
-                                mode="date"
-                                onChange={(date) => {
-                                    setDateOfEvent(date);
-                                }}
-                                minimumDate={minDate}
-                                maximumDate={maxDate}
-                            />
+                            <Picker
+                                selectedValue={type}
+                                onValueChange={(itemValue) => setType(itemValue)}
+                                themeVariant={appState.userPreferences.theme}
+                            >
+                                <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
+                                <Picker.Item label="Meeting" value={ActivityType.MEETING} />
+                                <Picker.Item label="Work" value={ActivityType.WORK} />
+                                <Picker.Item label="Event" value={ActivityType.EVENT} />
+                                <Picker.Item label="Education" value={ActivityType.EDUCATION} />
+                                <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
+                                <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
+                                <Picker.Item label="Errand" value={ActivityType.ERRAND} />
+                                <Picker.Item label="Other" value={ActivityType.OTHER} />
+                            </Picker>
                             <TouchableOpacity 
                                 style={styles.button}
-                                onPress={() => setShowDatePicker(false)}
+                                onPress={() => setShowTypePicker(false)}
                             >
                                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
                             </TouchableOpacity>
                         </View>
-                    )}
+                    }
+
+                    {/* Panel 2 - Time Inputs */}
+                    {Panel2()}
+
+                    {/* Panel 3 - Date Picker */}
+                    <View>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                        <Pressable onPress={() => { setShowDatePicker(true) }}>
+                            <TextInput
+                                style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
+                                pointerEvents="none"
+                                value={dateOfEvent.getDateString()}
+                                editable={false}
+                            />
+                        </Pressable>
+                        {showDatePicker && (
+                            <View>
+                                <DateTimePicker
+                                    value={combineScheduleDateAndTime24(dateOfEvent, new Time24(0, 0))}
+                                    mode="date"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={(event, date) => {
+                                        if (date) setDateOfEvent(convertDateToScheduleDate(date));
+                                    }}
+                                    minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}
+                                    maximumDate={combineScheduleDateAndTime24(maxDate, new Time24(23, 59))}
+                                    themeVariant={appState.userPreferences.theme}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.button}
+                                    onPress={() => setShowDatePicker(false)}
+                                >
+                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+
+
+                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
+
+                    { /* Add Rigid Event Button */ }
+                    <TouchableOpacity 
+                        style={styles.button}
+                        onPress={() => {
+                            if (name.length == 0) {
+                                setWarning("Name of event cannot be empty")
+                                setShowWarning(true)
+                            } else if ((endTime.isBefore(startTime)) || endTime.equals(startTime)) {
+                                setWarning("End time must be after start time")
+                                setShowWarning(true)
+                            } else {
+                                setShowWarning(false)
+                                onClick(name, type, dateOfEvent, startTime, endTime)
+                                setToDefaults();
+                            }
+                        }}
+                    >
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
+                    </TouchableOpacity>
                 </View>
-
-
-                {showWarning && <Text style={styles.warning}>{warning}</Text>}
-
-                { /* Add Rigid Event Button */ }
-                <TouchableOpacity 
-                    style={styles.button}
-                    onPress={() => {
-                        if (name.length == 0) {
-                            setWarning("Name of event cannot be empty")
-                            setShowWarning(true)
-                        } else if ((endTime.isBefore(startTime)) || endTime.equals(startTime)) {
-                            setWarning("End time must be after start time")
-                            setShowWarning(true)
-                        } else {
-                            setShowWarning(false)
-                            onClick(name, type, dateOfEvent, startTime, endTime)
-                            setToDefaults();
-                        }
-                    }}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
-                </TouchableOpacity>
-            </View>
+            </TouchableWithoutFeedback>
         </Modal>
     )
 }

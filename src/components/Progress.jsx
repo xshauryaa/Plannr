@@ -47,7 +47,7 @@ const Progress = () => {
     const ScheduleView = () => {
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                <Text style={{ ...styles.topText, color: theme.FOREGROUND }}>You've completed {Math.round(progress)}% of this week's tasks!</Text>
+                <Text style={{ ...styles.topText, color: theme.FOREGROUND }}>You've completed {Math.round(progress)}% of this schedule's tasks!</Text>
                 <View style={styles.progressBarBack}>
                     <LinearGradient
                         colors={[theme.GRADIENT_START, theme.GRADIENT_END]}

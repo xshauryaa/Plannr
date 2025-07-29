@@ -149,7 +149,7 @@ const RescheduleScreen = ({ route, navigation }) => {
                 onViewSchedule={() => { 
                     setShowReschedulingModal(false) 
                     const toView = appState.savedSchedules.find(s => s.name === schedule.name);
-                    navigation.navigate('View', { schedName: toView.name });
+                    navigation.replace('View', { schedName: toView.name });
                 }}
                 reschedule={true}
             />
