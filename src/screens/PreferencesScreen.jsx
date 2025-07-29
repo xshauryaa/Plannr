@@ -8,6 +8,7 @@ import LightMode from '../../assets/system-icons/LightMode.svg'
 import DarkMode from '../../assets/system-icons/DarkMode.svg'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
+import { padding } from '../design/spacing.js'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
@@ -206,19 +207,20 @@ const PreferencesScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
         backgroundColor: '#FFFFFF',
         height: '100%',
     },
     subContainer: {
         height: '80%',
-        paddingBottom: 32
+        paddingBottom: 32,
+        paddingHorizontal: padding.SCREEN_PADDING,
     },
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: 64,
-        marginBottom: 8
+        marginBottom: 8,
+        marginLeft: padding.SCREEN_PADDING,
     },
     card: {
         width: '99%',

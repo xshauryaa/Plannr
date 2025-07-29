@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react
 import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
+import { padding } from '../design/spacing.js'
 
 const SavedSchedulesScreen = ({ navigation }) => {
     const { appState } = useAppState();
@@ -57,17 +58,18 @@ const SavedSchedulesScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
         height: '100%',
     },
     subContainer: {
         height: '90%',
+        paddingHorizontal: padding.SCREEN_PADDING,
     },
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: 16,
-        marginBottom: 8
+        marginBottom: 8,
+        marginLeft: padding.SCREEN_PADDING,
     },
     card: {
         width: '99%',

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react' 
-import { Text, View, StyleSheet } from 'react-native'
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import GoIcon from '../../assets/system-icons/GoIcon.svg';
 import { useAppState } from '../context/AppStateContext.js'
@@ -7,6 +7,7 @@ import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
 import { typography } from '../design/typography.js';
 import { Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
@@ -16,6 +17,7 @@ const Progress = () => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const [progress, setProgress] = useState(0);
+    const navigation = useNavigation();
 
     useEffect(() => {
         let totalTasks = 0;
@@ -58,7 +60,9 @@ const Progress = () => {
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR }}>
                     <Text style={{ ...styles.bottomText, color: theme.FOREGROUND }}>View your current schedule</Text>
-                    <GoIcon style={styles.icon} width={18} height={18} color={theme.FOREGROUND} />
+                    <TouchableOpacity onPress={() => navigation.navigate('View', { schedName: appState.activeSchedule.name })}>
+                        <GoIcon style={styles.icon} width={18} height={18} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
                 </View>
             </View>
         )
@@ -73,7 +77,7 @@ const Progress = () => {
 
 const styles = StyleSheet.create({
     card: {
-        width: WIDTH - 10,
+        width: WIDTH,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {

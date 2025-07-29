@@ -72,17 +72,21 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: padding.SCREEN_PADDING,
+        paddingVertical: padding.SCREEN_PADDING,
         height: '100%',
     },
     subContainer: {
-        height: '90%',
+        height: width,
+        alignSelf: 'center',
+        alignContent: 'center',
+        paddingHorizontal: padding.SCREEN_PADDING,
     },
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
+        marginLeft: padding.SCREEN_PADDING,
     },
     subHeading: {
         fontSize: typography.subHeadingSize,
@@ -90,7 +94,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACE,
     },
     horizontalGrid: {
-        width: '99%',
+        width: '100%',
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',

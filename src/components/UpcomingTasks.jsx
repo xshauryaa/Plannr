@@ -142,7 +142,7 @@ const UpcomingTasks = ({ onClick }) => {
 
 const styles = StyleSheet.create({
     card: {
-        width: WIDTH - 10,
+        width: WIDTH,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {

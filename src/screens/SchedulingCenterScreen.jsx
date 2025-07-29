@@ -62,17 +62,20 @@ const SchedulingCenterScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: padding.SCREEN_PADDING,
+        paddingVertical: padding.SCREEN_PADDING,
         height: '100%',
     },
     subContainer: {
         height: '90%',
+        paddingHorizontal: padding.SCREEN_PADDING,
+
     },
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
+        marginLeft: padding.SCREEN_PADDING,
     },
     subHeading: {
         fontSize: typography.subHeadingSize,
