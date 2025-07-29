@@ -85,11 +85,11 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         return (
             <View style={{ gap: 12, marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
                     <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
                     <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                 </View>
             </View>

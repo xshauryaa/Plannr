@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
-import EditIcon from '../../assets/system-icons/EditIcon.svg'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 
@@ -43,11 +42,6 @@ const SavedSchedulesScreen = ({ navigation }) => {
                                                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
                                                     {item.schedule.getFirstDate().getDateString()} onwards
                                                 </Text>
-                                            </View>
-                                            <View style={{ flexDirection: 'row', gap: 12 }}>
-                                                <TouchableOpacity onPress={() => {}}> 
-                                                    <EditIcon width={24} height={24} color={theme.FOREGROUND} />
-                                                </TouchableOpacity> 
                                             </View>
                                         </View>
                                     </View>

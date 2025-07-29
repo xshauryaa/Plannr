@@ -142,7 +142,7 @@ const RescheduleScreen = ({ route, navigation }) => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Reschedule Tasks</Text>
+            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Reschedule</Text>
             {currentView}
             <GenerationModal
                 isVisible={showReschedulingModal}

@@ -36,7 +36,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const [showGenerationModal, setShowGenerationModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
 
-    const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Event Dependencies', 'VI. Rounding Up']
+    const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Dependencies', 'VI. Rounding Up']
 
     const SchedulerInitialization = (name, numDays, date, gap, workingLimit) => {
         const startDate = combineScheduleDateAndTime24(date, new Time24(0, 0)); // convertDateToScheduleDate(date)

@@ -50,7 +50,6 @@ const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
 const styles = StyleSheet.create({
     card: {
         width: 361,
-        height: 200,
         borderRadius: 36,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',

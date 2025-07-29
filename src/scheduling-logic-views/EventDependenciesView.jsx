@@ -40,8 +40,8 @@ const EventDependenciesView = ({ onNext, events, depsInput }) => {
 
         return (
             <View style={{  ...styles.depCard, backgroundColor: theme.INPUT }}>
-                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{dependentEvent.name}  </Text>
-                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{listOfDeps}</Text>
+                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 60 }}>{dependentEvent.name}  </Text>
+                <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 120 }}>{listOfDeps}</Text>
                 <TouchableOpacity onPress={() => { 
                     const deps = eventDependencies.getDependenciesForEvent(dependentEvent);
                     for (const dep of deps) {
@@ -135,7 +135,6 @@ const styles = StyleSheet.create({
         gap: 12
     },
     depCard: {
-        height: 40,
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',

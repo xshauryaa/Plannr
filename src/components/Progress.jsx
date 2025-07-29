@@ -57,7 +57,7 @@ const Progress = () => {
                     />
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR }}>
-                    <Text style={{ ...styles.bottomText, color: theme.FOREGROUND }}>View your current week's schedule</Text>
+                    <Text style={{ ...styles.bottomText, color: theme.FOREGROUND }}>View your current schedule</Text>
                     <GoIcon style={styles.icon} width={18} height={18} color={theme.FOREGROUND} />
                 </View>
             </View>
@@ -73,7 +73,7 @@ const Progress = () => {
 
 const styles = StyleSheet.create({
     card: {
-        width: WIDTH,
+        width: WIDTH - 10,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -84,7 +84,8 @@ const styles = StyleSheet.create({
         shadowRadius: 24,
         paddingHorizontal: 16,
         paddingVertical: 12,
-        marginBottom: SPACE
+        marginBottom: SPACE,
+        alignSelf: 'center',
     },
     topText: {
         fontSize: 12,

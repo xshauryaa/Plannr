@@ -53,11 +53,11 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                 <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
                     {/* Time Inputs */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
                         <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
                         <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                     </View>
 
@@ -106,7 +106,7 @@ const AddBreaksModal = ({ isVisible, onClick, minDate, numDays }) => {
                                 : <Unchecked width={24} height={24}color={theme.FOREGROUND} />
                             }
                         </TouchableOpacity>
-                        <Text style={{ ...styles.subHeading, marginBottom: 0, color: theme.FOREGROUND }}>Check this box to add this break on all days</Text>
+                        <Text style={{ ...styles.subHeading, marginBottom: 0, color: theme.FOREGROUND, width: 300 }}>Check this box to add this break on all days</Text>
                     </View>
 
                     {/* Warning message */}

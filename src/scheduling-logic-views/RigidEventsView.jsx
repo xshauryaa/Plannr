@@ -29,7 +29,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
         return (
             <View style={{ ...styles.eventCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 250 }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setRigidEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />

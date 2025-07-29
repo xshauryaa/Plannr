@@ -30,7 +30,7 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 
     if (broad) {
         return (
-            <TouchableOpacity style={{ ...styles.card, width: WIDTH, aspectRatio: WIDTH/90, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
+            <TouchableOpacity style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
                 <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 { ICONS[icon] || null }
             </TouchableOpacity>
@@ -47,7 +47,8 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
 const styles = StyleSheet.create({
     card: {
         width: (WIDTH - padding.SCREEN_PADDING) / 2,
-        aspectRatio: 191/90,
+        // aspectRatio: 191/90,
+        height: 100,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -69,4 +70,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default MenuButton
+export default MenuButton;

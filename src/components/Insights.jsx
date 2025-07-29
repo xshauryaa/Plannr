@@ -32,7 +32,7 @@ const Insights = ({ version, schedule }) => {
                     <ClockIcon width={24} height={24} color={theme.PURPLE} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND }}>
+                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 100 }}>
                         {day + 1}
                         <Text style={{ ...styles.subHeading, marginBottom: 0, fontSize: 24, color: theme.FOREGROUND }}> / {totalDays}</Text>
                     </Text>
@@ -115,11 +115,11 @@ const Insights = ({ version, schedule }) => {
         return (
             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Missed Tasks</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Missed</Text>
                     <WarningIcon width={24} height={24} color={theme.RED} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND }}>
+                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 120 }}>
                         {missedTasks}
                         <Text style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}> tasks</Text>
                     </Text>
@@ -162,7 +162,7 @@ const Insights = ({ version, schedule }) => {
                     <FireIcon width={24} height={24} color={theme.ORANGE} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND }}>
+                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 100 }}>
                         {streak}
                         <Text style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}> days</Text>
                     </Text>
@@ -190,7 +190,6 @@ const Insights = ({ version, schedule }) => {
 const styles = StyleSheet.create({
     card: {
         width: (WIDTH - padding.SCREEN_PADDING) / 2,
-        aspectRatio: 1.1,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {

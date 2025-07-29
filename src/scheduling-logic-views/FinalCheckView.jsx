@@ -25,14 +25,14 @@ const FinalCheckView = ({ onNext, buttonText = 'Generate Schedule' }) => {
         <View style={styles.subContainer}>
             <View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - some final preferences</Text>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Start Time</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Timings</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
                         <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
                         <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                     </View>
                     {showWarning && <Text style={styles.warning}>{warning}</Text>}

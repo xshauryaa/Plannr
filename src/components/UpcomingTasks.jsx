@@ -105,7 +105,7 @@ const UpcomingTasks = ({ onClick }) => {
                         )
                     }}
                 />
-                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR}}>
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR, marginTop: 8 }}>
                     <Text style={{ fontSize: 12, fontFamily: 'AlbertSans', color: theme.FOREGROUND }}>Expand to view all of today's tasks</Text>
                     <TouchableOpacity onPress={onClick}>
                         <Expand width={18} height={18} color={theme.FOREGROUND} />
@@ -142,8 +142,7 @@ const UpcomingTasks = ({ onClick }) => {
 
 const styles = StyleSheet.create({
     card: {
-        width: WIDTH,
-        aspectRatio: 398/262,
+        width: WIDTH - 10,
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: {
@@ -153,7 +152,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 24,
         padding: 16,
-        marginBottom: SPACE
+        marginBottom: SPACE,
+        alignSelf: 'center',
     },
     taskCard: {
         flexDirection: 'row',

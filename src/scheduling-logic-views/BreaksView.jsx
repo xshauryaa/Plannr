@@ -42,7 +42,7 @@ const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput
         return (
             <View style={{ ...styles.breakCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 250 }}>Break  |  {breakObj[0].getDateString()}  |  {breakObj[1].startTime.to12HourString()} - {breakObj[1].endTime.to12HourString()}</Text>
                 </View>
                 <TouchableOpacity onPress={() => { setBreaks(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />

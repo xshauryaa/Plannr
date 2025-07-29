@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Text, View, StyleSheet } from 'react-native'
+import { Text, View, StyleSheet, ScrollView } from 'react-native'
 import * as Font from 'expo-font';
 
 import LoadingScreen from './LoadingScreen.jsx';
@@ -39,7 +39,7 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hello {appState.name}</Text>
-            <View style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
+            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
                 <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
                 <Progress/>
@@ -65,7 +65,7 @@ const HomeScreen = ({ navigation }) => {
                         navTo={() => { navigation.navigate("Preferences") }}
                     />
                 </View>
-            </View>
+            </ScrollView>
         </View>
     )
 }
@@ -90,7 +90,8 @@ const styles = StyleSheet.create({
         marginBottom: SPACE,
     },
     horizontalGrid: {
-        width: '100%',
+        width: '99%',
+        alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
     }

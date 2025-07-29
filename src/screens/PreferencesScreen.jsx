@@ -193,9 +193,8 @@ const PreferencesScreen = () => {
                                     } }
                                     onBlur={validateAndSave}
                                 />
-                                <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>minutes before a task</Text>
+                                <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>minutes earlier</Text>
                             </View>
-                            {showLeadMinutesWarning && <Text style={styles.warning}>Must be a positive number</Text>}
                         </View>
                     )}
                 </View>

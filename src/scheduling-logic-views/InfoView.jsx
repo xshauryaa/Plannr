@@ -134,7 +134,7 @@ const InfoView = ({ onNext }) => {
                         hasError = true;
                     }
 
-                    if (appState.schedules.some(schedule => schedule.name === name)) {
+                    if (appState.savedSchedules.some(schedule => schedule.name === name)) {
                         setNameWarningType(2);
                         setShowNameWarning(true);
                         hasError = true;

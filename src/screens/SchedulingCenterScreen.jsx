@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -20,7 +20,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Plannr Center</Text>
-            <View style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
+            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
 
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
                 {
@@ -54,11 +54,8 @@ const SchedulingCenterScreen = ({ navigation }) => {
                         navTo={() => { bottomSheetRef.current?.show() }}
                     />
                 </View>
-            </View>
-            <RescheduleBottomSheet ref={bottomSheetRef} theme={theme}>
-                
-                
-            </RescheduleBottomSheet>
+            </ScrollView>
+            <RescheduleBottomSheet ref={bottomSheetRef} theme={theme}/>
         </View>
     );
 }
