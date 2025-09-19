@@ -30,7 +30,7 @@ const HomeScreen = ({ navigation }) => {
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
         'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
-      });
+    });
     
     if (!fontsLoaded) return null;
 

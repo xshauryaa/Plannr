@@ -107,10 +107,10 @@ export const AppStateProvider = ({ children }) => {
     let scheduleForTesting1 = testScheduler(new ScheduleDate(27, 6, 2025));
     let scheduleForTesting2 = testScheduler(new ScheduleDate(4, 7, 2025));
     let scheduleForTesting3 = testScheduler(new ScheduleDate(17, 7, 2025));
-    let scheduleForTesting4 = testScheduler(new ScheduleDate(28, 7, 2025));
+    let scheduleForTesting4 = testScheduler(new ScheduleDate(13, 9, 2025));
     
     const [appState, setAppState] = useState({
-        name: 'Vardaan',
+        name: '',
         userPreferences: {
             theme: 'light',
             defaultStrategy: 'earliest-fit',
@@ -120,10 +120,10 @@ export const AppStateProvider = ({ children }) => {
             leadMinutes: '30',
         },
         savedSchedules: [
-            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: true },
+            { name: 'Schedule 1', schedule: scheduleForTesting1, isActive: false },
             { name: 'Schedule 2', schedule: scheduleForTesting2, isActive: false },
             { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
-            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: false },
+            { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: true },
         ],
         activeSchedule: {name: 'Schedule 4', schedule: scheduleForTesting4, isActive: true},
         onboarded: false,
@@ -131,31 +131,31 @@ export const AppStateProvider = ({ children }) => {
     });
     const [storageLoaded, setStorageLoaded] = useState(true);
 
-    useEffect(() => {
-        const loadAppState = async () => {
-            console.log("Loading state")
-            try {
-                const raw = await AsyncStorage.getItem('appState');
-                const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-                if (parsed !== null) {
-                    setAppState(parsed);
-                } else if (parsed == null) {
-                    if (appState.firstLaunch) {
-                        console.log("First launch detected, initializing app state");
-                        setAppState({
-                            ...appState,
-                            firstLaunch: false
-                        });
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to load app state from storage', e);
-            } finally {
-                setStorageLoaded(true);
-            }
-        };
-        loadAppState();
-    }, []);
+    // useEffect(() => {
+    //     const loadAppState = async () => {
+    //         console.log("Loading state")
+    //         try {
+    //             const raw = await AsyncStorage.getItem('appState');
+    //             const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
+    //             if (parsed !== null) {
+    //                 setAppState(parsed);
+    //             } else if (parsed == null) {
+    //                 if (appState.firstLaunch) {
+    //                     console.log("First launch detected, initializing app state");
+    //                     setAppState({
+    //                         ...appState,
+    //                         firstLaunch: false
+    //                     });
+    //                 }
+    //             }
+    //         } catch (e) {
+    //             console.error('Failed to load app state from storage', e);
+    //         } finally {
+    //             setStorageLoaded(true);
+    //         }
+    //     };
+    //     loadAppState();
+    // }, []);
 
     useEffect(() => {
         console.log("Writing state")
