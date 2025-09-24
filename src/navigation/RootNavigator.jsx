@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-// import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
 
 import { useAppState } from '../context/AppStateContext';
 import LoadingScreen from '../screens/LoadingScreen.jsx';
@@ -10,17 +10,17 @@ import OnboardingStack from './OnboardingStack';
 import AppStack from './AppStack';
 
 export default function RootNavigator() {
-  // const { isLoaded, isSignedIn } = useUser();
-  const { appState } = useAppState();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { appState, storageLoaded } = useAppState();
 
-//   if (!isLoaded) {
-//     // Wait for Clerk to hydrate
-//     return <LoadingScreen />;
-//   }
+  if (!isLoaded || !storageLoaded) {
+    // Wait for Clerk to hydrate and storage to load
+    return <LoadingScreen />;
+  }
 
   return (
     <NavigationContainer>
-      { 0==1 ? ( // !isSignedIn ? ( -- Temporary disable auth for testing
+      { !isSignedIn ? (
         <AuthStack />
       ) : !appState?.onboarded ? (
         <OnboardingStack />

@@ -6,6 +6,8 @@ import 'react-native-gesture-handler';
 import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 import RootNavigator from './src/navigation/RootNavigator.jsx';
+import { ClerkProvider } from '@clerk/clerk-expo';
+import { tokenCache } from '@clerk/clerk-expo/token-cache';
 
 const DismissKeyboardWrapper = ({ children }) => (
   <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -18,14 +20,16 @@ export default function App() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View style={{ flex: 1 }}>
-                <AppStateProvider>
-                    <TaskCompletionChecker />
-                    <SafeAreaProvider>
-                        <RootNavigator />
-                    </SafeAreaProvider>
-                </AppStateProvider>
-            </View>
+            <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+                <View style={{ flex: 1 }}>
+                    <AppStateProvider>
+                        <TaskCompletionChecker />
+                        <SafeAreaProvider>
+                            <RootNavigator />
+                        </SafeAreaProvider>
+                    </AppStateProvider>
+                </View>
+            </ClerkProvider>
         </TouchableWithoutFeedback>
     );
 }

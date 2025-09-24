@@ -129,33 +129,33 @@ export const AppStateProvider = ({ children }) => {
         onboarded: false,
         firstLaunch: true
     });
-    const [storageLoaded, setStorageLoaded] = useState(true);
+    const [storageLoaded, setStorageLoaded] = useState(false);
 
-    // useEffect(() => {
-    //     const loadAppState = async () => {
-    //         console.log("Loading state")
-    //         try {
-    //             const raw = await AsyncStorage.getItem('appState');
-    //             const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-    //             if (parsed !== null) {
-    //                 setAppState(parsed);
-    //             } else if (parsed == null) {
-    //                 if (appState.firstLaunch) {
-    //                     console.log("First launch detected, initializing app state");
-    //                     setAppState({
-    //                         ...appState,
-    //                         firstLaunch: false
-    //                     });
-    //                 }
-    //             }
-    //         } catch (e) {
-    //             console.error('Failed to load app state from storage', e);
-    //         } finally {
-    //             setStorageLoaded(true);
-    //         }
-    //     };
-    //     loadAppState();
-    // }, []);
+    useEffect(() => {
+        const loadAppState = async () => {
+            console.log("Loading state")
+            try {
+                const raw = await AsyncStorage.getItem('appState');
+                const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
+                if (parsed !== null) {
+                    setAppState(parsed);
+                } else if (parsed == null) {
+                    if (appState.firstLaunch) {
+                        console.log("First launch detected, initializing app state");
+                        setAppState({
+                            ...appState,
+                            firstLaunch: false
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load app state from storage', e);
+            } finally {
+                setStorageLoaded(true);
+            }
+        };
+        loadAppState();
+    }, []);
 
     useEffect(() => {
         console.log("Writing state")

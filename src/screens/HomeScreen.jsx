@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Text, View, StyleSheet, ScrollView } from 'react-native'
 import * as Font from 'expo-font';
+import { useClerk } from '@clerk/clerk-expo';
 
 import LoadingScreen from './LoadingScreen.jsx';
 import UpcomingTasks from '../components/UpcomingTasks.jsx';
@@ -35,6 +36,8 @@ const HomeScreen = ({ navigation }) => {
     if (!fontsLoaded) return null;
 
     const todaysDate = convertDateToScheduleDate(currentTime);
+
+    const { signOut } = useClerk();
     
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -57,7 +60,10 @@ const HomeScreen = ({ navigation }) => {
                     <MenuButton
                         title="View Your Saved Schedules"
                         icon="Saved"
-                        navTo={() => { navigation.navigate("Saved") }}
+                        navTo={() => { 
+                            signOut();
+                            // navigation.navigate("Saved") 
+                        }}
                     />
                     <MenuButton
                         title="Change Preferences"
