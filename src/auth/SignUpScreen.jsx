@@ -1,6 +1,6 @@
-import { useSignUp } from "@clerk/clerk-expo";
+import { useSignUp, useClerk } from "@clerk/clerk-expo";
 import React, { useState, useRef } from "react";
-import { View, TextInput, Button, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
+import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";
@@ -15,6 +15,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const SignUpScreen = ({ navigation }) => {
 
     const { signUp, setActive, isLoaded } = useSignUp();
+    const clerk = useClerk();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,7 +23,7 @@ const SignUpScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [pendingVerification, setPendingVerification] = useState(false);
     const [verifying, setVerifying] = useState(false);
-    
+
     const verificationBottomSheetRef = useRef(null);
 
     const handleSignUp = async () => {
@@ -48,7 +49,7 @@ const SignUpScreen = ({ navigation }) => {
 
             await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
             setPendingVerification(true)
-            
+
             // Show verification bottom sheet
             verificationBottomSheetRef.current?.show();
         } catch (err) {
@@ -85,30 +86,62 @@ const SignUpScreen = ({ navigation }) => {
         }
     };
 
+    const handleGoogleSignUp = async () => {
+        setLoading(true);
+        try {
+            await clerk.authenticateWithRedirect({
+                strategy: 'oauth_google',
+                redirectUrl: 'plannr://oauth-callback',
+                redirectUrlComplete: 'plannr://oauth-complete'
+            });
+        } catch (err) {
+            Alert.alert("Error signing up with Google. Please try again.");
+            console.error(JSON.stringify(err, null, 2));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAppleSignUp = async () => {
+        setLoading(true);
+        try {
+            await clerk.authenticateWithRedirect({
+                strategy: 'oauth_apple',
+                redirectUrl: 'plannr://oauth-callback',
+                redirectUrlComplete: 'plannr://oauth-complete'
+            });
+        } catch (err) {
+            Alert.alert("Error signing up with Apple. Please try again.");
+            console.error(JSON.stringify(err, null, 2));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView style={styles.keyboardView} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
                 <ScrollView contentContainerStyle={styles.scrollContent} showVerticalScrollIndicator={false} >
                     <Image source={require('../../assets/background.png')} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width, height, opacity: 0.8 }} />
-                    <View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR}}>
+                    <View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR }}>
                         <Text style={styles.title}>Welcome to Plannr 📆</Text>
                         <Text style={styles.subHeading}>Sign up to continue</Text>
-                        <TextInput 
-                            style={{ ...styles.input, backgroundColor: lightColor.INPUT, color: lightColor.FOREGROUND }} 
-                            placeholder="Email" 
-                            placeholderTextColor="#888" 
-                            keyboardType="email-address" 
-                            autoCapitalize="none" 
-                            value={email} 
-                            onChangeText={setEmail} 
+                        <TextInput
+                            style={{ ...styles.input, backgroundColor: lightColor.INPUT, color: lightColor.FOREGROUND }}
+                            placeholder="Email"
+                            placeholderTextColor="#888"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            value={email}
+                            onChangeText={setEmail}
                         />
-                        <TextInput 
-                            style={{ ...styles.input, backgroundColor: lightColor.INPUT, color: lightColor.FOREGROUND }} 
-                            placeholder="Password" 
-                            placeholderTextColor="#888" 
-                            secureTextEntry={!showPassword} 
-                            value={password} 
-                            onChangeText={setPassword} 
+                        <TextInput
+                            style={{ ...styles.input, backgroundColor: lightColor.INPUT, color: lightColor.FOREGROUND }}
+                            placeholder="Password"
+                            placeholderTextColor="#888"
+                            secureTextEntry={!showPassword}
+                            value={password}
+                            onChangeText={setPassword}
                         />
                         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: SPACE, gap: 8 }}>
                             {showPassword ? <EyeClosedIcon color="#888" height={20} width={20} /> : <EyeIcon color="#888" height={20} width={20} />}
@@ -122,11 +155,11 @@ const SignUpScreen = ({ navigation }) => {
                             <Text style={{ marginHorizontal: 8, color: '#888', fontSize: typography.subHeadingSize * 0.8, marginBottom: SPACE }}>OR</Text>
                             <View style={{ flex: 1, height: 1, backgroundColor: '#ccc', alignSelf: 'center', marginBottom: SPACE }} />
                         </View>
-                        <TouchableOpacity style={styles.button} onPress={() => console.log("Google Sign-Up")} disabled={loading}>
+                        <TouchableOpacity style={styles.button} onPress={handleGoogleSignUp} disabled={loading}>
                             <Google width={20} height={20} />
                             <Text style={{ ...styles.subHeading, color: '#FFF', marginBottom: 0 }}>{loading ? "Loading..." : "Sign Up with Google"}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => console.log("Apple Sign-Up")} disabled={loading}>
+                        <TouchableOpacity style={styles.button} onPress={handleAppleSignUp} disabled={loading}>
                             <Apple width={20} height={20} color="#FFF" />
                             <Text style={{ ...styles.subHeading, color: '#FFF', marginBottom: 0 }}>{loading ? "Loading..." : "Sign Up with Apple"}</Text>
                         </TouchableOpacity>
@@ -137,7 +170,7 @@ const SignUpScreen = ({ navigation }) => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-            
+
             <VerificationBottomSheet
                 ref={verificationBottomSheetRef}
                 onVerifyCode={handleVerifyCode}
@@ -192,7 +225,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
@@ -202,7 +235,7 @@ const styles = StyleSheet.create({
     button: {
         width: '90%',
         borderRadius: 12,
-        backgroundColor: '#000' ,
+        backgroundColor: '#000',
         paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: 'row',

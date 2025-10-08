@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "plannr",
     "splash": {
       "image": "./assets/icon.png",
       "resizeMode": "contain",
@@ -17,7 +18,8 @@
       "bundleIdentifier": "com.sthareja19.Plannr",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

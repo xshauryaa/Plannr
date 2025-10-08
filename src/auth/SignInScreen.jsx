@@ -1,6 +1,6 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useClerk } from "@clerk/clerk-expo";
 import React, { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
+import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";
@@ -20,6 +20,7 @@ const SignInScreen = ({ navigation }) => {
     });
 
     const { signIn, setActive, isLoaded } = useSignIn();
+    const clerk = useClerk();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -37,20 +38,52 @@ const SignInScreen = ({ navigation }) => {
         setLoading(true);
         try {
             const signInAttempt = await signIn.create({
-                identifier: emailAddress,
+                identifier: email,
                 password,
             });
 
             if (signInAttempt.status === 'complete') {
-                await setActive({ session: signInAttempt.createdSessionId })
-                router.replace('/')
+                await setActive({ session: signInAttempt.createdSessionId });
+                // Navigation will be handled by RootNavigator
             } else {
                 Alert.alert("Sign-in not complete. Please try again.");
-                console.error(JSON.stringify(signInAttempt.status, null, 2))
+                console.error(JSON.stringify(signInAttempt.status, null, 2));
             }
         } catch (err) {
             Alert.alert("Error signing in. Please check your credentials and try again.");
-            console.error(JSON.stringify(err, null, 2))
+            console.error(JSON.stringify(err, null, 2));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        setLoading(true);
+        try {
+            await clerk.authenticateWithRedirect({
+                strategy: 'oauth_google',
+                redirectUrl: 'plannr://oauth-callback',
+                redirectUrlComplete: 'plannr://oauth-complete'
+            });
+        } catch (err) {
+            Alert.alert("Error signing in with Google. Please try again.");
+            console.error(JSON.stringify(err, null, 2));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAppleSignIn = async () => {
+        setLoading(true);
+        try {
+            await clerk.authenticateWithRedirect({
+                strategy: 'oauth_apple',
+                redirectUrl: 'plannr://oauth-callback',
+                redirectUrlComplete: 'plannr://oauth-complete'
+            });
+        } catch (err) {
+            Alert.alert("Error signing in with Apple. Please try again.");
+            console.error(JSON.stringify(err, null, 2));
         } finally {
             setLoading(false);
         }
@@ -95,11 +128,11 @@ const SignInScreen = ({ navigation }) => {
                             <Text style={{ marginHorizontal: 8, color: '#888', fontSize: typography.subHeadingSize * 0.8, marginBottom: SPACE }}>OR</Text>
                             <View style={{ flex: 1, height: 1, backgroundColor: '#ccc', alignSelf: 'center', marginBottom: SPACE }} />
                         </View>
-                        <TouchableOpacity style={styles.button} onPress={() => console.log("Google Sign-In")} disabled={loading}>
+                        <TouchableOpacity style={styles.button} onPress={handleGoogleSignIn} disabled={loading}>
                             <Google width={20} height={20} />
                             <Text style={{ ...styles.subHeading, color: '#FFF', marginBottom: 0 }}>{loading ? "Signing In..." : "Sign In with Google"}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => console.log("Apple Sign-In")} disabled={loading}>
+                        <TouchableOpacity style={styles.button} onPress={handleAppleSignIn} disabled={loading}>
                             <Apple width={20} height={20} color="#FFF" />
                             <Text style={{ ...styles.subHeading, color: '#FFF', marginBottom: 0 }}>{loading ? "Signing In..." : "Sign In with Apple"}</Text>
                         </TouchableOpacity>
