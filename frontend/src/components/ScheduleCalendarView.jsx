@@ -5,8 +5,7 @@ import { lightColor, darkColor } from '../design/colors.js';
 import { spacing } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import ActivityType from '../model/ActivityType.js'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
+// Removed Reanimated imports for Expo Go compatibility
 
 const ActivityTypeColors = {
   [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
@@ -31,22 +30,16 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [rowHeight, setRowHeight] = useState(60);
-    const rowHeightShared = useSharedValue(60);
+    // Removed Reanimated shared value for Expo Go compatibility
 
     const timeBlocks = schedule.getScheduleForDate(date).getTimeBlocks();
     const start = schedule.startTime.getHour();
     const HOURS = Array.from({ length: 24 - start }, (_, i) => i + start);
 
-    const pinch = Gesture.Pinch()
-        .onUpdate((event) => {
-            const newHeight = Math.max(30, Math.min(200, rowHeightShared.value * event.scale));
-            rowHeightShared.value = newHeight;
-            runOnJS(setRowHeight)(newHeight);
-        });
+    // Removed pinch gesture for Expo Go compatibility - can be re-enabled in production build
 
     return ((isVisible == true) 
-        ? <GestureDetector gesture={pinch}>
-            <ScrollView
+        ? <ScrollView
                 style={styles.container}
                 contentContainerStyle={{ flexDirection: 'row' }}
                 showsVerticalScrollIndicator={false}
@@ -99,7 +92,6 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
                     })}
                 </View>
             </ScrollView>
-        </GestureDetector>
         : null
     );
 }

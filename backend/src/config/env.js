@@ -14,5 +14,5 @@ export const ENV = {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV || 'development',
     AUTH_DEV: process.env.AUTH_DEV === 'true',
-    API_URL: process.env.API_URL // Your Render deployment URL
+    API_URL: process.env.API_URL || 'https://plannr-690n.onrender.com' // Your Render deployment URL
 }
