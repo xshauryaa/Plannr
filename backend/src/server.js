@@ -3,6 +3,7 @@ import cors from 'cors';
 import { ENV } from './config/env.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middleware/error.js';
+import { startCronJobs, stopCronJobs } from './config/cron.js';
 
 const app = express();
 const PORT = ENV.PORT;
@@ -29,4 +30,20 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Plannr Backend Server is running on port ${PORT}`);
     console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+    
+    // Start cron jobs for keep-alive
+    startCronJobs();
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('🛑 Received SIGTERM, shutting down gracefully...');
+    stopCronJobs();
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('🛑 Received SIGINT, shutting down gracefully...');
+    stopCronJobs();
+    process.exit(0);
 });
