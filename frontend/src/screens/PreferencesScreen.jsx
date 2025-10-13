@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Switch } from 'react-native'
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native'
+import { useClerk } from "@clerk/clerk-expo"
+import { TokenCacheUtils } from '../../cache.js'
 import { useAppState } from '../context/AppStateContext.js'
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg'
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg'
@@ -12,12 +14,44 @@ import { padding } from '../design/spacing.js'
 
 const PreferencesScreen = () => {
     const { appState, setAppState } = useAppState();
+    const { signOut } = useClerk();
     const [showNameWarning, setShowNameWarning] = useState(false);
     const [showMinGapWarning, setShowMinGapWarning] = useState(false);
     const [showMaxHoursWarning, setShowMaxHoursWarning] = useState(false);
     const [showLeadMinutesWarning, setShowLeadMinutesWarning] = useState(false);
     
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    const handleLogout = async () => {
+        Alert.alert(
+            "Sign Out",
+            "Are you sure you want to sign out?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Sign Out",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            // Clear all authentication tokens from secure storage
+                            await TokenCacheUtils.clearAllAuthData();
+                            
+                            // Sign out from Clerk
+                            await signOut();
+                            
+                            console.log("Successfully signed out and cleared all tokens");
+                        } catch (error) {
+                            console.error("Error signing out:", error);
+                            Alert.alert("Error", "Failed to sign out. Please try again.");
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     const validateAndSave = () => {
         // Reset all warnings
@@ -65,6 +99,14 @@ const PreferencesScreen = () => {
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Preferences</Text>
             <ScrollView style={styles.subContainer}>
+                {/* Logout Button */}
+                <TouchableOpacity 
+                    style={{ ...styles.logoutButton, backgroundColor: theme.COMP_COLOR, borderColor: '#FF4444' }}
+                    onPress={handleLogout}
+                >
+                    <Text style={{ ...styles.logoutButtonText, color: '#FF4444' }}>Sign Out</Text>
+                </TouchableOpacity>
+                
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your Name</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
@@ -294,6 +336,22 @@ const styles = StyleSheet.create({
         marginTop: 8,
         color: '#FF0000',
         alignSelf: 'center'
+    },
+    logoutButton: {
+        width: '92%',
+        borderRadius: 12,
+        borderWidth: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginBottom: 16,
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoutButtonText: {
+        fontSize: typography.subHeadingSize,
+        fontFamily: 'AlbertSans',
+        fontWeight: '600',
     },
 })
 

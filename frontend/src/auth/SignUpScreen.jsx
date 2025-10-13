@@ -1,6 +1,7 @@
-import { useSignUp, useClerk } from "@clerk/clerk-expo";
-import React, { useState, useRef } from "react";
+import { useSignUp, useClerk, useSSO } from "@clerk/clerk-expo";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
+import { TokenCacheUtils } from '../../cache.js';
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";
@@ -9,13 +10,32 @@ const { width, height } = Dimensions.get('window');
 import Google from '../../assets/auth/Google.svg';
 import Apple from '../../assets/auth/Apple.svg';
 import VerificationBottomSheet from '../components/VerificationBottomSheet.jsx';
+import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
+
+export const useWarmUpBrowser = () => {
+  useEffect(() => {
+    if (Platform.OS !== 'android') return
+    void WebBrowser.warmUpAsync()
+    return () => {
+      // Cleanup: closes browser when component unmounts
+      void WebBrowser.coolDownAsync()
+    }
+  }, [])
+}
+
+// Handle any pending authentication sessions
+WebBrowser.maybeCompleteAuthSession()
+
 
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 const SignUpScreen = ({ navigation }) => {
+    useWarmUpBrowser();
 
     const { signUp, setActive, isLoaded } = useSignUp();
     const clerk = useClerk();
+    const { startSSOFlow } = useSSO();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -25,6 +45,8 @@ const SignUpScreen = ({ navigation }) => {
     const [verifying, setVerifying] = useState(false);
 
     const verificationBottomSheetRef = useRef(null);
+
+
 
     const handleSignUp = async () => {
         if (!email || !password) {
@@ -73,6 +95,12 @@ const SignUpScreen = ({ navigation }) => {
             if (completeSignUp.status === 'complete') {
                 await setActive({ session: completeSignUp.createdSessionId });
                 verificationBottomSheetRef.current?.hide();
+                
+                // Log successful authentication
+                if (__DEV__) {
+                    console.log("User successfully signed up and verified");
+                    await TokenCacheUtils.getDebugInfo();
+                }
                 // User is now signed up and signed in
             } else {
                 Alert.alert("Verification failed. Please check the code and try again.");
@@ -86,37 +114,168 @@ const SignUpScreen = ({ navigation }) => {
         }
     };
 
-    const handleGoogleSignUp = async () => {
+    const handleGoogleSignUp = useCallback(async () => {
+        if (loading) return; // Prevent multiple simultaneous requests
+        
         setLoading(true);
+        
         try {
-            await clerk.authenticateWithRedirect({
-                strategy: 'oauth_google',
-                redirectUrl: 'plannr://oauth-callback',
-                redirectUrlComplete: 'plannr://oauth-complete'
+            // Start the authentication process by calling `startSSOFlow()`
+            const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+                strategy: 'oauth_google'
             });
-        } catch (err) {
-            Alert.alert("Error signing up with Google. Please try again.");
-            console.error(JSON.stringify(err, null, 2));
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const handleAppleSignUp = async () => {
-        setLoading(true);
-        try {
-            await clerk.authenticateWithRedirect({
-                strategy: 'oauth_apple',
-                redirectUrl: 'plannr://oauth-callback',
-                redirectUrlComplete: 'plannr://oauth-complete'
-            });
+            // If sign in was successful, set the active session
+            if (createdSessionId) {
+                await setActive({
+                    session: createdSessionId,
+                    navigate: async ({ session }) => {
+                        if (session?.currentTask) {
+                            console.log("Session task found:", session?.currentTask);
+                            return;
+                        }
+                        
+                        // Log successful authentication
+                        if (__DEV__) {
+                            console.log("User successfully signed up/in with Google");
+                            await TokenCacheUtils.getDebugInfo();
+                        }
+                    },
+                });
+            } else {
+                console.log("Google Sign-In completed but no session created. Missing requirements may need to be handled.");
+                Alert.alert(
+                    "Additional Setup Required", 
+                    "Please complete your account setup to continue."
+                );
+            }
         } catch (err) {
-            Alert.alert("Error signing up with Apple. Please try again.");
-            console.error(JSON.stringify(err, null, 2));
+            console.error("Google Sign-In Error:", JSON.stringify(err, null, 2));
+            
+            // Handle specific error cases
+            if (err.errors && err.errors.length > 0) {
+                const errorCode = err.errors[0]?.code;
+                const errorMessage = err.errors[0]?.message;
+                
+                switch (errorCode) {
+                    case 'form_identifier_exists':
+                        Alert.alert(
+                            "Account Exists", 
+                            "An account with this Google account already exists. Please sign in instead."
+                        );
+                        break;
+                    case 'oauth_access_denied':
+                        console.log("User cancelled Google Sign-In");
+                        break;
+                    case 'clerk_network_error':
+                        Alert.alert(
+                            "Network Error", 
+                            "Please check your internet connection and try again."
+                        );
+                        break;
+                    default:
+                        Alert.alert(
+                            "Sign-In Error", 
+                            errorMessage || "Something went wrong with Google Sign-In. Please try again."
+                        );
+                }
+            } else {
+                Alert.alert(
+                    "Sign-In Error", 
+                    "Something went wrong with Google Sign-In. Please try again."
+                );
+            }
         } finally {
             setLoading(false);
         }
-    };
+    }, [loading, startSSOFlow]);
+
+    const handleAppleSignUp = useCallback(async () => {
+        if (loading) return; // Prevent multiple simultaneous requests
+        
+        setLoading(true);
+        
+        try {
+            // Start the authentication process by calling `startSSOFlow()`
+            const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+                strategy: 'oauth_apple'
+            });
+
+            // If sign in was successful, set the active session
+            if (createdSessionId) {
+                await setActive({
+                    session: createdSessionId,
+                    // Check for session tasks and navigate to custom UI to help users resolve them
+                    // See https://clerk.com/docs/guides/development/custom-flows/overview#session-tasks
+                    navigate: async ({ session }) => {
+                        if (session?.currentTask) {
+                            console.log("Session task found:", session?.currentTask);
+                            // Handle any additional session tasks if needed
+                            // For most cases, this can be left as is
+                            return;
+                        }
+                        
+                        // Log successful authentication
+                        if (__DEV__) {
+                            console.log("User successfully signed up/in with Apple");
+                            await TokenCacheUtils.getDebugInfo();
+                        }
+                    },
+                });
+            } else {
+                // If there is no `createdSessionId`,
+                // there are missing requirements, such as MFA
+                // See https://clerk.com/docs/guides/development/custom-flows/authentication/oauth-connections#handle-missing-requirements
+                console.log("Apple Sign-In completed but no session created. Missing requirements may need to be handled.");
+                Alert.alert(
+                    "Additional Setup Required", 
+                    "Please complete your account setup to continue."
+                );
+            }
+        } catch (err) {
+            // See https://clerk.com/docs/guides/development/custom-flows/error-handling
+            // for more info on error handling
+            console.error("Apple Sign-In Error:", JSON.stringify(err, null, 2));
+            
+            // Handle specific error cases
+            if (err.errors && err.errors.length > 0) {
+                const errorCode = err.errors[0]?.code;
+                const errorMessage = err.errors[0]?.message;
+                
+                switch (errorCode) {
+                    case 'form_identifier_exists':
+                        Alert.alert(
+                            "Account Exists", 
+                            "An account with this Apple ID already exists. Please sign in instead."
+                        );
+                        break;
+                    case 'oauth_access_denied':
+                        // User cancelled the Apple Sign-In process
+                        console.log("User cancelled Apple Sign-In");
+                        break;
+                    case 'clerk_network_error':
+                        Alert.alert(
+                            "Network Error", 
+                            "Please check your internet connection and try again."
+                        );
+                        break;
+                    default:
+                        Alert.alert(
+                            "Sign-In Error", 
+                            errorMessage || "Something went wrong with Apple Sign-In. Please try again."
+                        );
+                }
+            } else {
+                // Generic error handling
+                Alert.alert(
+                    "Sign-In Error", 
+                    "Something went wrong with Apple Sign-In. Please try again."
+                );
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [loading, startSSOFlow]);
 
     return (
         <View style={styles.container}>

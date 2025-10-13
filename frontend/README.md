@@ -28,7 +28,24 @@ Welcome to Plannr - a dynamic auto-scheduling appliation. It generates smart, op
 
 4. Schedules are stored locally as demanded by the user.
 
-## 🖥️ Tech Stack
+## � Authentication & Security
+
+Plannr uses **Clerk** for authentication with **expo-secure-store** for secure token caching:
+
+- **Secure Token Storage**: All authentication tokens are encrypted and stored in the device's secure keychain/keystore
+- **Automatic Token Management**: Tokens are automatically cached and retrieved during app sessions
+- **Secure Logout**: Complete token cleanup ensures no sensitive data remains after logout
+- **Cross-Platform**: Works seamlessly on both iOS (Keychain) and Android (Keystore)
+
+### Token Cache Implementation
+
+The app uses a custom secure token cache (`cache.js`) that:
+- Encrypts all Clerk authentication tokens using expo-secure-store
+- Provides automatic cleanup on logout
+- Includes debugging utilities for development
+- Follows security best practices for mobile authentication
+
+## �🖥️ Tech Stack
 | Layer       | Technology                                 |
 | ----------- | ------------------------------------------ |
 | Core Logic  | JavaScript (Migrated from Java) (Pure OOP) |

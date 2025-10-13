@@ -7,7 +7,7 @@ import { Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 
 import RootNavigator from './src/navigation/RootNavigator.jsx';
 import { ClerkProvider } from '@clerk/clerk-expo';
-import { tokenCache } from '@clerk/clerk-expo/token-cache';
+import { tokenCache } from './cache.js';
 
 const DismissKeyboardWrapper = ({ children }) => (
   <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

@@ -1,5 +1,5 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
-import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { spacing } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import { lightColor } from '../design/colors.js';
@@ -156,75 +156,80 @@ const VerificationBottomSheet = forwardRef(({ onVerifyCode, email, loading }, re
                     maxHeight: MAX_TRANSLATE_Y,
                 }}
             >
-                <View
-                    {...panResponder.panHandlers}
-                    style={{
-                        width: '100%',
-                        alignItems: 'center',
-                        paddingVertical: 10,
-                    }}
+                <KeyboardAvoidingView 
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
                 >
-                    <View style={{ height: 8, width: 40, backgroundColor: lightColor.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
+                    <View
+                        {...panResponder.panHandlers}
+                        style={{
+                            width: '100%',
+                            alignItems: 'center',
+                            paddingVertical: 10,
+                        }}
+                    >
+                        <View style={{ height: 8, width: 40, backgroundColor: lightColor.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
+                        
+                        <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: lightColor.FOREGROUND, marginBottom: SPACE/2, alignSelf: 'center' }}>Verify Your Email</Text>
+                        <Text style={{ fontSize: typography.bodySize, fontFamily: 'AlbertSans', color: lightColor.FOREGROUND + '80', marginBottom: SPACE, alignSelf: 'center', textAlign: 'center' }}>
+                            We sent a 6-digit code to {email}
+                        </Text>
+                    </View>
                     
-                    <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: lightColor.FOREGROUND, marginBottom: SPACE/2, alignSelf: 'center' }}>Verify Your Email</Text>
-                    <Text style={{ fontSize: typography.bodySize, fontFamily: 'AlbertSans', color: lightColor.FOREGROUND + '80', marginBottom: SPACE, alignSelf: 'center', textAlign: 'center' }}>
-                        We sent a 6-digit code to {email}
-                    </Text>
-                </View>
-                
-                {/* Code Input Fields */}
-                <View style={styles.codeContainer}>
-                    {code.map((digit, index) => (
-                        <TextInput
-                            key={index}
-                            ref={(el) => inputRefs.current[index] = el}
-                            style={[
-                                styles.codeInput,
-                                { 
-                                    backgroundColor: lightColor.INPUT,
-                                    color: lightColor.FOREGROUND,
-                                    borderColor: focusedIndex === index ? '#000' : 'transparent',
-                                    borderWidth: focusedIndex === index ? 2 : 0,
-                                }
-                            ]}
-                            value={digit}
-                            onChangeText={(text) => handleCodeChange(text, index)}
-                            onKeyPress={(e) => handleKeyPress(e, index)}
-                            onFocus={() => setFocusedIndex(index)}
-                            keyboardType="numeric"
-                            maxLength={1}
-                            textAlign="center"
-                            selectTextOnFocus
-                        />
-                    ))}
-                </View>
+                    {/* Code Input Fields */}
+                    <View style={styles.codeContainer}>
+                        {code.map((digit, index) => (
+                            <TextInput
+                                key={index}
+                                ref={(el) => inputRefs.current[index] = el}
+                                style={[
+                                    styles.codeInput,
+                                    { 
+                                        backgroundColor: lightColor.INPUT,
+                                        color: lightColor.FOREGROUND,
+                                        borderColor: focusedIndex === index ? '#000' : 'transparent',
+                                        borderWidth: focusedIndex === index ? 2 : 0,
+                                    }
+                                ]}
+                                value={digit}
+                                onChangeText={(text) => handleCodeChange(text, index)}
+                                onKeyPress={(e) => handleKeyPress(e, index)}
+                                onFocus={() => setFocusedIndex(index)}
+                                keyboardType="numeric"
+                                maxLength={1}
+                                textAlign="center"
+                                selectTextOnFocus
+                            />
+                        ))}
+                    </View>
 
-                {/* Verify Button */}
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        { backgroundColor: isCodeComplete ? '#000' : '#888' }
-                    ]}
-                    onPress={() => handleVerify()}
-                    disabled={!isCodeComplete || loading}
-                >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
-                        {loading ? "Verifying..." : "Verify Code"}
-                    </Text>
-                </TouchableOpacity>
+                    {/* Verify Button */}
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            { backgroundColor: isCodeComplete ? '#000' : '#888' }
+                        ]}
+                        onPress={() => handleVerify()}
+                        disabled={!isCodeComplete || loading}
+                    >
+                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                            {loading ? "Verifying..." : "Verify Code"}
+                        </Text>
+                    </TouchableOpacity>
 
-                {/* Resend Code */}
-                <TouchableOpacity
-                    style={styles.resendButton}
-                    onPress={() => {
-                        // TODO: Add resend functionality
-                        console.log("Resend code");
-                    }}
-                >
-                    <Text style={{ color: lightColor.FOREGROUND + '80', fontFamily: 'AlbertSans', fontSize: typography.bodySize, textDecorationLine: 'underline' }}>
-                        Didn't receive the code? Resend
-                    </Text>
-                </TouchableOpacity>
+                    {/* Resend Code */}
+                    <TouchableOpacity
+                        style={styles.resendButton}
+                        onPress={() => {
+                            // TODO: Add resend functionality
+                            console.log("Resend code");
+                        }}
+                    >
+                        <Text style={{ color: lightColor.FOREGROUND + '80', fontFamily: 'AlbertSans', fontSize: typography.bodySize, textDecorationLine: 'underline' }}>
+                            Didn't receive the code? Resend
+                        </Text>
+                    </TouchableOpacity>
+                </KeyboardAvoidingView>
             </Animated.View>
         </>
     );
