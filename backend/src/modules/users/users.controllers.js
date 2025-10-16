@@ -239,39 +239,121 @@ export const refreshToken = async (req, res, next) => {
 // Clerk webhook handler for user events
 export const handleClerkWebhook = async (req, res, next) => {
     try {
+        console.log('🔗 Clerk webhook received:', req.body);
+        
         const { type, data } = req.validatedData;
+        console.log(`📨 Webhook type: ${type}`);
 
         switch (type) {
             case 'user.created':
+                console.log('👤 Handling user creation...');
                 await handleUserCreated(data);
                 break;
             case 'user.updated':
+                console.log('✏️ Handling user update...');
                 await handleUserUpdated(data);
                 break;
             case 'user.deleted':
+                console.log('🗑️ Handling user deletion...');
                 await handleUserDeleted(data);
                 break;
             default:
-                console.log(`Unhandled webhook type: ${type}`);
+                console.log(`⚠️ Unhandled webhook type: ${type}`);
         }
 
+        console.log('✅ Webhook processed successfully');
         res.status(200).json({ success: true });
     } catch (error) {
+        console.error('❌ Webhook processing error:', error);
+        next(error);
+    }
+};
+
+// Manual sync function for testing
+export const syncUserFromClerk = async (req, res, next) => {
+    try {
+        const { clerkUserId, email, displayName, avatarUrl } = req.body;
+        
+        if (!clerkUserId) {
+            return res.status(400).json({
+                success: false,
+                message: 'clerkUserId is required'
+            });
+        }
+
+        // Check if user already exists
+        const existingUser = await repo.getUserByClerkId(clerkUserId);
+        if (existingUser) {
+            return res.status(200).json({
+                success: true,
+                message: 'User already exists',
+                data: { userId: existingUser.id }
+            });
+        }
+
+        // If minimal data provided, create user with basic info
+        // The webhook will update with full details later
+        const userData = {
+            clerkUserId,
+            email: email || `user-${clerkUserId}@temp.com`,
+            displayName: displayName || null,
+            avatarUrl: avatarUrl || null,
+        };
+
+        console.log('Creating user with data:', userData);
+
+        // Create new user
+        const newUser = await repo.createUser(userData);
+
+        // Create default preferences
+        await repo.createDefaultPreferences(newUser.id);
+
+        res.status(201).json({
+            success: true,
+            message: 'User synced successfully',
+            data: {
+                userId: newUser.id,
+                clerkUserId: newUser.clerkUserId,
+                email: newUser.email,
+                displayName: newUser.displayName,
+                avatarUrl: newUser.avatarUrl,
+                createdAt: newUser.createdAt,
+            }
+        });
+    } catch (error) {
+        console.error('Sync user error:', error);
         next(error);
     }
 };
 
 // Helper functions for webhook handlers
 const handleUserCreated = async (userData) => {
+    console.log('📋 User data received:', userData);
+    
     const primaryEmail = userData.email_addresses?.find(email => email.id === userData.primary_email_address_id);
     
-    if (primaryEmail) {
-        await repo.createUser({
+    if (!primaryEmail) {
+        console.error('❌ No primary email found for user:', userData.id);
+        throw new Error('No primary email address found');
+    }
+
+    console.log(`📧 Creating user with email: ${primaryEmail.email_address}`);
+    
+    try {
+        const newUser = await repo.createUser({
             clerkUserId: userData.id,
             email: primaryEmail.email_address,
             displayName: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : null,
             avatarUrl: userData.profile_image_url || userData.image_url,
         });
+        
+        // Create default preferences
+        await repo.createDefaultPreferences(newUser.id);
+        
+        console.log(`✅ User created successfully: ${newUser.id}`);
+    } catch (error) {
+        console.error('❌ Error creating user:', error);
+        throw error;
     }
 };
 

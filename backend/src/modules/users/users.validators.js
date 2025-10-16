@@ -23,13 +23,16 @@ export const clerkWebhookSchema = z.object({
         email_addresses: z.array(z.object({
             email_address: z.string().email(),
             id: z.string(),
-        })),
-        first_name: z.string().optional(),
-        last_name: z.string().optional(),
-        image_url: z.string().optional(),
-        profile_image_url: z.string().optional(),
-    }),
-});
+        })).optional(),
+        primary_email_address_id: z.string().optional(),
+        first_name: z.string().nullable().optional(),
+        last_name: z.string().nullable().optional(),
+        image_url: z.string().nullable().optional(),
+        profile_image_url: z.string().nullable().optional(),
+        created_at: z.number().optional(),
+        updated_at: z.number().optional(),
+    }).passthrough(), // Allow additional fields that Clerk might send
+}).passthrough(); // Allow additional top-level fields
 
 export const userIdParamSchema = z.object({
     userId: z.string().uuid('Valid user ID is required'),

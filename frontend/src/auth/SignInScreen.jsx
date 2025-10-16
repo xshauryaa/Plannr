@@ -2,6 +2,7 @@ import { useSignIn, useClerk, useSSO } from "@clerk/clerk-expo";
 import React, { useState, useEffect, useCallback } from "react";
 import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { TokenCacheUtils } from '../../cache.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";
@@ -40,6 +41,7 @@ const SignInScreen = ({ navigation }) => {
     const { signIn, setActive, isLoaded } = useSignIn();
     const clerk = useClerk();
     const { startSSOFlow } = useSSO();
+    const { syncUserToBackend } = useAuthenticatedAPI();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -69,6 +71,21 @@ const SignInScreen = ({ navigation }) => {
                     console.log("User successfully signed in");
                     await TokenCacheUtils.getDebugInfo();
                 }
+                
+                // Sync user to backend (fallback if webhook doesn't work)
+                // Give more time for auth state to stabilize
+                setTimeout(async () => {
+                    try {
+                        console.log("Starting user sync to backend...");
+                        await syncUserToBackend();
+                        console.log("User synced to backend successfully");
+                    } catch (syncError) {
+                        console.error("Failed to sync user to backend:", syncError);
+                        // Don't block the user flow if sync fails
+                        // The user can still use the app, and webhook might catch up later
+                    }
+                }, 1500);
+                
                 // Navigation will be handled by RootNavigator
             } else {
                 Alert.alert("Sign-in not complete. Please try again.");
@@ -109,6 +126,18 @@ const SignInScreen = ({ navigation }) => {
                             console.log("User successfully signed in with Google");
                             await TokenCacheUtils.getDebugInfo();
                         }
+                        
+                        // Sync user to backend (fallback if webhook doesn't work)
+                        // Delay to allow auth state to be available
+                        setTimeout(async () => {
+                            try {
+                                await syncUserToBackend();
+                                console.log("User synced to backend successfully");
+                            } catch (syncError) {
+                                console.error("Failed to sync user to backend:", syncError);
+                                // Don't block the user flow if sync fails
+                            }
+                        }, 1000);
                     },
                 });
             } else {
@@ -186,6 +215,19 @@ const SignInScreen = ({ navigation }) => {
                             console.log("User successfully signed in with Apple");
                             await TokenCacheUtils.getDebugInfo();
                         }
+                        
+                        // Sync user to backend (fallback if webhook doesn't work)
+                        // Give more time for auth state to stabilize
+                        setTimeout(async () => {
+                            try {
+                                console.log("Starting user sync to backend...");
+                                await syncUserToBackend();
+                                console.log("User synced to backend successfully");
+                            } catch (syncError) {
+                                console.error("Failed to sync user to backend:", syncError);
+                                // Don't block the user flow if sync fails
+                            }
+                        }, 1500);
                     },
                 });
             } else {

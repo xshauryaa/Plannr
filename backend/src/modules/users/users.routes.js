@@ -37,4 +37,16 @@ router.post('/auth/refresh', ctrl.refreshToken);
 // POST /users/webhooks/clerk - Clerk webhook handler
 router.post('/webhooks/clerk', validateClerkWebhook, ctrl.handleClerkWebhook);
 
+// POST /users/sync - Manual sync user from Clerk (for testing)
+router.post('/sync', ctrl.syncUserFromClerk);
+
+// GET /users/webhooks/test - Test webhook endpoint (for debugging)
+router.get('/webhooks/test', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        message: 'Webhook endpoint is reachable',
+        timestamp: new Date().toISOString()
+    });
+});
+
 export default router;

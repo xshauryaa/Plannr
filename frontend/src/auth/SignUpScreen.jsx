@@ -1,7 +1,8 @@
-import { useSignUp, useClerk, useSSO } from "@clerk/clerk-expo";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useSignUp, useClerk, useSSO, useUser } from "@clerk/clerk-expo";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { TokenCacheUtils } from '../../cache.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";
@@ -9,7 +10,7 @@ import { EyeIcon, EyeClosedIcon } from "lucide-react-native";
 const { width, height } = Dimensions.get('window');
 import Google from '../../assets/auth/Google.svg';
 import Apple from '../../assets/auth/Apple.svg';
-import VerificationBottomSheet from '../components/VerificationBottomSheet.jsx';
+import VerificationModal from '../modals/VerificationModal.jsx';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 
@@ -36,6 +37,8 @@ const SignUpScreen = ({ navigation }) => {
     const { signUp, setActive, isLoaded } = useSignUp();
     const clerk = useClerk();
     const { startSSOFlow } = useSSO();
+    const { user } = useUser();
+    const { syncUserToBackend } = useAuthenticatedAPI();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -43,8 +46,7 @@ const SignUpScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [pendingVerification, setPendingVerification] = useState(false);
     const [verifying, setVerifying] = useState(false);
-
-    const verificationBottomSheetRef = useRef(null);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
 
 
 
@@ -72,8 +74,8 @@ const SignUpScreen = ({ navigation }) => {
             await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
             setPendingVerification(true)
 
-            // Show verification bottom sheet
-            verificationBottomSheetRef.current?.show();
+            // Show verification modal
+            setShowVerificationModal(true);
         } catch (err) {
             Alert.alert("Error signing up. Please check your details and try again.");
             console.error(JSON.stringify(err, null, 2));
@@ -94,13 +96,26 @@ const SignUpScreen = ({ navigation }) => {
 
             if (completeSignUp.status === 'complete') {
                 await setActive({ session: completeSignUp.createdSessionId });
-                verificationBottomSheetRef.current?.hide();
+                setShowVerificationModal(false);
                 
                 // Log successful authentication
                 if (__DEV__) {
                     console.log("User successfully signed up and verified");
                     await TokenCacheUtils.getDebugInfo();
                 }
+                
+                // Sync user to backend (fallback if webhook doesn't work)
+                // Delay to allow auth state to be available
+                setTimeout(async () => {
+                    try {
+                        await syncUserToBackend();
+                        console.log("User synced to backend successfully");
+                    } catch (syncError) {
+                        console.error("Failed to sync user to backend:", syncError);
+                        // Don't block the user flow if sync fails
+                    }
+                }, 1000);
+                
                 // User is now signed up and signed in
             } else {
                 Alert.alert("Verification failed. Please check the code and try again.");
@@ -139,7 +154,33 @@ const SignUpScreen = ({ navigation }) => {
                         if (__DEV__) {
                             console.log("User successfully signed up/in with Google");
                             await TokenCacheUtils.getDebugInfo();
+                            
+                            // Log the user object state right after session creation
+                            console.log("=== USER OBJECT DEBUG (Google Sign-In) ===");
+                            console.log("User object exists:", !!user);
+                            console.log("User object:", JSON.stringify(user, null, 2));
+                            console.log("User ID:", user?.id);
+                            console.log("User email addresses:", user?.emailAddresses);
+                            console.log("User primary email:", user?.emailAddresses?.[0]?.emailAddress);
+                            console.log("User first name:", user?.firstName);
+                            console.log("User last name:", user?.lastName);
+                            console.log("User image URL:", user?.imageUrl);
+                            console.log("User created at:", user?.createdAt);
+                            console.log("=== END USER OBJECT DEBUG ===");
                         }
+                        
+                        // Sync user to backend (fallback if webhook doesn't work)
+                        // Delay to allow auth state to be available
+                        setTimeout(async () => {
+                            try {
+                                console.log("Starting backend sync - user object at sync time:", !!user);
+                                await syncUserToBackend();
+                                console.log("User synced to backend successfully");
+                            } catch (syncError) {
+                                console.error("Failed to sync user to backend:", syncError);
+                                // Don't block the user flow if sync fails
+                            }
+                        }, 1000);
                     },
                 });
             } else {
@@ -219,7 +260,33 @@ const SignUpScreen = ({ navigation }) => {
                         if (__DEV__) {
                             console.log("User successfully signed up/in with Apple");
                             await TokenCacheUtils.getDebugInfo();
+                            
+                            // Log the user object state right after session creation
+                            console.log("=== USER OBJECT DEBUG (Apple Sign-In) ===");
+                            console.log("User object exists:", !!user);
+                            console.log("User object:", JSON.stringify(user, null, 2));
+                            console.log("User ID:", user?.id);
+                            console.log("User email addresses:", user?.emailAddresses);
+                            console.log("User primary email:", user?.emailAddresses?.[0]?.emailAddress);
+                            console.log("User first name:", user?.firstName);
+                            console.log("User last name:", user?.lastName);
+                            console.log("User image URL:", user?.imageUrl);
+                            console.log("User created at:", user?.createdAt);
+                            console.log("=== END USER OBJECT DEBUG ===");
                         }
+                        
+                        // Sync user to backend (fallback if webhook doesn't work)
+                        // Delay to allow auth state to be available
+                        setTimeout(async () => {
+                            try {
+                                console.log("Starting backend sync - user object at sync time:", !!user);
+                                await syncUserToBackend();
+                                console.log("User synced to backend successfully");
+                            } catch (syncError) {
+                                console.error("Failed to sync user to backend:", syncError);
+                                // Don't block the user flow if sync fails
+                            }
+                        }, 1000);
                     },
                 });
             } else {
@@ -330,9 +397,10 @@ const SignUpScreen = ({ navigation }) => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            <VerificationBottomSheet
-                ref={verificationBottomSheetRef}
+            <VerificationModal
+                isVisible={showVerificationModal}
                 onVerifyCode={handleVerifyCode}
+                onClose={() => setShowVerificationModal(false)}
                 email={email}
                 loading={verifying}
             />
