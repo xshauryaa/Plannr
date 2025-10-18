@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { Text, View, StyleSheet, ScrollView } from 'react-native'
 import * as Font from 'expo-font';
-import { useClerk } from '@clerk/clerk-expo';
 
 import LoadingScreen from './LoadingScreen.jsx';
+import TimeOfDay from '../components/TimeOfDay.jsx';
 import UpcomingTasks from '../components/UpcomingTasks.jsx';
 import Progress from '../components/Progress.jsx';
 import MenuButton from '../components/MenuButton.jsx';
@@ -23,30 +23,27 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
     const currentTime = useCurrentTime();
-
-    if (!storageLoaded) { return (<LoadingScreen/>) }
-
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
         'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
     });
-    
+
+    // Early returns after all hooks have been called
+    if (!storageLoaded) { return (<LoadingScreen/>) }
     if (!fontsLoaded) return null;
 
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);
-
-    const { signOut } = useClerk();
     
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hello {appState.name}</Text>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
+                <TimeOfDay/>
                 <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
                 <Progress/>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>For Your Scheduling</Text>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
@@ -55,22 +52,19 @@ const HomeScreen = ({ navigation }) => {
                         navTo={() => { navigation.navigate("Center") }}
                     />
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>
+                {/* <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}> 
                     <MenuButton
                         title="View Your Saved Schedules"
                         icon="Saved"
-                        navTo={() => { 
-                            signOut();
-                            // navigation.navigate("Saved") 
-                        }}
+                        navTo={() => { navigation.navigate("Saved") }}
                     />
                     <MenuButton
                         title="Change Preferences"
                         icon="Preferences"
                         navTo={() => { navigation.navigate("Preferences") }}
                     />
-                </View>
+                </View> */}
             </ScrollView>
         </View>
     )
