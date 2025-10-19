@@ -100,7 +100,7 @@ const UpcomingTasks = ({ onClick }) => {
                                         <Text style={{ ...styles.time, color: theme.FOREGROUND }}>{`${item.startTime.hour}:${(item.startTime.minute < 10) ? '0'+item.startTime.minute : item.startTime.minute}`} - {`${item.endTime.hour}:${(item.endTime.minute < 10) ? '0'+item.endTime.minute : item.endTime.minute}`}</Text>
                                     </View>
                                 </View>
-                                <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }}></View>
+                                <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }} />
                             </View>
                         )
                     }}

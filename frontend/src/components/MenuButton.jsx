@@ -5,6 +5,8 @@ import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg'
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg'
 import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
+import ProfileIcon from '../../assets/nav-icons/ProfileIcon.svg'
+import ProductivityAnalyticsIcon from '../../assets/system-icons/ProductivityAnalyticsIcon.svg'
 import { useAppState } from '../context/AppStateContext.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
@@ -26,6 +28,8 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
         Generate: <AddIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
         Preferences: <PreferencesIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
         Reschedule: <RescheduleIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Profile: <ProfileIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Productivity: <ProductivityAnalyticsIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
     }
 
     if (broad) {
@@ -67,7 +71,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: (width > 400) ? padding.PADDING_4 : (width > 350) ? padding.PADDING_3 : padding.PADDING_2,
         bottom: (width > 400) ? padding.PADDING_4 : (width > 350) ? padding.PADDING_3 : padding.PADDING_2,
-    }
+    },
 })
 
 export default MenuButton;

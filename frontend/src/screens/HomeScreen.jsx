@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     subContainer: {
-        height: width,
+        width: width,
         alignSelf: 'center',
         alignContent: 'center',
         paddingHorizontal: padding.SCREEN_PADDING,

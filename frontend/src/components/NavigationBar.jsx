@@ -6,6 +6,7 @@ import TasksIcon from '../../assets/nav-icons/TasksIcon.svg';
 import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg';
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg';
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg';
+import ProfileIcon from '../../assets/nav-icons/ProfileIcon.svg';
 import Indicator from '../../assets/nav-icons/Indicator.svg';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
@@ -30,15 +31,16 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
         Home: HomeIcon,
         Tasks: TasksIcon,
         Center: PlannrCenterIcon,
-        Saved: SavedIcon,
-        Preferences: PreferencesIcon,
+        // Saved: SavedIcon,
+        // Preferences: PreferencesIcon,
+        Profile: ProfileIcon
     };
 
     const indicatorX = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         const index = state.index;
-        const GAP = (WIDTH - (2 * PADDING_HORIZONTAL) - (5 * ICON_DIM)) / 4;
+        const GAP = (WIDTH - (2 * PADDING_HORIZONTAL) - (4 * ICON_DIM)) / 3;
         const xPosition = index * (GAP + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
