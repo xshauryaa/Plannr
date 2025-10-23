@@ -212,7 +212,7 @@ const PreferencesScreen = () => {
                     <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                         <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, opacity: 0.5 }}>{(appState.userPreferences.taskRemindersEnabled) ? 'Enabled' : 'Disabled'}</Text>
                         <Switch
-                            trackColor={{ false: '#000000', true: '#4166FB' }}
+                            trackColor={{ false: '#000000', true: theme.GRADIENT_END }}
                             thumbColor={'#FFFFFF'}
                             ios_backgroundColor={'#C0C0C0'}
                             onValueChange={() => { 
