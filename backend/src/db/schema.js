@@ -81,6 +81,7 @@ export const preferences = pgTable("preferences", {
   minGapMinutes: integer("min_gap_minutes").notNull().default(15),
   maxWorkHoursPerDay: integer("max_work_hours_per_day").notNull().default(8),
   weekendPolicy: text("weekend_policy").notNull().default("allow"),
+  defaultStrategy: text("default_strategy").notNull().default("earliest-fit"), // 'earliest-fit'|'balanced-work'|'deadline-oriented'
   nickname: text("nickname"),
   version: integer("version").notNull().default(1),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

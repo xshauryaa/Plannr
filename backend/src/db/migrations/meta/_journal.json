@@ -8,6 +8,13 @@
       "when": 1759886522436,
       "tag": "0000_wise_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761440175699,
+      "tag": "0001_omniscient_deathbird",
+      "breakpoints": true
     }
   ]
 }

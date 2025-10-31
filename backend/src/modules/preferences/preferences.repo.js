@@ -41,6 +41,11 @@ export const getPreferencesByClerkId = async (clerkUserId) => {
 
 export const updatePreferences = async (userId, updateData) => {
     try {
+        console.log('🗃️ Repository updatePreferences called with:');
+        console.log('  userId:', userId);
+        console.log('  updateData:', JSON.stringify(updateData, null, 2));
+        console.log('  defaultStrategy in updateData:', updateData.defaultStrategy);
+
         const [updatedPreferences] = await db
             .update(preferences)
             .set({
@@ -51,8 +56,12 @@ export const updatePreferences = async (userId, updateData) => {
             .where(eq(preferences.userId, userId))
             .returning();
 
+        console.log('✅ Repository update result:', JSON.stringify(updatedPreferences, null, 2));
+        console.log('🎯 defaultStrategy in result:', updatedPreferences.defaultStrategy);
+
         return updatedPreferences;
     } catch (error) {
+        console.error('💥 Repository update error:', error);
         throw new Error(`Failed to update preferences: ${error.message}`);
     }
 };
@@ -69,6 +78,7 @@ export const createPreferences = async (userId, preferencesData = {}) => {
                 minGapMinutes: parseInt(preferencesData.defaultMinGap) || 15,
                 maxWorkHoursPerDay: parseInt(preferencesData.defaultMaxWorkingHours) || 8,
                 weekendPolicy: 'allow',
+                defaultStrategy: preferencesData.defaultStrategy || 'earliest-fit',
                 nickname: preferencesData.nickname || null,
             })
             .returning();
@@ -90,6 +100,7 @@ export const resetPreferences = async (userId) => {
                 minGapMinutes: 15,
                 maxWorkHoursPerDay: 8,
                 weekendPolicy: 'allow',
+                defaultStrategy: 'earliest-fit',
                 nickname: null,
                 updatedAt: new Date(),
                 version: 1,

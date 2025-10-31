@@ -72,22 +72,35 @@ export const updatePreferences = async (req, res, next) => {
             });
         }
 
+        // Debug logging
+        console.log('🔍 Raw request body:', JSON.stringify(req.body, null, 2));
+        console.log('🔍 Validated data:', JSON.stringify(req.validatedData, null, 2));
+        console.log('🎯 Default strategy in validated data:', req.validatedData.defaultStrategy);
+
         // Convert frontend preferences to backend format
         const backendPrefs = mapFrontendToBackend(req.validatedData);
+        console.log('🔄 Mapped backend prefs:', JSON.stringify(backendPrefs, null, 2));
+        console.log('🎯 Default strategy in backend prefs:', backendPrefs.defaultStrategy);
 
         // Check if preferences exist
         let userPreferences = await repo.getPreferencesByUserId(user.id);
         
         if (!userPreferences) {
+            console.log('📝 Creating new preferences...');
             // Create new preferences if they don't exist
             userPreferences = await repo.createPreferences(user.id, req.validatedData);
         } else {
+            console.log('🔄 Updating existing preferences...');
+            console.log('🔍 Before update - existing prefs:', JSON.stringify(userPreferences, null, 2));
             // Update existing preferences
             userPreferences = await repo.updatePreferences(user.id, backendPrefs);
+            console.log('✅ After update - new prefs:', JSON.stringify(userPreferences, null, 2));
         }
 
         // Convert back to frontend format for response
         const frontendPrefs = mapBackendToFrontend(userPreferences);
+        console.log('🔄 Final frontend prefs:', JSON.stringify(frontendPrefs, null, 2));
+        console.log('🎯 Final default strategy:', frontendPrefs.defaultStrategy);
 
         res.status(200).json({
             success: true,
@@ -95,6 +108,7 @@ export const updatePreferences = async (req, res, next) => {
             data: frontendPrefs
         });
     } catch (error) {
+        console.error('💥 Error in updatePreferences:', error);
         next(error);
     }
 };

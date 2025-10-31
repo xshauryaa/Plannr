@@ -131,6 +131,9 @@ export const useAuthenticatedAPI = () => {
             method: 'PUT',
             body: JSON.stringify(data),
         }),
+        deleteUserAccount: () => makeAuthenticatedRequest('/api/users/account', {
+            method: 'DELETE',
+        }),
         
         // Schedules operations  
         getSchedules: () => makeAuthenticatedRequest('/api/schedules'),

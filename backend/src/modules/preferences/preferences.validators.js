@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 export const updatePreferencesSchema = z.object({
     theme: z.enum(['light', 'dark', 'system']).optional(),
-    defaultStrategy: z.string().optional(),
+    defaultStrategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional(),
     defaultMinGap: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 0, 'Must be a valid number').optional(),
     defaultMaxWorkingHours: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 1 && val <= 24, 'Must be between 1 and 24 hours').optional(),
     taskRemindersEnabled: z.boolean().optional(),
@@ -24,6 +24,7 @@ export const mapFrontendToBackend = (frontendPrefs) => {
         minGapMinutes: frontendPrefs.defaultMinGap ? parseInt(frontendPrefs.defaultMinGap) : 15,
         maxWorkHoursPerDay: frontendPrefs.defaultMaxWorkingHours ? parseInt(frontendPrefs.defaultMaxWorkingHours) : 8,
         weekendPolicy: frontendPrefs.weekendPolicy || 'allow',
+        defaultStrategy: frontendPrefs.defaultStrategy || 'earliest-fit',
         nickname: frontendPrefs.nickname || null,
     };
 };
@@ -32,7 +33,7 @@ export const mapFrontendToBackend = (frontendPrefs) => {
 export const mapBackendToFrontend = (backendPrefs) => {
     return {
         theme: backendPrefs.uiMode || 'system',
-        defaultStrategy: 'earliest-fit', // This might come from a different field
+        defaultStrategy: backendPrefs.defaultStrategy || 'earliest-fit',
         defaultMinGap: backendPrefs.minGapMinutes?.toString() || '15',
         defaultMaxWorkingHours: backendPrefs.maxWorkHoursPerDay?.toString() || '8',
         taskRemindersEnabled: backendPrefs.notificationsEnabled ?? true,

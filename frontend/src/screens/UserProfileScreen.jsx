@@ -27,7 +27,7 @@ const UserProfileScreen = ({ navigation }) => {
     const { signOut } = useClerk();
 
     const currentTime = useCurrentTime();
-    const { getUserProfile } = useAuthenticatedAPI();
+    const { getUserProfile, updatePreferences, deleteUserAccount } = useAuthenticatedAPI();
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -135,8 +135,9 @@ const UserProfileScreen = ({ navigation }) => {
                                         try {
                                             console.log("🗑️ Starting account deletion process...");
                                             
-                                            // TODO: Call backend API to delete user account
-                                            // const result = await deleteUserAccount();
+                                            // Call backend API to delete user account
+                                            const result = await deleteUserAccount();
+                                            console.log("🔄 Backend account deletion result:", result);
                                             
                                             // Clear all authentication tokens from secure storage
                                             await TokenCacheUtils.clearAllAuthData();
@@ -166,6 +167,43 @@ const UserProfileScreen = ({ navigation }) => {
                 }
             ]
         );
+    };
+
+    // Separate function for saving preferences to backend
+    const savePreferences = async (updatedPreferences = null) => {
+        try {
+            setLoading(true);
+            // Use passed preferences or current state
+            const prefsToSave = updatedPreferences || appState.userPreferences;
+            const payload = { 
+                theme: prefsToSave.theme,
+                taskRemindersEnabled: prefsToSave.taskRemindersEnabled,
+                leadMinutes: prefsToSave.leadMinutes,
+                defaultMinGap: prefsToSave.defaultMinGap,
+                defaultMaxWorkingHours: prefsToSave.defaultMaxWorkingHours,
+                defaultStrategy: prefsToSave.defaultStrategy
+            };
+            console.log('📤 Updating user preferences via authenticatedAPI...');
+            console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+            console.log('🎯 Default Strategy being sent:', payload.defaultStrategy);
+
+            const response = await updatePreferences(payload);
+            console.log('✅ Preferences saved successfully via authenticatedAPI.');
+            console.log('ℹ️ Server response:', response);
+            
+            // If server returns normalized/validated preferences, merge them into app state
+            if (response && response.userPreferences) {
+                setAppState(prevState => ({ ...prevState, userPreferences: response.userPreferences }));
+                console.log('🔁 Local appState.userPreferences updated from server response.');
+            } else {
+                console.log('ℹ️ Server did not return userPreferences; keeping local state as-is.');
+            }
+        } catch (error) {
+            console.error('💥 Error saving preferences via authenticatedAPI:', error);
+            Alert.alert('Error', 'An unexpected error occurred while saving preferences.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const validateAndSave = () => {
@@ -199,53 +237,9 @@ const UserProfileScreen = ({ navigation }) => {
             }
         }
 
+        // Only save if validation passes
         if (!hasError) {
-            (async () => {
-                try {
-                    setLoading(true);
-                    const payload = { userPreferences: appState.userPreferences };
-                    console.log('📤 Posting updated user preferences to server...');
-                    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-
-                    const response = await fetch('/api/user/preferences', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        // include credentials in case backend uses cookies/sessions
-                        credentials: 'include',
-                        body: JSON.stringify(payload),
-                    });
-
-                    let responseBody = null;
-                    try {
-                        responseBody = await response.json();
-                    } catch (parseErr) {
-                        console.warn('⚠️ Failed to parse JSON response:', parseErr);
-                    }
-
-                    if (response.ok) {
-                        console.log('✅ Preferences saved successfully on server.');
-                        console.log('ℹ️ Server response:', responseBody);
-                        // If server returns normalized/validated preferences, merge them into app state
-                        if (responseBody && responseBody.userPreferences) {
-                            setAppState({ ...appState, userPreferences: responseBody.userPreferences });
-                            console.log('🔁 Local appState.userPreferences updated from server response.');
-                        } else {
-                            console.log('ℹ️ Server did not return userPreferences; keeping local state as-is.');
-                        }
-                    } else {
-                        console.error('❌ Failed to save preferences. HTTP status:', response.status);
-                        console.error('❌ Server response body:', responseBody);
-                        Alert.alert('Save Failed', 'Unable to save preferences. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('💥 Network or unexpected error while saving preferences:', error);
-                    Alert.alert('Error', 'An unexpected error occurred while saving preferences.');
-                } finally {
-                    setLoading(false);
-                }
-            })();
+            savePreferences();
         }
     };
 
@@ -313,7 +307,11 @@ const UserProfileScreen = ({ navigation }) => {
                 <View style={{ ...styles.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.COMP_COLOR }}>
                     <TouchableOpacity 
                         style={(appState.userPreferences.theme == 'light') ? { ...styles.uiModeButtonSelected, borderColor: theme.FOREGROUND} : { ...styles.uiModeButtonDefault, borderColor: (theme.FOREGROUND + '1A')}}
-                        onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'light' }})}
+                        onPress={() => {
+                            const newPrefs = { ...appState.userPreferences, theme: 'light' };
+                            setAppState({ ...appState, userPreferences: newPrefs });
+                            setTimeout(() => savePreferences(newPrefs), 300);
+                        }}
                     >
                         <View>
                             <LightMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'light') ? '#E3CD00' : theme.FOREGROUND}/>
@@ -322,7 +320,11 @@ const UserProfileScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={(appState.userPreferences.theme == 'dark') ? { ...styles.uiModeButtonSelected, borderColor: theme.FOREGROUND} : { ...styles.uiModeButtonDefault, borderColor: (theme.FOREGROUND + '1A')}}
-                        onPress={() => setAppState({ ...appState, userPreferences: { ...appState.userPreferences, theme: 'dark' }})}
+                        onPress={() => {
+                            const newPrefs = { ...appState.userPreferences, theme: 'dark' };
+                            setAppState({ ...appState, userPreferences: newPrefs });
+                            setTimeout(() => savePreferences(newPrefs), 300);
+                        }}
                     >
                         <View>
                             <DarkMode width={32} height={32} style={{ marginBottom: 4 }} color={(appState.userPreferences.theme == 'dark') ? '#8C84E5' : theme.FOREGROUND }/>
@@ -339,7 +341,10 @@ const UserProfileScreen = ({ navigation }) => {
                             ios_backgroundColor={'#C0C0C0'}
                             onValueChange={() => { 
                                 const currPref = appState.userPreferences.taskRemindersEnabled;
-                                setAppState({ ...appState, userPreferences: {...appState.userPreferences, taskRemindersEnabled: !currPref }}) }}
+                                const newPrefs = {...appState.userPreferences, taskRemindersEnabled: !currPref };
+                                setAppState({ ...appState, userPreferences: newPrefs });
+                                setTimeout(() => savePreferences(newPrefs), 300);
+                            }}
                             value={appState.userPreferences.taskRemindersEnabled}
                         />
                     </View>
@@ -356,7 +361,16 @@ const UserProfileScreen = ({ navigation }) => {
                                     onChange={ ({ nativeEvent }) => { 
                                         setAppState({ ...appState, userPreferences: { ...appState.userPreferences, leadMinutes: nativeEvent.text } })
                                     } }
-                                    onBlur={validateAndSave}
+                                    onBlur={() => {
+                                        // Validate lead minutes first
+                                        const leadMinutesInt = parseInt(appState.userPreferences.leadMinutes);
+                                        if (isNaN(leadMinutesInt) || leadMinutesInt <= 0) {
+                                            setShowLeadMinutesWarning(true);
+                                        } else {
+                                            setShowLeadMinutesWarning(false);
+                                            savePreferences();
+                                        }
+                                    }}
                                 />
                                 <Text style={{ ...styles.subHeading, marginTop: 4, marginBottom: 4, color: theme.FOREGROUND }}>minutes earlier</Text>
                             </View>
@@ -379,7 +393,16 @@ const UserProfileScreen = ({ navigation }) => {
                                 onChange={ ({ nativeEvent }) => { 
                                     setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMinGap: nativeEvent.text }})
                                 } }
-                                onBlur={validateAndSave}
+                                onBlur={() => {
+                                    // Validate min gap first
+                                    const minGapInt = parseInt(appState.userPreferences.defaultMinGap);
+                                    if (isNaN(minGapInt) || minGapInt < 0) {
+                                        setShowMinGapWarning(true);
+                                    } else {
+                                        setShowMinGapWarning(false);
+                                        savePreferences();
+                                    }
+                                }}
                             />
                             {showMinGapWarning && <Text style={styles.warning}>Must be non-negative</Text>}
                         </View>
@@ -394,7 +417,16 @@ const UserProfileScreen = ({ navigation }) => {
                                 onChange={ ({ nativeEvent }) => { 
                                     setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultMaxWorkingHours: nativeEvent.text }})
                                 } }
-                                onBlur={validateAndSave}
+                                onBlur={() => {
+                                    // Validate max working hours first
+                                    const maxHoursFloat = parseFloat(appState.userPreferences.defaultMaxWorkingHours);
+                                    if (isNaN(maxHoursFloat) || maxHoursFloat <= 0 || maxHoursFloat > 24) {
+                                        setShowMaxHoursWarning(true);
+                                    } else {
+                                        setShowMaxHoursWarning(false);
+                                        savePreferences();
+                                    }
+                                }}
                             />
                             {showMaxHoursWarning && <Text style={styles.warning}>Must be 0-24</Text>}
                         </View>
@@ -405,7 +437,13 @@ const UserProfileScreen = ({ navigation }) => {
                         <EarliestFitIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
-                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'earliest-fit' }})}}
+                            onPress={() => {
+                                const newPrefs = { ...appState.userPreferences, defaultStrategy: 'earliest-fit' };
+                                console.log('🎯 Setting strategy to earliest-fit, new prefs:', newPrefs);
+                                setAppState({ ...appState, userPreferences: newPrefs });
+                                // Save immediately when strategy changes
+                                setTimeout(() => savePreferences(newPrefs), 300);
+                            }}
                         >
                                 <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Earliest Fit</Text>
                         </TouchableOpacity>
@@ -414,7 +452,13 @@ const UserProfileScreen = ({ navigation }) => {
                         <BalancedWorkIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTION : theme.INPUT }}
-                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'balanced-work' }})}}
+                            onPress={() => {
+                                const newPrefs = { ...appState.userPreferences, defaultStrategy: 'balanced-work' };
+                                console.log('🎯 Setting strategy to balanced-work, new prefs:', newPrefs);
+                                setAppState({ ...appState, userPreferences: newPrefs });
+                                // Save immediately when strategy changes
+                                setTimeout(() => savePreferences(newPrefs), 300);
+                            }}
                         >
                                 <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Balanced Work</Text>
                         </TouchableOpacity>
@@ -423,7 +467,13 @@ const UserProfileScreen = ({ navigation }) => {
                         <DeadlineOrientedIcon width={20} height={20}/>
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT }}
-                            onPress={() => {setAppState({ ...appState, userPreferences: { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' }})}}
+                            onPress={() => {
+                                const newPrefs = { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' };
+                                console.log('🎯 Setting strategy to deadline-oriented, new prefs:', newPrefs);
+                                setAppState({ ...appState, userPreferences: newPrefs });
+                                // Save immediately when strategy changes
+                                setTimeout(() => savePreferences(newPrefs), 300);
+                            }}
                         >
                                 <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND }}>Deadline Oriented</Text>
                         </TouchableOpacity>
