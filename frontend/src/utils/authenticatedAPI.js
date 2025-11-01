@@ -122,6 +122,9 @@ export const useAuthenticatedAPI = () => {
     };
 
     return {
+        // Direct access to the authenticated request function
+        makeAuthenticatedRequest,
+        
         // Manual sync function
         syncUserToBackend,
         

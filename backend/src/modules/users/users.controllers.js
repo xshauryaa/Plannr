@@ -376,3 +376,57 @@ const handleUserDeleted = async (userData) => {
         await repo.deleteUser(user.id);
     }
 };
+
+export const uploadAvatar = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No image file provided'
+            });
+        }
+
+        // Get user from database
+        const user = await repo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // For now, we'll just store the filename and serve it statically
+        // In production, you'd upload to a cloud storage service like AWS S3
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+        // Update user's avatar URL in database
+        const updatedUser = await repo.updateUser(user.id, {
+            avatarUrl: avatarUrl
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Avatar uploaded successfully',
+            data: {
+                avatarUrl: avatarUrl,
+                user: {
+                    id: updatedUser.id,
+                    clerkUserId: updatedUser.clerkUserId,
+                    avatarUrl: updatedUser.avatarUrl
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error uploading avatar:', error);
+        next(error);
+    }
+};
