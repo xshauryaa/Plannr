@@ -1,0 +1,117 @@
+# Microsoft To-Do Import API Tests
+# Use these HTTP requests in VS Code with the REST Client extension
+# or copy them to Postman
+
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = test-token-123
+
+### 1. Health Check
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+### 2. Test Import Routes - Get Connections (should return empty initially)
+GET {{baseUrl}}/import/connections
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 3. Start Microsoft OAuth Flow
+POST {{baseUrl}}/import/auth/microsoft/initiate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "returnUrl": "http://localhost:3000/import-success"
+}
+
+### 4. Start Import Session
+POST {{baseUrl}}/import/start
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "provider": "microsoft",
+  "options": {
+    "includeCompletedTasks": false,
+    "dueDateFilter": {
+      "after": "2024-01-01",
+      "before": "2025-12-31",
+      "requireDueDate": false
+    }
+  }
+}
+
+### 5. Check Import Session Status (replace sessionId with actual ID from step 4)
+GET {{baseUrl}}/import/sessions/{{$guid}}/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 6. Execute Import (replace sessionId with actual ID from step 4)
+POST {{baseUrl}}/import/sessions/{{$guid}}/execute
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "options": {
+    "includeCompletedTasks": false,
+    "selectedLists": []
+  }
+}
+
+### 7. Get Imported Tasks (replace sessionId with actual ID)
+GET {{baseUrl}}/import/sessions/{{$guid}}/tasks?page=1&limit=20
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 8. Create Enrichment Request (replace sessionId with actual ID)
+POST {{baseUrl}}/import/sessions/{{$guid}}/enrich
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "scheduleOptions": {
+    "startDate": "2024-01-15T00:00:00Z",
+    "endDate": "2024-01-31T23:59:59Z",
+    "workingHours": {
+      "start": 9,
+      "end": 17
+    },
+    "workingDays": [1, 2, 3, 4, 5],
+    "strategy": "balanced",
+    "bufferTime": 15
+  }
+}
+
+### 9. Generate Schedule from Imported Tasks (replace sessionId with actual ID)
+POST {{baseUrl}}/import/sessions/{{$guid}}/generate-schedule
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "scheduleOptions": {
+    "startDate": "2024-01-15T00:00:00Z",
+    "endDate": "2024-01-31T23:59:59Z",
+    "strategy": "balanced",
+    "workingHours": {
+      "start": 9,
+      "end": 17
+    },
+    "workingDays": [1, 2, 3, 4, 5],
+    "bufferTime": 15
+  }
+}
+
+### 10. Delete Import Session (replace sessionId with actual ID)
+DELETE {{baseUrl}}/import/sessions/{{$guid}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 11. Disconnect Microsoft Account
+DELETE {{baseUrl}}/import/auth/microsoft/disconnect
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 12. Cleanup Expired Sessions (admin endpoint)
+GET {{baseUrl}}/import/cleanup
+Authorization: Bearer {{authToken}}
+Content-Type: application/json

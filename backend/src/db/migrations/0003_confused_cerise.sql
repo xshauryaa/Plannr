@@ -1,0 +1,1 @@
+ALTER TABLE "provider_connections" RENAME COLUMN "token_expires_at" TO "expires_at";

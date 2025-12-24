@@ -9,7 +9,7 @@ import UserProfileStack from './UserProfileStack.jsx';
 import SavedSchedulesScreen from '../screens/SavedSchedulesScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
 import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
-import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
+import TodoImportScreen from '../screens/TodoImportScreen.jsx';
 import RescheduleScreen from '../screens/RescheduleScreen.jsx';
 import ScheduleViewScreen from '../screens/ScheduleViewScreen.jsx';
 
@@ -37,7 +37,7 @@ export default function AppStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="View" component={ScheduleViewScreen} />
-      <Stack.Screen name="Generate" component={GenerateScheduleScreen} />
+      <Stack.Screen name="Generate" component={TodoImportScreen} />
       <Stack.Screen name="Reschedule" component={RescheduleScreen} />
     </Stack.Navigator>
   );

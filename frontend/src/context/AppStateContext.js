@@ -106,8 +106,8 @@ export const AppStateProvider = ({ children }) => {
 
     let scheduleForTesting1 = testScheduler(new ScheduleDate(27, 6, 2025));
     let scheduleForTesting2 = testScheduler(new ScheduleDate(4, 7, 2025));
-    let scheduleForTesting3 = testScheduler(new ScheduleDate(17, 7, 2025));
-    let scheduleForTesting4 = testScheduler(new ScheduleDate(13, 9, 2025));
+    let scheduleForTesting3 = testScheduler(new ScheduleDate(17, 9, 2025));
+    let scheduleForTesting4 = testScheduler(new ScheduleDate(11, 11, 2025));
     
     const [appState, setAppState] = useState({
         name: '',

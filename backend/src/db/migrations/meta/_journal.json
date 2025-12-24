@@ -15,6 +15,20 @@
       "when": 1761440175699,
       "tag": "0001_omniscient_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766558755857,
+      "tag": "0002_shiny_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766559049741,
+      "tag": "0003_confused_cerise",
+      "breakpoints": true
     }
   ]
 }

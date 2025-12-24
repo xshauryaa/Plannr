@@ -13,7 +13,7 @@ export default function RootNavigator() {
   const { isLoaded, isSignedIn } = useAuth();
   const { appState, storageLoaded } = useAppState();
 
-  if (!isLoaded || !storageLoaded) {
+  if (!storageLoaded) {
     // Wait for Clerk to hydrate and storage to load
     return <LoadingScreen />;
   }
