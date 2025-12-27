@@ -144,6 +144,31 @@ export const useAuthenticatedAPI = () => {
             method: 'POST',
             body: JSON.stringify(data),
         }),
+        getScheduleById: (id, includeBlocks = false) => makeAuthenticatedRequest(`/api/schedules/${id}?includeBlocks=${includeBlocks}`),
+        updateSchedule: (id, data) => makeAuthenticatedRequest(`/api/schedules/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        deleteSchedule: (id) => makeAuthenticatedRequest(`/api/schedules/${id}`, {
+            method: 'DELETE',
+        }),
+        
+        // Blocks operations
+        addBlocksToSchedule: (scheduleId, blocks) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks`, {
+            method: 'POST',
+            body: JSON.stringify({ blocks }),
+        }),
+        updateBlock: (scheduleId, blockId, data) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        deleteBlock: (scheduleId, blockId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}`, {
+            method: 'DELETE',
+        }),
+        markBlockComplete: (scheduleId, blockId, completed = true) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}/complete`, {
+            method: 'POST',
+            body: JSON.stringify({ completed }),
+        }),
         
         // Preferences operations
         getPreferences: () => makeAuthenticatedRequest('/api/preferences'),

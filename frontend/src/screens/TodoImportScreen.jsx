@@ -56,12 +56,13 @@ const TodoImportScreen = ({ navigation }) => {
         setShowImportModal(false);
         console.log(`🚀 Starting import from ${source.name}`);
         
-        // TODO: Implement actual import logic
+        // LAUNCH VERSION: Import functionality disabled for iOS submission
+        // Will be enabled after launch with proper backend integration
         setTimeout(() => {
             setImporting(false);
-            // For now, navigate to Center after "importing"
+            // For launch, just navigate to Center after "importing" placeholder
             navigation.navigate('Center');
-        }, 2000);
+        }, 1500);
     };
 
     const ImportSourceItem = ({ source }) => (
