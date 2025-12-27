@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TextInput, TouchableOpacity, Platform, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
 import { useAppState } from '../context/AppStateContext.js';
 import { useUser } from '@clerk/clerk-expo';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { getAvatarList, getAvatarImageSource } from '../utils/avatarUtils.js';
 import LoadingScreen from './LoadingScreen.jsx';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -28,9 +28,37 @@ const ManageAccountScreen = () => {
     const [userLastName, setUserLastName] = useState(appState.name);
     const [userEmail, setUserEmail] = useState(user?.primaryEmailAddress?.emailAddress || '');
     
-    // Profile picture state
-    const [profileImage, setProfileImage] = useState(user?.imageUrl || null);
-    const [uploadingImage, setUploadingImage] = useState(false);
+    // Avatar selection state
+    const [selectedAvatar, setSelectedAvatar] = useState('cat'); // Default avatar
+    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+    const avatarList = getAvatarList();
+    
+    // Load user profile on component mount
+    useEffect(() => {
+        const loadUserProfile = async () => {
+            try {
+                if (authenticatedAPI?.getUserProfile) {
+                    console.log('🔄 Loading user profile for avatar...');
+                    const profileData = await authenticatedAPI.getUserProfile();
+                    
+                    if (profileData.success && profileData.data) {
+                        setUserProfile(profileData.data);
+                        if (profileData.data.avatarName) {
+                            setSelectedAvatar(profileData.data.avatarName);
+                            console.log('🐾 Loaded current avatar:', profileData.data.avatarName);
+                        }
+                    }
+                } else {
+                    console.warn('⚠️ getUserProfile API not available');
+                }
+            } catch (error) {
+                console.error('💥 Error loading user profile:', error);
+            }
+        };
+
+        loadUserProfile();
+    }, [authenticatedAPI]);
     
     // Birth date state
     const [birthDate, setBirthDate] = useState(new Date());
@@ -39,137 +67,30 @@ const ManageAccountScreen = () => {
     // Check if user has social login (SSO) enabled
     const hasSocialLogin = user?.externalAccounts && user.externalAccounts.length > 0;
 
-    // Upload image to server
-    const uploadProfileImage = async (imageUri) => {
+    // Handle avatar selection
+    const selectAvatar = async (avatarName) => {
         try {
-            setUploadingImage(true);
+            setSelectedAvatar(avatarName);
+            setShowAvatarPicker(false);
             
-            // Create FormData for file upload
-            const formData = new FormData();
-            formData.append('profileImage', {
-                uri: imageUri,
-                type: 'image/jpeg',
-                name: 'profile.jpg',
-            });
-
-            console.log('📤 Uploading profile image...');
+            console.log('🐾 Updating avatar to:', avatarName);
             
-            const response = await authenticatedAPI.makeAuthenticatedRequest('/api/users/upload-avatar', {
-                method: 'POST',
-                headers: {
-                    // Don't set Content-Type for multipart/form-data - let fetch set it automatically
-                    // 'Content-Type': 'multipart/form-data',
-                },
-                body: formData,
-            });
-
-            if (response.success) {
-                console.log('✅ Profile image uploaded successfully');
-                console.log('🔗 New avatar URL:', response.data.avatarUrl);
+            if (authenticatedAPI?.updateAvatar) {
+                const result = await authenticatedAPI.updateAvatar(avatarName);
                 
-                // Update local state with new image URL
-                setProfileImage(response.data.avatarUrl);
-                
-                // Optionally update app state if you store user data there
-                // if (appState.userProfile) {
-                //     setAppState({
-                //         ...appState,
-                //         userProfile: {
-                //             ...appState.userProfile,
-                //             avatarUrl: response.data.avatarUrl
-                //         }
-                //     });
-                // }
-                
-                Alert.alert('Success', 'Profile picture updated successfully!');
+                if (result.success) {
+                    console.log('✅ Avatar updated successfully:', result.data);
+                    Alert.alert('Success', 'Avatar updated successfully!');
+                } else {
+                    console.error('❌ Failed to update avatar:', result);
+                    Alert.alert('Error', 'Failed to update avatar. Please try again.');
+                }
             } else {
-                throw new Error(response.message || 'Upload failed');
+                console.warn('⚠️ updateAvatar API not available');
             }
         } catch (error) {
-            console.error('💥 Error uploading profile image:', error);
-            Alert.alert(
-                'Upload Failed', 
-                'Failed to upload your profile picture. Please try again.',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            // Revert to previous image
-                            setProfileImage(user?.imageUrl || null);
-                        }
-                    }
-                ]
-            );
-        } finally {
-            setUploadingImage(false);
-        }
-    };
-
-    // Profile picture picker
-    const pickImage = async () => {
-        // Request permissions first
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Required', 'We need camera roll permissions to change your profile picture.');
-            return;
-        }
-
-        // Show action sheet to choose between camera and gallery
-        Alert.alert(
-            'Select Profile Picture',
-            'Choose how you would like to select your new profile picture',
-            [
-                {
-                    text: 'Camera',
-                    onPress: () => openCamera(),
-                },
-                {
-                    text: 'Photo Library',
-                    onPress: () => openImageLibrary(),
-                },
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-            ]
-        );
-    };
-
-    const openCamera = async () => {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Required', 'We need camera permissions to take a photo.');
-            return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1], // Square aspect ratio
-            quality: 0.8,
-        });
-
-        if (!result.canceled && result.assets[0]) {
-            // Immediately show the new image
-            setProfileImage(result.assets[0].uri);
-            // Upload to server
-            await uploadProfileImage(result.assets[0].uri);
-        }
-    };
-
-    const openImageLibrary = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1], // Square aspect ratio
-            quality: 0.8,
-        });
-
-        if (!result.canceled && result.assets[0]) {
-            // Immediately show the new image
-            setProfileImage(result.assets[0].uri);
-            // Upload to server
-            await uploadProfileImage(result.assets[0].uri);
+            console.error('� Error updating avatar:', error);
+            Alert.alert('Error', 'Failed to update avatar. Please try again.');
         }
     };
 
@@ -193,34 +114,64 @@ const ManageAccountScreen = () => {
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Your Account</Text>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
-                {/* Profile Picture */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Profile Picture</Text>
+                {/* Avatar Selection */}
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Avatar</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, alignItems: 'center' }}>
                     <TouchableOpacity 
                         style={styles.profileImageContainer}
-                        onPress={pickImage}
+                        onPress={() => setShowAvatarPicker(true)}
                     >
-                        {profileImage ? (
-                            <Image 
-                                source={{ uri: profileImage }} 
-                                style={styles.profileImage}
-                                resizeMode="cover"
-                            />
-                        ) : (
-                            <View style={{ ...styles.profileImagePlaceholder, backgroundColor: theme.INPUT }}>
-                                <Text style={{ ...styles.profileImagePlaceholderText, color: theme.FOREGROUND }}>
-                                    {appState.name ? appState.name.charAt(0).toUpperCase() : '+'}
-                                </Text>
-                            </View>
-                        )}
+                        <Image 
+                            source={getAvatarImageSource(selectedAvatar)} 
+                            style={styles.profileImage}
+                            resizeMode="cover"
+                        />
                         <View style={styles.editIconOverlay}>
                             <Text style={styles.editIconText}>✏️</Text>
                         </View>
                     </TouchableOpacity>
                     <Text style={{ ...styles.profileImageHint, color: theme.FOREGROUND }}>
-                        Tap to change your profile picture
+                        Tap to choose your avatar
                     </Text>
                 </View>
+
+                {/* Avatar Picker Modal */}
+                {showAvatarPicker && (
+                    <View style={{ ...styles.avatarPickerModal, backgroundColor: theme.COMP_COLOR }}>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center', marginBottom: 16 }}>
+                            Choose Your Avatar
+                        </Text>
+                        <View style={styles.avatarGrid}>
+                            {avatarList.map((avatar) => (
+                                <TouchableOpacity
+                                    key={avatar.name}
+                                    style={[
+                                        styles.avatarOption,
+                                        selectedAvatar === avatar.name && { ...styles.avatarOptionSelected, borderColor: theme.SELECTION }
+                                    ]}
+                                    onPress={() => selectAvatar(avatar.name)}
+                                >
+                                    <Image 
+                                        source={avatar.image} 
+                                        style={styles.avatarOptionImage}
+                                        resizeMode="cover"
+                                    />
+                                    <Text style={{ ...styles.avatarOptionText, color: theme.FOREGROUND }}>
+                                        {avatar.displayName}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        <TouchableOpacity
+                            style={{ ...styles.avatarPickerCloseButton, backgroundColor: theme.INPUT }}
+                            onPress={() => setShowAvatarPicker(false)}
+                        >
+                            <Text style={{ ...styles.avatarPickerCloseText, color: theme.FOREGROUND }}>
+                                Cancel
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* First and Last Name */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Name</Text>
@@ -424,6 +375,76 @@ const styles = StyleSheet.create({
         fontFamily: 'AlbertSans',
         opacity: 0.7,
         textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '90%',
+        maxWidth: 400,
+        borderRadius: 16,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: typography.subHeadingSize,
+        fontFamily: 'PinkSunset',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    avatarGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    avatarOption: {
+        margin: 8,
+        padding: 4,
+        borderRadius: 50,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    selectedAvatarOption: {
+        borderColor: '#007AFF',
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    },
+    avatarImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    modalButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        minWidth: 80,
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#F0F0F0',
+    },
+    selectButton: {
+        backgroundColor: '#007AFF',
+    },
+    modalButtonText: {
+        fontSize: typography.bodySize,
+        fontFamily: 'AlbertSans',
+        fontWeight: 'bold',
+    },
+    cancelButtonText: {
+        color: '#333',
+    },
+    selectButtonText: {
+        color: '#FFF',
     },
 });
 

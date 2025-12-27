@@ -16,6 +16,7 @@ import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js';
 import useCurrentTime from '../utils/useCurrentTime.js';
+import { getAvatarImageSource } from '../utils/avatarUtils.js';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useClerk } from '@clerk/clerk-expo';
 
@@ -55,7 +56,7 @@ const UserProfileScreen = ({ navigation }) => {
                 if (profileData.success) {
                     setUserProfile(profileData.data);
                     console.log('✅ User profile set:', JSON.stringify(profileData.data, null, 2));
-                    console.log('🖼️ Avatar URL specifically:', profileData.data?.avatarUrl);
+                    console.log('🖼️ Avatar name specifically:', profileData.data?.avatarName);
                 } else {
                     console.log('❌ Profile fetch failed:', profileData);
                 }
@@ -72,7 +73,7 @@ const UserProfileScreen = ({ navigation }) => {
     // Debug userProfile changes
     useEffect(() => {
         console.log('🔍 UserProfile state changed:', userProfile);
-        console.log('🖼️ Current avatarUrl:', userProfile?.avatarUrl);
+        console.log('🖼️ Current avatarName:', userProfile?.avatarName);
     }, [userProfile]);
 
     const handleLogout = async () => {
@@ -256,29 +257,18 @@ const UserProfileScreen = ({ navigation }) => {
                     <LinearGradient style={{ height: 164, width: 164, alignSelf: 'center', borderRadius: 120 }} colors={[theme.GRADIENT_START, theme.GRADIENT_END]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
                     <View style={{ height: 156, width: 156, borderRadius: 120, backgroundColor: theme.BACKGROUND, zIndex: 1, position: 'absolute', top: 4, left: 4 }}/>
                     <View style={{ height: 148, width: 148, borderRadius: 120, backgroundColor: theme.FOREGROUND, zIndex: 2, position: 'absolute', top: 8, left: 8, overflow: 'hidden' }}>
-                        {userProfile?.avatarUrl ? (
+                        {userProfile?.avatarName ? (
                             <Image 
-                                source={{ uri: userProfile.avatarUrl }} 
+                                source={getAvatarImageSource(userProfile.avatarName)} 
                                 style={{ width: '100%', height: '100%', borderRadius: 120 }}
                                 resizeMode="cover"
-                                onLoad={() => console.log('🖼️ Image loaded successfully:', userProfile.avatarUrl)}
-                                onError={(error) => {
-                                    console.error('💥 Image load error:', error.nativeEvent.error);
-                                    console.error('🔗 Failed URL:', userProfile.avatarUrl);
-                                    console.error('🔍 URL Analysis:');
-                                    console.log('  - Is HTTPS:', userProfile.avatarUrl.startsWith('https://'));
-                                    console.log('  - Has file extension:', /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(userProfile.avatarUrl));
-                                    console.log('  - Is Imgur:', userProfile.avatarUrl.includes('imgur.com'));
-                                }}
-                                onLoadStart={() => console.log('🔄 Image load started:', userProfile.avatarUrl)}
-                                defaultSource={require('../../assets/images/light/NoTasks.png')}
                             />
                         ) : (
-                            <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={{ color: theme.BACKGROUND, fontSize: 48, fontFamily: 'PinkSunset' }}>
-                                    {appState.name ? appState.name.charAt(0).toUpperCase() : '?'}
-                                </Text>
-                            </View>
+                            <Image 
+                                source={getAvatarImageSource('cat')} // Default to cat avatar
+                                style={{ width: '100%', height: '100%', borderRadius: 120 }}
+                                resizeMode="cover"
+                            />
                         )}
                     </View>
                 </View>

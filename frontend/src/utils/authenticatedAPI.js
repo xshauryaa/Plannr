@@ -103,9 +103,7 @@ export const useAuthenticatedAPI = () => {
                 if (user.firstName || user.lastName) {
                     userData.displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                 }
-                if (user.imageUrl) {
-                    userData.avatarUrl = user.imageUrl;
-                }
+                // Avatar will be assigned randomly by backend, no longer using Clerk imageUrl
             }
 
             console.log('Syncing user data:', userData);
@@ -133,6 +131,10 @@ export const useAuthenticatedAPI = () => {
         updateUserProfile: (data) => makeAuthenticatedRequest('/api/users/profile', {
             method: 'PUT',
             body: JSON.stringify(data),
+        }),
+        updateAvatar: (avatarName) => makeAuthenticatedRequest('/api/users/avatar', {
+            method: 'PUT',
+            body: JSON.stringify({ avatarName }),
         }),
         deleteUserAccount: () => makeAuthenticatedRequest('/api/users/account', {
             method: 'DELETE',
