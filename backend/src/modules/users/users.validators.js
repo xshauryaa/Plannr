@@ -8,12 +8,22 @@ export const createUserSchema = z.object({
     clerkUserId: z.string().min(1, 'Clerk User ID is required'),
     email: z.string().email('Valid email is required'),
     displayName: z.string().optional(),
-    avatarUrl: z.string().url('Valid avatar URL required').optional(),
+    avatarName: z.enum(['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'], {
+        errorMap: () => ({ message: 'Invalid avatar name' })
+    }).optional(),
 });
 
 export const updateUserProfileSchema = z.object({
     displayName: z.string().min(1, 'Display name is required').optional(),
-    avatarUrl: z.string().url('Valid avatar URL required').optional(),
+    avatarName: z.enum(['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'], {
+        errorMap: () => ({ message: 'Invalid avatar name' })
+    }).optional(),
+});
+
+export const updateAvatarSchema = z.object({
+    avatarName: z.enum(['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'], {
+        errorMap: () => ({ message: 'Invalid avatar name' })
+    }),
 });
 
 export const clerkWebhookSchema = z.object({
@@ -55,6 +65,19 @@ export const validateCreateUser = (req, res, next) => {
 export const validateUpdateUserProfile = (req, res, next) => {
     try {
         req.validatedData = updateUserProfileSchema.parse(req.body);
+        next();
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation failed',
+            errors: error.errors,
+        });
+    }
+};
+
+export const validateUpdateAvatar = (req, res, next) => {
+    try {
+        req.validatedData = updateAvatarSchema.parse(req.body);
         next();
     } catch (error) {
         return res.status(400).json({

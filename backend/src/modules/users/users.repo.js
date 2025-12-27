@@ -8,14 +8,14 @@ import { eq, and } from 'drizzle-orm';
  */
 
 export const createUser = async (userData) => {
-    const { clerkUserId, email, displayName, avatarUrl } = userData;
+    const { clerkUserId, email, displayName, avatarName } = userData;
     
     try {
         const [newUser] = await db.insert(users).values({
             clerkUserId,
             email,
             displayName,
-            avatarUrl,
+            avatarName,
         }).returning();
 
         return newUser;

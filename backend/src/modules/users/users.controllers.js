@@ -7,7 +7,7 @@ import * as repo from './users.repo.js';
 
 export const createUser = async (req, res, next) => {
     try {
-        const { clerkUserId, email, displayName, avatarUrl } = req.validatedData;
+        const { clerkUserId, email, displayName, avatarName } = req.validatedData;
 
         // Check if user already exists
         const existingUser = await repo.getUserByClerkId(clerkUserId);
@@ -24,7 +24,7 @@ export const createUser = async (req, res, next) => {
             clerkUserId,
             email,
             displayName,
-            avatarUrl,
+            avatarName,
         });
 
         // Create default preferences for the user
@@ -38,7 +38,7 @@ export const createUser = async (req, res, next) => {
                 clerkUserId: newUser.clerkUserId,
                 email: newUser.email,
                 displayName: newUser.displayName,
-                avatarUrl: newUser.avatarUrl,
+                avatarName: newUser.avatarName,
                 createdAt: newUser.createdAt,
             }
         });
@@ -79,7 +79,7 @@ export const getUserProfile = async (req, res, next) => {
                 clerkUserId: fullUserData.clerkUserId,
                 email: fullUserData.email,
                 displayName: fullUserData.displayName,
-                avatarUrl: fullUserData.avatarUrl,
+                avatarName: fullUserData.avatarName,
                 preferences: fullUserData.preferences,
                 createdAt: fullUserData.createdAt,
                 updatedAt: fullUserData.updatedAt,
@@ -121,7 +121,7 @@ export const updateUserProfile = async (req, res, next) => {
                 clerkUserId: updatedUser.clerkUserId,
                 email: updatedUser.email,
                 displayName: updatedUser.displayName,
-                avatarUrl: updatedUser.avatarUrl,
+                avatarName: updatedUser.avatarName,
                 updatedAt: updatedUser.updatedAt,
             }
         });
@@ -178,12 +178,12 @@ export const loginUser = async (req, res, next) => {
         
         // If user doesn't exist in our DB, create them
         if (!user) {
-            const { email, displayName, avatarUrl } = req.body;
+            const { email, displayName, avatarName } = req.body;
             user = await repo.createUser({
                 clerkUserId,
                 email,
                 displayName,
-                avatarUrl,
+                avatarName,
             });
             
             // Create default preferences
@@ -201,7 +201,7 @@ export const loginUser = async (req, res, next) => {
                 clerkUserId: fullUserData.clerkUserId,
                 email: fullUserData.email,
                 displayName: fullUserData.displayName,
-                avatarUrl: fullUserData.avatarUrl,
+                avatarName: fullUserData.avatarName,
                 preferences: fullUserData.preferences,
             }
         });
@@ -272,7 +272,7 @@ export const handleClerkWebhook = async (req, res, next) => {
 // Manual sync function for testing
 export const syncUserFromClerk = async (req, res, next) => {
     try {
-        const { clerkUserId, email, displayName, avatarUrl } = req.body;
+        const { clerkUserId, email, displayName, avatarName } = req.body;
         
         if (!clerkUserId) {
             return res.status(400).json({
@@ -297,7 +297,7 @@ export const syncUserFromClerk = async (req, res, next) => {
             clerkUserId,
             email: email || `user-${clerkUserId}@temp.com`,
             displayName: displayName || null,
-            avatarUrl: avatarUrl || null,
+            avatarName: avatarName || 'puppy', // Default to puppy avatar
         };
 
         console.log('Creating user with data:', userData);
@@ -316,7 +316,7 @@ export const syncUserFromClerk = async (req, res, next) => {
                 clerkUserId: newUser.clerkUserId,
                 email: newUser.email,
                 displayName: newUser.displayName,
-                avatarUrl: newUser.avatarUrl,
+                avatarName: newUser.avatarName,
                 createdAt: newUser.createdAt,
             }
         });
@@ -327,6 +327,11 @@ export const syncUserFromClerk = async (req, res, next) => {
 };
 
 // Helper functions for webhook handlers
+const getRandomAvatar = () => {
+    const avatars = ['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'];
+    return avatars[Math.floor(Math.random() * avatars.length)];
+};
+
 const handleUserCreated = async (userData) => {
     console.log('📋 User data received:', userData);
     
@@ -344,7 +349,7 @@ const handleUserCreated = async (userData) => {
             clerkUserId: userData.id,
             email: primaryEmail.email_address,
             displayName: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : null,
-            avatarUrl: userData.profile_image_url || userData.image_url,
+            avatarName: getRandomAvatar(), // Assign random avatar instead of using profile image
         });
         
         // Create default preferences
@@ -365,7 +370,7 @@ const handleUserUpdated = async (userData) => {
         await repo.updateUser(user.id, {
             email: primaryEmail?.email_address || user.email,
             displayName: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : user.displayName,
-            avatarUrl: userData.profile_image_url || userData.image_url || user.avatarUrl,
+            // Keep existing avatar name, don't change it on updates
         });
     }
 };
@@ -377,7 +382,7 @@ const handleUserDeleted = async (userData) => {
     }
 };
 
-export const uploadAvatar = async (req, res, next) => {
+export const updateAvatar = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'];
         
@@ -388,10 +393,21 @@ export const uploadAvatar = async (req, res, next) => {
             });
         }
 
-        if (!req.file) {
+        const { avatarName } = req.validatedData;
+
+        if (!avatarName) {
             return res.status(400).json({
                 success: false,
-                message: 'No image file provided'
+                message: 'Avatar name is required'
+            });
+        }
+
+        // Validate avatar name
+        const validAvatars = ['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'];
+        if (!validAvatars.includes(avatarName)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid avatar name'
             });
         }
 
@@ -404,29 +420,25 @@ export const uploadAvatar = async (req, res, next) => {
             });
         }
 
-        // For now, we'll just store the filename and serve it statically
-        // In production, you'd upload to a cloud storage service like AWS S3
-        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-
-        // Update user's avatar URL in database
+        // Update user's avatar name in database
         const updatedUser = await repo.updateUser(user.id, {
-            avatarUrl: avatarUrl
+            avatarName: avatarName
         });
 
         res.status(200).json({
             success: true,
-            message: 'Avatar uploaded successfully',
+            message: 'Avatar updated successfully',
             data: {
-                avatarUrl: avatarUrl,
+                avatarName: avatarName,
                 user: {
                     id: updatedUser.id,
                     clerkUserId: updatedUser.clerkUserId,
-                    avatarUrl: updatedUser.avatarUrl
+                    avatarName: updatedUser.avatarName
                 }
             }
         });
     } catch (error) {
-        console.error('Error uploading avatar:', error);
+        console.error('Error updating avatar:', error);
         next(error);
     }
 };
