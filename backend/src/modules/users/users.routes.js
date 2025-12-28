@@ -44,6 +44,9 @@ router.post('/sync', ctrl.syncUserFromClerk);
 // PUT /users/avatar - Update user avatar
 router.put('/avatar', validateUpdateAvatar, ctrl.updateAvatar);
 
+// POST /users/onboarding/complete - Mark onboarding as complete
+router.post('/onboarding/complete', ctrl.markOnboardingComplete);
+
 // GET /users/webhooks/test - Test webhook endpoint (for debugging)
 router.get('/webhooks/test', (req, res) => {
     res.status(200).json({ 

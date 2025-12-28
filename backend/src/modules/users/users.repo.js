@@ -121,3 +121,20 @@ export const createDefaultPreferences = async (userId) => {
         throw new Error(`Failed to create default preferences: ${error.message}`);
     }
 };
+
+export const markUserAsOnboarded = async (userId) => {
+    try {
+        const [updatedUser] = await db
+            .update(users)
+            .set({
+                onboarded: true,
+                updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId))
+            .returning();
+
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Failed to mark user as onboarded: ${error.message}`);
+    }
+};

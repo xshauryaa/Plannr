@@ -136,6 +136,9 @@ export const useAuthenticatedAPI = () => {
             method: 'PUT',
             body: JSON.stringify({ avatarName }),
         }),
+        markOnboardingComplete: () => makeAuthenticatedRequest('/api/users/onboarding/complete', {
+            method: 'POST',
+        }),
         deleteUserAccount: () => makeAuthenticatedRequest('/api/users/account', {
             method: 'DELETE',
         }),

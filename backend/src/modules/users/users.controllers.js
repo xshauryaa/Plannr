@@ -80,6 +80,7 @@ export const getUserProfile = async (req, res, next) => {
                 email: fullUserData.email,
                 displayName: fullUserData.displayName,
                 avatarName: fullUserData.avatarName,
+                onboarded: fullUserData.onboarded,
                 preferences: fullUserData.preferences,
                 createdAt: fullUserData.createdAt,
                 updatedAt: fullUserData.updatedAt,
@@ -122,6 +123,7 @@ export const updateUserProfile = async (req, res, next) => {
                 email: updatedUser.email,
                 displayName: updatedUser.displayName,
                 avatarName: updatedUser.avatarName,
+                onboarded: updatedUser.onboarded,
                 updatedAt: updatedUser.updatedAt,
             }
         });
@@ -202,6 +204,7 @@ export const loginUser = async (req, res, next) => {
                 email: fullUserData.email,
                 displayName: fullUserData.displayName,
                 avatarName: fullUserData.avatarName,
+                onboarded: fullUserData.onboarded,
                 preferences: fullUserData.preferences,
             }
         });
@@ -439,6 +442,45 @@ export const updateAvatar = async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error updating avatar:', error);
+        next(error);
+    }
+};
+
+export const markOnboardingComplete = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from database
+        const user = await repo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Mark user as onboarded
+        const updatedUser = await repo.markUserAsOnboarded(user.id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Onboarding completed successfully',
+            data: {
+                id: updatedUser.id,
+                clerkUserId: updatedUser.clerkUserId,
+                onboarded: updatedUser.onboarded,
+                updatedAt: updatedUser.updatedAt
+            }
+        });
+    } catch (error) {
+        console.error('Error marking onboarding complete:', error);
         next(error);
     }
 };
