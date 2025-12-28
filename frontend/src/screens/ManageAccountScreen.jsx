@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TextInput, TouchableOpacity, Platform, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppState } from '../context/AppStateContext.js';
 import { useUser } from '@clerk/clerk-expo';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
-import { getAvatarList, getAvatarImageSource } from '../utils/avatarUtils.js';
+import { getAvatarImageSource } from '../utils/avatarUtils.js';
+import AvatarPickerBottomSheet from '../components/AvatarPickerBottomSheet.jsx';
 import LoadingScreen from './LoadingScreen.jsx';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -20,6 +21,7 @@ const ManageAccountScreen = () => {
     const { user } = useUser();
     const authenticatedAPI = useAuthenticatedAPI();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const avatarPickerRef = useRef();
     
     // Debug log to see what's returned
     console.log('🔍 authenticatedAPI:', authenticatedAPI);
@@ -30,9 +32,7 @@ const ManageAccountScreen = () => {
     
     // Avatar selection state
     const [selectedAvatar, setSelectedAvatar] = useState('cat'); // Default avatar
-    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
-    const avatarList = getAvatarList();
     
     // Load user profile on component mount
     useEffect(() => {
@@ -71,7 +71,6 @@ const ManageAccountScreen = () => {
     const selectAvatar = async (avatarName) => {
         try {
             setSelectedAvatar(avatarName);
-            setShowAvatarPicker(false);
             
             console.log('🐾 Updating avatar to:', avatarName);
             
@@ -119,7 +118,7 @@ const ManageAccountScreen = () => {
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, alignItems: 'center' }}>
                     <TouchableOpacity 
                         style={styles.profileImageContainer}
-                        onPress={() => setShowAvatarPicker(true)}
+                        onPress={() => avatarPickerRef.current?.show()}
                     >
                         <Image 
                             source={getAvatarImageSource(selectedAvatar)} 
@@ -134,44 +133,6 @@ const ManageAccountScreen = () => {
                         Tap to choose your avatar
                     </Text>
                 </View>
-
-                {/* Avatar Picker Modal */}
-                {showAvatarPicker && (
-                    <View style={{ ...styles.avatarPickerModal, backgroundColor: theme.COMP_COLOR }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center', marginBottom: 16 }}>
-                            Choose Your Avatar
-                        </Text>
-                        <View style={styles.avatarGrid}>
-                            {avatarList.map((avatar) => (
-                                <TouchableOpacity
-                                    key={avatar.name}
-                                    style={[
-                                        styles.avatarOption,
-                                        selectedAvatar === avatar.name && { ...styles.avatarOptionSelected, borderColor: theme.SELECTION }
-                                    ]}
-                                    onPress={() => selectAvatar(avatar.name)}
-                                >
-                                    <Image 
-                                        source={avatar.image} 
-                                        style={styles.avatarOptionImage}
-                                        resizeMode="cover"
-                                    />
-                                    <Text style={{ ...styles.avatarOptionText, color: theme.FOREGROUND }}>
-                                        {avatar.displayName}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                        <TouchableOpacity
-                            style={{ ...styles.avatarPickerCloseButton, backgroundColor: theme.INPUT }}
-                            onPress={() => setShowAvatarPicker(false)}
-                        >
-                            <Text style={{ ...styles.avatarPickerCloseText, color: theme.FOREGROUND }}>
-                                Cancel
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
 
                 {/* First and Last Name */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Name</Text>
@@ -249,6 +210,13 @@ const ManageAccountScreen = () => {
                     )}
                 </View>
             </ScrollView>
+            
+            <AvatarPickerBottomSheet 
+                ref={avatarPickerRef}
+                theme={theme}
+                selectedAvatar={selectedAvatar}
+                onAvatarSelect={selectAvatar}
+            />
         </View>
     );
 }
@@ -375,76 +343,6 @@ const styles = StyleSheet.create({
         fontFamily: 'AlbertSans',
         opacity: 0.7,
         textAlign: 'center',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        width: '90%',
-        maxWidth: 400,
-        borderRadius: 16,
-        padding: 20,
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: typography.subHeadingSize,
-        fontFamily: 'PinkSunset',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    avatarGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        marginBottom: 20,
-    },
-    avatarOption: {
-        margin: 8,
-        padding: 4,
-        borderRadius: 50,
-        borderWidth: 2,
-        borderColor: 'transparent',
-    },
-    selectedAvatarOption: {
-        borderColor: '#007AFF',
-        backgroundColor: 'rgba(0, 122, 255, 0.1)',
-    },
-    avatarImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-    },
-    modalButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        minWidth: 80,
-        alignItems: 'center',
-    },
-    cancelButton: {
-        backgroundColor: '#F0F0F0',
-    },
-    selectButton: {
-        backgroundColor: '#007AFF',
-    },
-    modalButtonText: {
-        fontSize: typography.bodySize,
-        fontFamily: 'AlbertSans',
-        fontWeight: 'bold',
-    },
-    cancelButtonText: {
-        color: '#333',
-    },
-    selectButtonText: {
-        color: '#FFF',
     },
 });
 
