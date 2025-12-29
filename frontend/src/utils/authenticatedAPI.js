@@ -202,8 +202,8 @@ export const useAuthenticatedAPI = () => {
                 minGap: serialized.minGap,
                 workingHoursLimit: serialized.workingHoursLimit,
                 strategy: serialized.strategy,
-                startTime: serialized.startTime ? serialized.startTime.toInt() : 900, // Convert Time24 to integer
-                endTime: serialized.endTime ? serialized.endTime.toInt() : 1700,
+                startTime: serialized.startTime || 900, // Already an integer from serializeTime24
+                endTime: serialized.endTime || 1700, // Already an integer from serializeTime24
                 metadata: {
                     eventDependencies: serialized.eventDependencies,
                     fullScheduleData: serialized.schedule, // Store complete schedule map
@@ -224,8 +224,8 @@ export const useAuthenticatedAPI = () => {
             return {
                 type: serialized.type, // 'rigid' | 'flexible' | 'break'
                 title: serialized.name,
-                startAt: serialized.startTime ? serialized.startTime.toInt() : 0,
-                endAt: serialized.endTime ? serialized.endTime.toInt() : 0,
+                startAt: serialized.startTime || 0, // Already an integer from serializeTime24
+                endAt: serialized.endTime || 0, // Already an integer from serializeTime24
                 blockDate: serialized.date ? `${serialized.date.year}-${String(serialized.date.month).padStart(2, '0')}-${String(serialized.date.date).padStart(2, '0')}` : null,
                 dateObject: serialized.date, // JSONB field stores ScheduleDate object
                 category: serialized.activityType,

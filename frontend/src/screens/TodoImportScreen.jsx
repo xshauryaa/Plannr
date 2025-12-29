@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
-import Modal from 'react-native-modal';
-import { SvgXml } from 'react-native-svg';
-import { useAppState } from '../context/AppStateContext.js';
-import { lightColor, darkColor } from '../design/colors.js';
-import { spacing, padding } from '../design/spacing.js';
-import { typography } from '../design/typography.js';
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native'
+import Modal from 'react-native-modal'
+import { SvgXml } from 'react-native-svg'
+
+import { useAppState } from '../context/AppStateContext.js'
+import { useActionLogger } from '../hooks/useActionLogger.js'
+
+import { lightColor, darkColor } from '../design/colors.js'
+import { spacing, padding } from '../design/spacing.js'
+import { typography } from '../design/typography.js'
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
@@ -19,10 +22,15 @@ const FileAddIcon = `<svg width="120" height="120" viewBox="0 0 24 24" fill="non
 
 const TodoImportScreen = ({ navigation }) => {
     const { appState } = useAppState();
+    const { logAction, logScreenView } = useActionLogger('TodoImport');
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [showImportModal, setShowImportModal] = useState(false);
     const [importing, setImporting] = useState(false);
+
+    React.useEffect(() => {
+        logScreenView();
+    }, []);
 
     const importSources = [
         {
@@ -52,6 +60,11 @@ const TodoImportScreen = ({ navigation }) => {
     ];
 
     const handleImportSource = (source) => {
+        logAction('todo_import_source_selected', { 
+            sourceName: source.name,
+            sourceId: source.id 
+        });
+        
         setImporting(true);
         setShowImportModal(false);
         console.log(`🚀 Starting import from ${source.name}`);
@@ -60,9 +73,24 @@ const TodoImportScreen = ({ navigation }) => {
         // Will be enabled after launch with proper backend integration
         setTimeout(() => {
             setImporting(false);
+            logAction('todo_import_completed', { 
+                sourceName: source.name,
+                sourceId: source.id,
+                isPlaceholder: true 
+            });
             // For launch, just navigate to Center after "importing" placeholder
             navigation.navigate('Center');
         }, 1500);
+    };
+
+    const openImportModal = () => {
+        logAction('todo_import_modal_opened');
+        setShowImportModal(true);
+    };
+
+    const handleSkipImport = () => {
+        logAction('todo_import_skipped');
+        navigation.navigate('Center');
     };
 
     const ImportSourceItem = ({ source }) => (
@@ -107,7 +135,7 @@ const TodoImportScreen = ({ navigation }) => {
                 {/* Choose Import Button */}
                 <TouchableOpacity
                     style={[styles.chooseButton, { opacity: importing ? 0.6 : 1 }]}
-                    onPress={() => setShowImportModal(true)}
+                    onPress={openImportModal}
                     disabled={importing}
                 >
                     <Text style={styles.chooseButtonText}>
@@ -119,7 +147,7 @@ const TodoImportScreen = ({ navigation }) => {
             {/* Skip Option */}
             <TouchableOpacity 
                 style={styles.skipButton}
-                onPress={() => navigation.navigate('Center')}
+                onPress={handleSkipImport}
             >
                 <Text style={[styles.skipText, { color: theme.FOREGROUND_SECONDARY }]}>
                     Skip and add tasks manually

@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Image, TouchableOpacity, Switch, TextInput, Alert } from 'react-native';
+import { useClerk } from '@clerk/clerk-expo';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { useAppState } from '../context/AppStateContext.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 import { TokenCacheUtils } from '../../cache.js';
+
 import LoadingScreen from './LoadingScreen.jsx';
 import MenuButton from '../components/MenuButton.jsx';
-import LightMode from '../../assets/system-icons/LightMode.svg';
-import DarkMode from '../../assets/system-icons/DarkMode.svg';
-import Link from '../../assets/system-icons/Link.svg';
-import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
-import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
-import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
+
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js';
 import useCurrentTime from '../utils/useCurrentTime.js';
 import { getAvatarImageSource } from '../utils/avatarUtils.js';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useClerk } from '@clerk/clerk-expo';
+
+import LightMode from '../../assets/system-icons/LightMode.svg';
+import DarkMode from '../../assets/system-icons/DarkMode.svg';
+import Link from '../../assets/system-icons/Link.svg';
+import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
+import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
+import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -26,6 +31,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const UserProfileScreen = ({ navigation }) => {
     const { appState, setAppState, storageLoaded } = useAppState();
     const { signOut } = useClerk();
+    const { logAction, logScreenView, logError } = useActionLogger('UserProfile');
 
     const currentTime = useCurrentTime();
     const { getUserProfile, updatePreferences, deleteUserAccount } = useAuthenticatedAPI();
@@ -43,6 +49,15 @@ const UserProfileScreen = ({ navigation }) => {
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);
+
+    // Screen view logging
+    useEffect(() => {
+        logScreenView({
+            hasActiveSchedule: !!appState.activeSchedule,
+            totalSavedSchedules: appState.savedSchedules.length,
+            userName: appState.name
+        });
+    }, []);
 
     // Fetch user profile data including avatar
     useEffect(() => {
@@ -173,7 +188,6 @@ const UserProfileScreen = ({ navigation }) => {
     // Separate function for saving preferences to backend
     const savePreferences = async (updatedPreferences = null) => {
         try {
-            setLoading(true);
             // Use passed preferences or current state
             const prefsToSave = updatedPreferences || appState.userPreferences;
             const payload = { 
@@ -202,8 +216,6 @@ const UserProfileScreen = ({ navigation }) => {
         } catch (error) {
             console.error('💥 Error saving preferences via authenticatedAPI:', error);
             Alert.alert('Error', 'An unexpected error occurred while saving preferences.');
-        } finally {
-            setLoading(false);
         }
     };
 

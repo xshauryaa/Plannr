@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+
 import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
+
 import LoadingScreen from './LoadingScreen.jsx';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -9,6 +12,12 @@ import convertDateToScheduleDate from '../utils/dateConversion.js';
 import useCurrentTime from '../utils/useCurrentTime.js';
 
 const ProductivityAnalyticsScreen = () => {
+    const { logScreenView } = useActionLogger('ProductivityAnalytics');
+
+    React.useEffect(() => {
+        logScreenView();
+    }, []);
+
     return (
         <View style={styles.container}>
             <Text>Productivity Analytics Screen</Text>

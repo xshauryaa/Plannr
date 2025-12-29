@@ -11,6 +11,7 @@ import MenuButton from '../components/MenuButton.jsx';
 import { useAppState } from '../context/AppStateContext.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
+import { useActionLogger } from '../hooks/useActionLogger.js';
 
 import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
@@ -23,6 +24,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
     const currentTime = useCurrentTime();
+    const { logUserAction } = useActionLogger('Home');
     
     const [fontsLoaded] = Font.useFonts({
         'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -42,14 +44,20 @@ const HomeScreen = ({ navigation }) => {
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
                 <TimeOfDay/>
-                <UpcomingTasks onClick={() => { navigation.navigate("Tasks") }}/>
+                <UpcomingTasks onClick={() => { 
+                    logUserAction('upcoming_tasks_clicked');
+                    navigation.navigate("Tasks");
+                }}/>
                 <Progress/>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
                         title="Plannr Center"
                         icon="Center"
-                        navTo={() => { navigation.navigate("Center") }}
+                        navTo={() => { 
+                            logUserAction('plannr_center_clicked');
+                            navigation.navigate("Center");
+                        }}
                     />
                 </View>
                 {/* <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>

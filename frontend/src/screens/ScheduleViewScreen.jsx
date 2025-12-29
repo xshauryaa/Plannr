@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -20,34 +21,56 @@ const OFFSET = PADDING_HORIZONTAL - ((INDICATOR_DIM - ICON_DIM) / 2);
 
 const ScheduleViewScreen = ({ route }) => {
     const { appState, setAppState } = useAppState();
+    const { logUserAction, logScheduleAction, logError } = useActionLogger('ScheduleView');
     const { updateSchedule, getSchedules } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedName } = route.params;
+    
+    // ✅ ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedTB, setSelectedTB] = useState(null);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const indicatorX = useRef(new Animated.Value(0)).current;
+    
+    // ✅ NOW we can safely check for schedule existence
     const schedule = appState.savedSchedules.find(sched => sched.name === schedName);
 
+    // ✅ Initialize selectedDate when schedule is available
+    useEffect(() => {
+        if (!schedule || selectedDate) return; // ✅ Early return if no schedule or already set
+        setSelectedDate(schedule.schedule.getFirstDate().getId());
+    }, [schedule, selectedDate]);
+
+    // ✅ Screen view logging
+    useEffect(() => {
+        if (!schedule) return; // ✅ Early return if no schedule
+        logUserAction('view_schedule', { 
+            scheduleName: schedName,
+            isActive: schedule.isActive || false,
+            totalDays: schedule.schedule?.numDays || 0
+        });
+    }, [schedule, schedName]);
+
+    // Early return for missing schedule to prevent hooks errors
     if (!schedule) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ font: 'AlbertSans', size: 20}}>Schedule not found.</Text>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.BACKGROUND }}>
+                <Text style={{ fontFamily: 'AlbertSans', fontSize: 20, color: theme.FOREGROUND }}>Schedule not found.</Text>
             </View>
         );
     }
 
-    const [selectedDate, setSelectedDate] = useState(schedule.schedule.getFirstDate().getId());
-    const [selectedTB, setSelectedTB] = useState(null);
-    const [showInfoModal, setShowInfoModal] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-    const indicatorX = useRef(new Animated.Value(0)).current;
-
     useEffect(() => {
+        if (!schedule || !selectedDate) return; // ✅ Guard against null values
+        
         const index = schedule.schedule.getAllDatesInOrder().indexOf(selectedDate);
         const xPosition = index * (2 * PADDING_HORIZONTAL + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
             useNativeDriver: true,
         }).start();
-    }, [selectedDate]);
+    }, [selectedDate, schedule]); // ✅ Add schedule as dependency
 
     const onSelectTB = (tb) => {
         setSelectedTB(tb);
@@ -71,6 +94,11 @@ const ScheduleViewScreen = ({ route }) => {
                             try {
                                 if (schedule.isActive) {
                                     // Deactivating current schedule
+                                    logScheduleAction('deactivate', {
+                                        scheduleName: schedule.name,
+                                        scheduleId: schedule.backendId
+                                    });
+                                    
                                     await updateSchedule(schedule.backendId, { isActive: false });
                                     
                                     setAppState({ 
@@ -85,6 +113,12 @@ const ScheduleViewScreen = ({ route }) => {
                                     });
                                 } else {
                                     // Activating this schedule - first deactivate all others
+                                    logScheduleAction('activate', {
+                                        scheduleName: schedule.name,
+                                        scheduleId: schedule.backendId,
+                                        totalDays: schedule.schedule?.numDays || 0
+                                    });
+                                    
                                     const allSchedules = await getSchedules();
                                     
                                     // Update all schedules in database
@@ -117,12 +151,18 @@ const ScheduleViewScreen = ({ route }) => {
                                     });
                                 }
                             } catch (error) {
+                                logError('schedule_activation_failed', error, {
+                                    scheduleName: schedule.name,
+                                    scheduleId: schedule.backendId,
+                                    action: schedule.isActive ? 'deactivate' : 'activate'
+                                });
                                 console.error('Failed to update schedule activation:', error);
                                 // Could add error toast here
                             }
                         }}
                         value={schedule.isActive}
                     />
+                    {/* TEMPORARILY COMMENTED OUT - Delete functionality disabled
                     <TouchableOpacity 
                         style={{ width: 32, height: 32, marginRight: 8, opacity: (schedule.isActive) ? 0.2 : 1 }} 
                         disabled={schedule.isActive}
@@ -132,6 +172,7 @@ const ScheduleViewScreen = ({ route }) => {
                     >
                         <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
                     </TouchableOpacity>
+                    */}
                 </View>
             </View>
             <View style={styles.subContainer}>
@@ -174,11 +215,13 @@ const ScheduleViewScreen = ({ route }) => {
                 </View>
             </View>
             <EventInfoModal isVisible={showInfoModal} tb={selectedTB} onClose={onCloseModal} />
+            {/* TEMPORARILY COMMENTED OUT - Delete modal disabled
             <DeleteScheduleModal 
                 isVisible={showDeleteModal} 
                 onClose={() => setShowDeleteModal(false)} 
                 toDelete={schedule.name}
             />
+            */}
         </View>
     );
 }

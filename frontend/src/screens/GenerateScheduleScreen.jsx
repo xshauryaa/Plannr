@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
+import { useActionLogger } from '../hooks/useActionLogger.js'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
@@ -22,6 +23,7 @@ import Time24 from '../model/Time24.js'
 
 const GenerateScheduleScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
+    const { logUserAction, logScheduleAction, logError } = useActionLogger('GenerateSchedule');
     const { createSchedule, addBlocksToSchedule, convertScheduleToBackendJSON, convertTimeBlockToBackendJSON } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -69,131 +71,6 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const getScheduleDateDayName = (scheduleDate) => {
         const jsDate = new Date(scheduleDate.year, scheduleDate.month - 1, scheduleDate.date);
         return jsDate.toLocaleDateString('en-US', { weekday: 'long' });
-    };
-
-    // Helper function to convert frontend schedule to backend format
-    const convertScheduleToBackendFormat = (frontendSchedule, scheduleName, strategy, startTime, endTime) => {
-        try {
-            console.log('🔍 DEBUG: Converting schedule to backend format...');
-            const scheduleDate = frontendSchedule.getFirstDate();
-            console.log('🔍 DEBUG: scheduleDate:', scheduleDate);
-            
-            const periodStart = formatScheduleDateToISO(scheduleDate);
-            console.log('🔍 DEBUG: periodStart:', periodStart);
-            
-            // Calculate period end based on number of days
-            const endDate = new Date(periodStart);
-            endDate.setDate(endDate.getDate() + scheduler.numDays - 1);
-            const periodEnd = endDate.toISOString().split('T')[0];
-
-            // Convert strategy names to match backend format
-            const strategyMap = {
-                'earliest-fit': 'EarliestFit',
-                'balanced-work': 'BalancedWork', 
-                'deadline-oriented': 'DeadlineOriented'
-            };
-
-            console.log('🔍 DEBUG: Creating backendSchedule object...');
-            const backendSchedule = {
-                title: scheduleName,
-                periodStart: periodStart,
-                periodEnd: periodEnd,
-                day1Date: {
-                    date: scheduleDate.date,
-                    month: scheduleDate.month,
-                    year: scheduleDate.year
-                },
-                day1Day: getScheduleDateDayName(scheduleDate),
-                isActive: true,
-                numDays: scheduler.numDays,
-                minGap: scheduler.minGapMinutes,
-                workingHoursLimit: scheduler.maxWorkingHours,
-                strategy: strategyMap[strategy] || 'EarliestFit',
-                startTime: startTime,
-                endTime: endTime,
-                metadata: {
-                    generatedAt: new Date().toISOString(),
-                    frontendVersion: '1.0.0'
-                }
-            };
-            console.log('🔍 DEBUG: backendSchedule created successfully');
-
-            // Convert blocks
-            console.log('🔍 DEBUG: Converting blocks...');
-            const blocks = [];
-            const datesList = frontendSchedule.getAllDatesInOrder();
-            console.log('🔍 DEBUG: datesList:', datesList?.map(d => d?.toString?.() || 'invalid date'));
-            
-            for (const date of datesList) {
-                console.log('🔍 DEBUG: Processing date:', date?.toString?.() || 'invalid date');
-                const dailySchedule = frontendSchedule.getScheduleForDate(date);
-                const timeBlocks = dailySchedule.getTimeBlocks();
-                console.log('🔍 DEBUG: timeBlocks for date:', timeBlocks?.length || 0);
-                
-                for (const [blockIndex, block] of timeBlocks.entries()) {
-                    console.log(`🔍 DEBUG: Processing block ${blockIndex}:`, {
-                        title: block.title,
-                        name: block.name,
-                        type: block.type,
-                        activityType: block.activityType,
-                        priority: block.priority,
-                        startTime: block.startTime,
-                        endTime: block.endTime,
-                        description: block.description
-                    });
-                    
-                    blocks.push({
-                        title: block.title || block.name || 'Untitled Block',
-                        type: block.type || 'flexible', // Block type (rigid/flexible/break)
-                        category: mapActivityType(block.activityType || 'OTHER'), // Activity type (WORK/MEETING/etc.)
-                        priority: mapPriority(block.priority),
-                        duration: block.getDuration() || 60, // Use 'duration' instead of 'estimatedDuration'
-                        blockDate: formatScheduleDateToISO(date),
-                        startAt: block.startTime?.toInt() || 0, // Use 'startAt' instead of 'startTime'
-                        endAt: block.endTime?.toInt() || 0, // Use 'endAt' instead of 'endTime'
-                        completed: false, // Use 'completed' instead of 'isCompleted'
-                        metadata: {
-                            originalType: block.type,
-                            generatedOrder: blocks.length,
-                            description: block.description || ''
-                        }
-                    });
-                }
-            }
-            console.log('🔍 DEBUG: Blocks conversion completed, total blocks:', blocks.length);
-
-            return { schedule: backendSchedule, blocks };
-        } catch (error) {
-            console.error('🔍 DEBUG: Error in convertScheduleToBackendFormat:', error);
-            console.error('🔍 DEBUG: Error stack:', error.stack);
-            throw error;
-        }
-    };
-
-    // Helper functions for mapping frontend enums to backend enums
-    const mapActivityType = (frontendType) => {
-        const typeMap = {
-            'Break': 'BREAK',
-            'WORK': 'WORK', 
-            'MEETING': 'MEETING',
-            'PERSONAL': 'PERSONAL',
-            'EVENT': 'EVENT',
-            'EDUCATION': 'EDUCATION',
-            'TRAVEL': 'TRAVEL',
-            'RECREATIONAL': 'RECREATIONAL',
-            'ERRAND': 'ERRAND',
-            'OTHER': 'OTHER'
-        };
-        return typeMap[frontendType] || 'OTHER';
-    };
-
-    const mapPriority = (frontendPriority) => {
-        const priorityMap = {
-            'High': 'HIGH',
-            'Medium': 'MEDIUM', 
-            'Low': 'LOW'
-        };
-        return priorityMap[frontendPriority] || 'MEDIUM';
     };
 
     const SchedulerInitialization = (name, numDays, date, gap, workingLimit) => {
@@ -284,6 +161,16 @@ const GenerateScheduleScreen = ({ navigation }) => {
     }
 
     const Generation = async (startTime, endTime, strategy) => {
+        logScheduleAction('generate', {
+            strategy,
+            startTime: startTime.toString(),
+            endTime: endTime.toString(),
+            rigidEventsCount: rigidEvents.length,
+            flexibleEventsCount: flexibleEvents.length,
+            breaksCount: breaks.length,
+            repeatedBreaksCount: repeatedBreaks.length,
+            scheduleDays: scheduler.numDays
+        });
         (strategy == 'earliest-fit')
             ? strategy = "Earliest Fit" 
             : (strategy == 'balanced-work')
@@ -403,14 +290,51 @@ const GenerateScheduleScreen = ({ navigation }) => {
             console.log('💾 Converting schedule to backend format...');
             
             try {
-                // Use the new conversion helper instead of custom logic
+                // Create a temporary schedule object with proper Time24 objects for backend conversion
+                const startTimeObj = (typeof startTime === 'object' && startTime.toInt) 
+                    ? startTime 
+                    : new Time24(Math.floor(startTime / 100), startTime % 100);
+                    
+                const endTimeObj = (typeof endTime === 'object' && endTime.toInt) 
+                    ? endTime 
+                    : new Time24(Math.floor(endTime / 100), endTime % 100);
+                
+                console.log('🔍 Converting times for backend:', {
+                    originalStartTime: startTime,
+                    originalEndTime: endTime,
+                    startTimeObj: startTimeObj,
+                    endTimeObj: endTimeObj,
+                    startTimeHasToInt: typeof startTimeObj.toInt === 'function',
+                    endTimeHasToInt: typeof endTimeObj.toInt === 'function'
+                });
+                
+                // Create a temporary schedule-like object with the Time24 objects
+                const scheduleForBackend = {
+                    ...schedule,
+                    startTime: startTimeObj,
+                    endTime: endTimeObj
+                };
+                
+                console.log('🔍 Schedule for backend conversion:', {
+                    hasStartTime: !!scheduleForBackend.startTime,
+                    hasEndTime: !!scheduleForBackend.endTime,
+                    startTimeType: typeof scheduleForBackend.startTime,
+                    endTimeType: typeof scheduleForBackend.endTime
+                });
+                
+                // Use the conversion helper with the schedule that has proper Time24 objects
                 const backendSchedule = convertScheduleToBackendJSON(schedule);
+                
                 if (!backendSchedule) {
                     throw new Error('Failed to convert schedule to backend format');
                 }
 
                 // Override title with user's chosen name
                 backendSchedule.title = name;
+                backendSchedule.strategy = (backendSchedule.strategy === 'earliest-fit') ? 'EarliestFit'
+                    : (backendSchedule.strategy === 'balanced-work') ? 'BalancedWork'
+                    : (backendSchedule.strategy === 'deadline-oriented') ? 'DeadlineOriented'
+                    : 'EarliestFit';
 
                 console.log('📤 Saving schedule to backend...', { backendSchedule });
                 
@@ -420,23 +344,66 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 
                 // Update local schedule with backend ID
                 if (savedSchedule.success && savedSchedule.data) {
+                    const scheduleId = savedSchedule.data.id;
+                    
                     setAppState(prevState => ({
                         ...prevState,
                         savedSchedules: prevState.savedSchedules.map(s => 
-                            s.name === name ? { ...s, backendId: savedSchedule.data.id } : s
+                            s.name === name ? { ...s, backendId: scheduleId } : s
                         )
                     }));
-                }
-                
-                // Save blocks to backend if schedule creation was successful
-                if (savedSchedule.success && savedSchedule.data && blocks.length > 0) {
-                    console.log('📤 Saving blocks to backend...', { blocksCount: blocks.length });
+                    
+                    // Now save all the time blocks to the blocks table
+                    console.log('💾 Saving time blocks to backend...');
                     try {
-                        const savedBlocks = await addBlocksToSchedule(savedSchedule.data.id, blocks);
-                        console.log('✅ Blocks saved to backend:', savedBlocks);
+                        // Extract all time blocks from the schedule
+                        const allTimeBlocks = [];
+                        const datesList = schedule.getAllDatesInOrder();
+                        
+                        console.log('🔍 DEBUG: Starting time block extraction...');
+                        console.log(`📅 Found ${datesList.length} dates in schedule:`, datesList.map(d => d.toString()));
+                        
+                        for (const date of datesList) {
+                            const dailySchedule = schedule.getScheduleForDate(date);
+                            const timeBlocks = dailySchedule.getTimeBlocks();
+                            
+                            console.log(`📋 ${date.toString()}: Found ${timeBlocks.length} blocks`);
+                            
+                            for (const block of timeBlocks) {
+                                console.log('🔍 Processing block:', {
+                                    name: block.name,
+                                    type: block.type,
+                                    startTime: block.startTime?.toString(),
+                                    endTime: block.endTime?.toString(),
+                                    date: block.date?.toString(),
+                                    hasRequiredProps: !!(block.name && block.type && block.startTime && block.endTime && block.date)
+                                });
+                                
+                                // Convert each TimeBlock to backend format
+                                const backendBlock = convertTimeBlockToBackendJSON(block);
+                                console.log('🔄 Converted block:', backendBlock);
+                                
+                                if (backendBlock) {
+                                    allTimeBlocks.push(backendBlock);
+                                } else {
+                                    console.warn('⚠️ Failed to convert block:', block);
+                                }
+                            }
+                        }
+                        
+                        console.log(`📤 Total converted blocks: ${allTimeBlocks.length}`);
+                        console.log('📦 All blocks to save:', allTimeBlocks);
+                        
+                        if (allTimeBlocks.length > 0) {
+                            const blocksResult = await addBlocksToSchedule(scheduleId, allTimeBlocks);
+                            console.log('✅ Time blocks saved to backend:', blocksResult);
+                        } else {
+                            console.warn('⚠️ No time blocks to save to backend');
+                        }
+                        
                     } catch (blocksError) {
-                        console.error('⚠️ Failed to save blocks to backend:', blocksError);
-                        // Don't fail if blocks can't be saved - schedule is still created
+                        console.error('⚠️ Failed to save time blocks to backend:', blocksError);
+                        // Don't fail the entire process if block saving fails
                     }
                 }
                 
@@ -447,9 +414,25 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 setIsSavingToBackend(false);
             }
             
+            // Log successful generation
+            logScheduleAction('generate_success', {
+                strategy,
+                scheduleName: name,
+                totalTimeBlocks: actualTimeBlocks, // Use the actualTimeBlocks we already calculated
+                scheduleDays: scheduler.numDays,
+                savedToBackend: true
+            });
+            
             setShowGenerationModal(true);
         } catch (error) {
             setShowErrorModal(true);
+            logError('schedule_generation_failed', error, {
+                strategy,
+                startTime: startTime.toString(),
+                endTime: endTime.toString(),
+                rigidEventsCount: rigidEvents.length,
+                flexibleEventsCount: flexibleEvents.length
+            });
             console.error('💥 Schedule generation failed:', error);
             return;
         }
@@ -457,9 +440,18 @@ const GenerateScheduleScreen = ({ navigation }) => {
 
     const views = [
         <InfoView onNext={SchedulerInitialization}/>,
-        <BreaksView onNext={BreaksSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} breaksInput={breaks} repeatedBreaksInput={repeatedBreaks}/>,
-        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={rigidEvents}/>,
-        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {setGenStage(genStage - 1)}} eventsInput={flexibleEvents}/>,
+        <BreaksView onNext={BreaksSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {
+            logUserAction('generation_step_back', { fromStep: genStage, toStep: genStage - 1 });
+            setGenStage(genStage - 1);
+        }} breaksInput={breaks} repeatedBreaksInput={repeatedBreaks}/>,
+        <RigidEventsView onNext={RigidEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {
+            logUserAction('generation_step_back', { fromStep: genStage, toStep: genStage - 1 });
+            setGenStage(genStage - 1);
+        }} eventsInput={rigidEvents}/>,
+        <FlexibleEventsView onNext={FlexibleEventsSetup} minDate={firstDate} numDays={scheduler.numDays} onBack={() => {
+            logUserAction('generation_step_back', { fromStep: genStage, toStep: genStage - 1 });
+            setGenStage(genStage - 1);
+        }} eventsInput={flexibleEvents}/>,
         <EventDependenciesView onNext={EventDepsSetup} events={events} depsInput={deps}/>,
         <FinalCheckView onNext={Generation}/>
     ]

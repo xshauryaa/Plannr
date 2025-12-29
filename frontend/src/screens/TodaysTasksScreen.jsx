@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
+import { useActionLogger } from '../hooks/useActionLogger.js'
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
@@ -18,6 +19,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const TodaysTasksScreen = () => {
     
     const { appState, setAppState } = useAppState();
+    const { logUserAction, logError } = useActionLogger('TodaysTasks');
     const { markBlockComplete } = useAuthenticatedAPI();
     const currentTime = useCurrentTime();
 
@@ -99,10 +101,18 @@ const TodaysTasksScreen = () => {
                                         try {
                                             console.log('🔄 Updating task completion:', item.name);
                                             
+                                            // Log the task completion action
+                                            const newCompletedState = !item.completed;
+                                            logUserAction('task_completion_toggle', {
+                                                taskName: item.name,
+                                                taskType: item.activityType,
+                                                completed: newCompletedState,
+                                                taskId: item.backendId || 'local'
+                                            });
+                                            
                                             // 1. Update local UI immediately
                                             const updatedTasks = [...taskData];
                                             const updatedTask = { ...updatedTasks[index] };
-                                            const newCompletedState = !updatedTask.completed;
                                             updatedTask.completed = newCompletedState;
                                             updatedTasks[index] = updatedTask;
                                             setTaskData(updatedTasks);
@@ -175,6 +185,10 @@ const TodaysTasksScreen = () => {
                                             }));
 
                                         } catch (error) {
+                                            logError('task_completion_failed', error, {
+                                                taskName: item.name,
+                                                taskType: item.activityType
+                                            });
                                             console.error('💥 Error updating task completion:', error);
                                         }
                                     }}

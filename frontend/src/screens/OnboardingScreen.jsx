@@ -1,18 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Text, View, Animated, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, ScrollView } from 'react-native'
-import { useAppState } from '../context/AppStateContext';
+import * as Font from 'expo-font'
+
+import { useAppState } from '../context/AppStateContext'
+import { useActionLogger } from '../hooks/useActionLogger.js'
+
 import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
-import { typography  } from '../design/typography.js';
-import { getAvatarList, getRandomAvatar } from '../utils/avatarUtils.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
-import * as Font from 'expo-font';
+import { typography  } from '../design/typography.js'
+import { getAvatarList, getRandomAvatar } from '../utils/avatarUtils.js'
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 const OnboardingScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
     const { updateUserProfile, updatePreferences, markOnboardingComplete } = useAuthenticatedAPI();
+    const { logAction, logScreenView, logError } = useActionLogger('Onboarding');
 
     const [fontsLoaded] = Font.useFonts({
             'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -55,6 +59,8 @@ const OnboardingScreen = ({ navigation }) => {
     const indicatorXReminders = useRef(new Animated.Value(0)).current;
 
     const enterName = (name) => {
+        logAction('onboarding_name_entered', { nameLength: name.trim().length });
+        
         setAppState(prevState => ({
             ...prevState,
             name: name.trim(),
@@ -73,6 +79,8 @@ const OnboardingScreen = ({ navigation }) => {
     };
 
     const enterAvatar = (avatar) => {
+        logAction('onboarding_avatar_selected', { avatarName: avatar });
+        
         setAppState(prevState => ({
             ...prevState,
             avatarName: avatar,
@@ -91,6 +99,8 @@ const OnboardingScreen = ({ navigation }) => {
     };
 
     const enterStrategy = (strategy) => {
+        logAction('onboarding_strategy_selected', { strategy: strategy });
+        
         setAppState(prevState => ({
             ...prevState,
             userPreferences: {
@@ -112,6 +122,8 @@ const OnboardingScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
+        logScreenView({ currentStep: currentStep });
+        
         if (!fontsLoaded) return;
         
         const timeout = setTimeout(() => {
@@ -248,6 +260,13 @@ const OnboardingScreen = ({ navigation }) => {
                         // Save all onboarding data to database
                         const saveOnboardingData = async () => {
                             try {
+                                logAction('onboarding_completion_started', {
+                                    name: name.trim(),
+                                    selectedAvatar: selectedAvatar,
+                                    preferredStrategy: preferredStrategy,
+                                    remindersEnabled: remindersOn
+                                });
+
                                 console.log('💾 Saving onboarding data to database...');
                                 
                                 // Update user profile (name and avatar)
@@ -281,6 +300,13 @@ const OnboardingScreen = ({ navigation }) => {
                                     onboarded: true,
                                 }));
                                 
+                                logAction('onboarding_completed_successfully', {
+                                    name: name.trim(),
+                                    selectedAvatar: selectedAvatar,
+                                    preferredStrategy: preferredStrategy,
+                                    remindersEnabled: remindersOn
+                                });
+                                
                                 console.log('✅ All onboarding data saved successfully');
                                 
                                 // Navigate to main app
@@ -288,6 +314,13 @@ const OnboardingScreen = ({ navigation }) => {
                                 navigation.replace('MainTabs');
                                 
                             } catch (error) {
+                                logError('onboarding_completion_failed', error, {
+                                    name: name.trim(),
+                                    selectedAvatar: selectedAvatar,
+                                    preferredStrategy: preferredStrategy,
+                                    remindersEnabled: remindersOn
+                                });
+                                
                                 console.error('⚠️ Failed to save onboarding data:', error);
                                 // Still navigate to main app even if API calls fail
                                 console.log('📊 Current appState in error case:', {

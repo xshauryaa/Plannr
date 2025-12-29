@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import NavigationBar from '../components/NavigationBar.jsx';
 
+import LoadingScreen from '../screens/LoadingScreen.jsx'
 import HomeScreen from '../screens/HomeScreen';
 import TodaysTasksScreen from '../screens/TodaysTasksScreen';
 import UserProfileStack from './UserProfileStack.jsx';

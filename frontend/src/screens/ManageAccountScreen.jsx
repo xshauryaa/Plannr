@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TextInput, TouchableOpacity, Platform, Image, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useUser } from '@clerk/clerk-expo';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
 import { getAvatarImageSource } from '../utils/avatarUtils.js';
@@ -18,6 +19,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 
 const ManageAccountScreen = () => {
     const { appState, setAppState } = useAppState();
+    const { logUserAction, logError, logSettingChange } = useActionLogger('ManageAccount');
     const { user } = useUser();
     const authenticatedAPI = useAuthenticatedAPI();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
@@ -81,14 +83,18 @@ const ManageAccountScreen = () => {
 
             console.log('🐾 Updating avatar to:', avatarName);
             
+            logSettingChange('avatar', avatarName, selectedAvatar);
+            
             if (authenticatedAPI?.updateAvatar) {
                 const result = await authenticatedAPI.updateAvatar(avatarName);
                 
                 if (result.success) {
                     console.log('✅ Avatar updated successfully:', result.data);
+                    logUserAction('avatar_updated_success', { avatarName });
                     Alert.alert('Success', 'Avatar updated successfully!');
                 } else {
                     console.error('❌ Failed to update avatar:', result);
+                    logError('avatar_update_failed', new Error('API call failed'), { avatarName, result });
                     Alert.alert('Error', 'Failed to update avatar. Please try again.');
                     // Revert AppState on failure
                     setAppState(prevState => ({
@@ -101,6 +107,7 @@ const ManageAccountScreen = () => {
                 console.warn('⚠️ updateAvatar API not available');
             }
         } catch (error) {
+            logError('avatar_update_error', error, { avatarName });
             console.error('💥 Error updating avatar:', error);
             Alert.alert('Error', 'Failed to update avatar. Please try again.');
             // Revert AppState on error

@@ -1,13 +1,32 @@
 import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
+
 import { useAppState } from '../context/AppStateContext.js'
+import { useActionLogger } from '../hooks/useActionLogger.js'
+
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 import { padding } from '../design/spacing.js'
 
 const SavedSchedulesScreen = ({ navigation }) => {
     const { appState } = useAppState();
+    const { logAction, logScreenView } = useActionLogger('SavedSchedules');
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    React.useEffect(() => {
+        logScreenView({
+            totalSavedSchedules: appState.savedSchedules.length,
+            hasActiveSchedule: !!appState.activeSchedule
+        });
+    }, []);
+
+    const handleSchedulePress = (scheduleName) => {
+        logAction('view_saved_schedule', {
+            scheduleName: scheduleName,
+            totalSavedSchedules: appState.savedSchedules.length
+        });
+        navigation.navigate("View", { schedName: scheduleName });
+    };
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
@@ -32,7 +51,7 @@ const SavedSchedulesScreen = ({ navigation }) => {
                         };
                             return (
                                 <TouchableOpacity
-                                    onPress={() => { navigation.navigate("View", { schedName: item.name }); }}
+                                    onPress={() => { handleSchedulePress(item.name); }}
                                 >
                                     <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                                         {/* Background Image */}

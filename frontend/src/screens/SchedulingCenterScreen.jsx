@@ -1,6 +1,7 @@
 import React, { useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
@@ -14,6 +15,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 
 const SchedulingCenterScreen = ({ navigation }) => {
     const { appState } = useAppState();
+    const { logUserAction } = useActionLogger('SchedulingCenter');
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const bottomSheetRef = useRef();
 
@@ -45,13 +47,19 @@ const SchedulingCenterScreen = ({ navigation }) => {
                         broad={true}
                         title="Generate a New Schedule"
                         icon="Generate"
-                        navTo={() => { navigation.navigate("Generate") }}
+                        navTo={() => { 
+                            logUserAction('generate_schedule_clicked');
+                            navigation.navigate("Generate");
+                        }}
                     />
                     <MenuButton
                         broad={true}
                         title="Reschedule Tasks"
                         icon="Reschedule"
-                        navTo={() => { bottomSheetRef.current?.show() }}
+                        navTo={() => { 
+                            logUserAction('reschedule_tasks_clicked');
+                            bottomSheetRef.current?.show();
+                        }}
                     />
                 </View>
             </ScrollView>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -20,6 +21,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 
 const RescheduleScreen = ({ route, navigation }) => {
     const { appState, setAppState } = useAppState();
+    const { logUserAction, logScheduleAction, logError } = useActionLogger('Reschedule');
     const { getSchedules, updateSchedule, convertScheduleToBackendJSON } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedule } = route.params;
@@ -39,12 +41,21 @@ const RescheduleScreen = ({ route, navigation }) => {
 
     const ReplaceWithRescheduled = async (newSchedule) => {
         try {
+            logScheduleAction('reschedule', {
+                scheduleName: schedule.name,
+                isActive: schedule.isActive,
+                totalDays: newSchedule.numDays
+            });
+            
             // 1. Get all schedules to find the current schedule's ID by name
             const allSchedules = await getSchedules();
             const currentSchedule = allSchedules.find(s => s.title === schedule.name);
             
             if (!currentSchedule) {
                 console.error('Schedule not found in database:', schedule.name);
+                logError('reschedule_schedule_not_found', new Error('Schedule not found'), {
+                    scheduleName: schedule.name
+                });
                 return;
             }
 
@@ -53,6 +64,9 @@ const RescheduleScreen = ({ route, navigation }) => {
             
             if (!scheduleBackendData) {
                 console.error('Failed to convert rescheduled schedule to backend format');
+                logError('reschedule_conversion_failed', new Error('Backend format conversion failed'), {
+                    scheduleName: schedule.name
+                });
                 return;
             }
 
@@ -82,8 +96,18 @@ const RescheduleScreen = ({ route, navigation }) => {
                 }));
             }
 
+            logAction('reschedule_success', {
+                scheduleName: schedule.name,
+                isActive: schedule.isActive,
+                totalDays: newSchedule.numDays
+            });
+
             console.log('Schedule rescheduled and synced to database successfully');
         } catch (error) {
+            logError('reschedule_failed', error, {
+                scheduleName: schedule.name,
+                isActive: schedule.isActive
+            });
             console.error('Failed to sync rescheduled schedule to database:', error);
             // Still update local state as fallback
             if (schedule.isActive) {

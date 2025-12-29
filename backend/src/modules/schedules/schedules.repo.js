@@ -205,16 +205,13 @@ export const updateSchedule = async (scheduleId, updateData) => {
 
 export const deleteSchedule = async (scheduleId) => {
     try {
+        // First manually delete all blocks (hard delete to remove them completely)
+        await db.delete(blocks).where(eq(blocks.scheduleId, scheduleId));
+        
+        // Then hard delete the schedule
         const [deletedSchedule] = await db
-            .update(schedules)
-            .set({
-                deletedAt: new Date(),
-                updatedAt: new Date()
-            })
-            .where(and(
-                eq(schedules.id, scheduleId),
-                isNull(schedules.deletedAt)
-            ))
+            .delete(schedules)
+            .where(eq(schedules.id, scheduleId))
             .returning();
 
         return deletedSchedule;

@@ -1,20 +1,28 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { typography } from '../design/typography.js';
-import { lightColor, darkColor } from '../design/colors.js';
-import { spacing, padding } from '../design/spacing.js';
-import { useAppState } from '../context/AppStateContext.js';
-import WalkthroughBottomSheet from '../components/WalkthroughBottomSheet.jsx';
+import React, { useState, useRef } from 'react'
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Animated } from 'react-native'
+
+import { useAppState } from '../context/AppStateContext.js'
+import { useActionLogger } from '../hooks/useActionLogger.js'
+
+import { typography } from '../design/typography.js'
+import { lightColor, darkColor } from '../design/colors.js'
+import { spacing, padding } from '../design/spacing.js'
+import WalkthroughBottomSheet from '../components/WalkthroughBottomSheet.jsx'
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
 const IMAGE_WIDTH = (height > 900) ? 260 : (height > 800) ? 220 : 200;
 
 const WalkthroughScreen = () => {
     const { appState, setAppState } = useAppState();
+    const { logAction, logScreenView } = useActionLogger('Walkthrough');
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [currentStep, setCurrentStep] = useState(0);
     const walkthroughBottomSheetRef = useRef(null);
+
+    React.useEffect(() => {
+        logScreenView({ currentStep: currentStep });
+    }, [currentStep]);
 
     const indicatorX0 = useRef(new Animated.Value(0)).current;
     const indicatorX1 = useRef(new Animated.Value(0)).current;
@@ -35,6 +43,7 @@ const WalkthroughScreen = () => {
                 <TouchableOpacity
                     style={styles.button1}
                     onPress={() => {
+                        logAction('walkthrough_skipped', { currentStep: currentStep });
                         console.log('Skip Pressed');
                         setAppState(prevState => ({
                             ...prevState,
@@ -118,6 +127,10 @@ const WalkthroughScreen = () => {
                 <TouchableOpacity
                     style={styles.button2}
                     onPress={() => {
+                        logAction('walkthrough_next_pressed', { 
+                            fromStep: currentStep,
+                            toStep: currentStep + 1 
+                        });
                         console.log(currentStep, 'Next Pressed');
                         if (currentStep === 0) {
                             Animated.timing(indicatorX0, {
