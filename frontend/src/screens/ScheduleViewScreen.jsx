@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
@@ -19,6 +20,7 @@ const OFFSET = PADDING_HORIZONTAL - ((INDICATOR_DIM - ICON_DIM) / 2);
 
 const ScheduleViewScreen = ({ route }) => {
     const { appState, setAppState } = useAppState();
+    const { updateSchedule, getSchedules } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedName } = route.params;
     const schedule = appState.savedSchedules.find(sched => sched.name === schedName);
@@ -65,24 +67,59 @@ const ScheduleViewScreen = ({ route }) => {
                         trackColor={{ false: '#000000', true: '#4166FB' }}
                         thumbColor={'#FFFFFF'}
                         ios_backgroundColor={'#C0C0C0'}
-                        onValueChange={() => { 
-                            (schedule.isActive)
-                            ? setAppState({ ...appState, activeSchedule: null, savedSchedules: appState.savedSchedules.map(sched => {
-                                if (sched.name === schedule.name) {
-                                    return { ...sched, isActive: false };
+                        onValueChange={async () => { 
+                            try {
+                                if (schedule.isActive) {
+                                    // Deactivating current schedule
+                                    await updateSchedule(schedule.backendId, { isActive: false });
+                                    
+                                    setAppState({ 
+                                        ...appState, 
+                                        activeSchedule: null, 
+                                        savedSchedules: appState.savedSchedules.map(sched => {
+                                            if (sched.name === schedule.name) {
+                                                return { ...sched, isActive: false };
+                                            }
+                                            return sched;
+                                        }) 
+                                    });
+                                } else {
+                                    // Activating this schedule - first deactivate all others
+                                    const allSchedules = await getSchedules();
+                                    
+                                    // Update all schedules in database
+                                    await Promise.all(
+                                        allSchedules.map(sched => 
+                                            updateSchedule(sched.id, { 
+                                                isActive: sched.id === schedule.backendId 
+                                            })
+                                        )
+                                    );
+                                    
+                                    // Update local state
+                                    setAppState({ 
+                                        ...appState, 
+                                        activeSchedule: { 
+                                            name: schedule.name, 
+                                            schedule: schedule.schedule, 
+                                            backendId: schedule.backendId,
+                                            isActive: true 
+                                        }, 
+                                        savedSchedules: appState.savedSchedules.map(sched => {
+                                            if (sched.name === schedule.name) {
+                                                return { ...sched, isActive: true };
+                                            }
+                                            return {
+                                                ...sched,
+                                                isActive: false
+                                            };
+                                        }) 
+                                    });
                                 }
-                                return sched;
-                            }) })
-                            : setAppState({ ...appState, activeSchedule: { name: schedule.name, schedule: schedule.schedule, isActive: true }, savedSchedules: appState.savedSchedules.map(sched => {
-                                if (sched.name === schedule.name) {
-                                    return { ...sched, isActive: true };
-                                }
-                                return {
-                                    name: sched.name,
-                                    schedule: sched.schedule,
-                                    isActive: false
-                                };
-                            }) });
+                            } catch (error) {
+                                console.error('Failed to update schedule activation:', error);
+                                // Could add error toast here
+                            }
                         }}
                         value={schedule.isActive}
                     />

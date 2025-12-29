@@ -6,8 +6,6 @@ import NavigationBar from '../components/NavigationBar.jsx';
 import HomeScreen from '../screens/HomeScreen';
 import TodaysTasksScreen from '../screens/TodaysTasksScreen';
 import UserProfileStack from './UserProfileStack.jsx';
-import SavedSchedulesScreen from '../screens/SavedSchedulesScreen';
-import PreferencesScreen from '../screens/PreferencesScreen';
 import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
 import RescheduleScreen from '../screens/RescheduleScreen.jsx';
@@ -26,8 +24,6 @@ const MainTabs = () => {
       <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
       <Tab.Screen name="Center" component={SchedulingCenterScreen} />
       <Tab.Screen name="Profile" component={UserProfileStack} />
-      {/* <Tab.Screen name="Saved" component={SavedSchedulesScreen} />
-      <Tab.Screen name="Preferences" component={PreferencesScreen} /> */}
     </Tab.Navigator>
   );
 };

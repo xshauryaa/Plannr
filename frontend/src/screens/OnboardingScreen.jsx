@@ -4,12 +4,15 @@ import { useAppState } from '../context/AppStateContext';
 import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
 import { typography  } from '../design/typography.js';
+import { getAvatarList, getRandomAvatar } from '../utils/avatarUtils.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
 import * as Font from 'expo-font';
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 
 const OnboardingScreen = ({ navigation }) => {
-    const { setAppState } = useAppState();
+    const { appState, setAppState } = useAppState();
+    const { updateUserProfile, updatePreferences, markOnboardingComplete } = useAuthenticatedAPI();
 
     const [fontsLoaded] = Font.useFonts({
             'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
@@ -22,8 +25,10 @@ const OnboardingScreen = ({ navigation }) => {
         if (currentStep === 0) {
             return name.trim() === '';
         } else if (currentStep === 1) {
-            return preferredStrategy.trim() === '';
+            return selectedAvatar === '';
         } else if (currentStep === 2) {
+            return preferredStrategy.trim() === '';
+        } else if (currentStep === 3) {
             return false;
         }
     }
@@ -36,6 +41,10 @@ const OnboardingScreen = ({ navigation }) => {
     const indicatorXName = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
     
+    // Information for Avatar Card
+    const [selectedAvatar, setSelectedAvatar] = useState('');
+    const indicatorXAvatar = useRef(new Animated.Value(0)).current;
+    const avatarList = getAvatarList();
 
     // Information for Strategy Card
     const [preferredStrategy, setPreferredStrategy] = useState('');
@@ -55,12 +64,30 @@ const OnboardingScreen = ({ navigation }) => {
             duration: 500,
             useNativeDriver: true,
         }).start();
-        Animated.timing(indicatorXStrategy, {
+        Animated.timing(indicatorXAvatar, {
             toValue: -width,
             duration: 500,
             useNativeDriver: true,
         }).start();
         setCurrentStep(1);
+    };
+
+    const enterAvatar = (avatar) => {
+        setAppState(prevState => ({
+            ...prevState,
+            avatarName: avatar,
+        }));
+        Animated.timing(indicatorXAvatar, {
+            toValue: -(2*width),
+            duration: 500,
+            useNativeDriver: true,
+        }).start();
+        Animated.timing(indicatorXStrategy, {
+            toValue: -(2*width),
+            duration: 500,
+            useNativeDriver: true,
+        }).start();
+        setCurrentStep(2);
     };
 
     const enterStrategy = (strategy) => {
@@ -72,16 +99,16 @@ const OnboardingScreen = ({ navigation }) => {
             }
         }));
         Animated.timing(indicatorXStrategy, {
-            toValue: -(2*width),
+            toValue: -(3*width),
             duration: 500,
             useNativeDriver: true,
         }).start();
         Animated.timing(indicatorXReminders, {
-            toValue: -(2*width),
+            toValue: -(3*width),
             duration: 500,
             useNativeDriver: true,
         }).start();
-        setCurrentStep(2);
+        setCurrentStep(3);
     };
 
     useEffect(() => {
@@ -130,6 +157,36 @@ const OnboardingScreen = ({ navigation }) => {
                     />
                     <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: SPACE }}>You can change this later, don't worry</Text>
                 </Animated.View>
+                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXAvatar }] }}>
+                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>🐾 Pick your avatar!</Text>
+                    <View style={styles.avatarGrid}>
+                        {avatarList.map((avatar) => (
+                            <TouchableOpacity
+                                key={avatar.name}
+                                style={[
+                                    styles.avatarOption,
+                                    { backgroundColor: lightColor.INPUT },
+                                    selectedAvatar === avatar.name && { 
+                                        ...styles.selectedAvatarOption, 
+                                        borderColor: '#000',
+                                        backgroundColor: '#000' + '20' 
+                                    }
+                                ]}
+                                onPress={() => setSelectedAvatar(avatar.name)}
+                            >
+                                <Image 
+                                    source={avatar.image} 
+                                    style={styles.avatarImage}
+                                    resizeMode="cover"
+                                />
+                                <Text style={{ ...styles.avatarText, color: lightColor.FOREGROUND }}>
+                                    {avatar.displayName}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: 0 }}>You can change this later, don't worry</Text>
+                </Animated.View>
                 <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXStrategy }] }}>
                     <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>How do you like to get your work done?</Text>
                     <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'space-between' }}>
@@ -157,7 +214,7 @@ const OnboardingScreen = ({ navigation }) => {
                     </View>
                     <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: SPACE }}>You can change this later, don't worry</Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXStrategy }] }}>
+                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXReminders }] }}>
                     <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>Would you like task reminders?</Text>
                         <TouchableOpacity 
                             style={{ ...styles.choiceButton, backgroundColor: (remindersOn == true) ? '#000' : lightColor.INPUT }}
@@ -184,16 +241,80 @@ const OnboardingScreen = ({ navigation }) => {
                     if (currentStep === 0) {
                         enterName(name)
                     } else if (currentStep === 1) {
-                        enterStrategy(preferredStrategy)
+                        enterAvatar(selectedAvatar)
                     } else if (currentStep === 2) {
-                        setAppState(prevState => ({
-                            ...prevState,
-                            userPreferences: {
-                                ...prevState.userPreferences,
-                                taskRemindersEnabled: remindersOn,
+                        enterStrategy(preferredStrategy)
+                    } else if (currentStep === 3) {
+                        // Save all onboarding data to database
+                        const saveOnboardingData = async () => {
+                            try {
+                                console.log('💾 Saving onboarding data to database...');
+                                
+                                // Update user profile (name and avatar)
+                                await updateUserProfile({
+                                    displayName: name.trim(),
+                                    avatarName: selectedAvatar
+                                });
+                                console.log('✅ User profile updated');
+                                
+                                // Update preferences (strategy and reminders)
+                                await updatePreferences({
+                                    defaultStrategy: preferredStrategy,
+                                    notificationsEnabled: remindersOn
+                                });
+                                console.log('✅ User preferences updated');
+                                
+                                // Mark onboarding as complete
+                                await markOnboardingComplete();
+                                console.log('✅ Onboarding marked as complete');
+                                
+                                // Update local app state
+                                setAppState(prevState => ({
+                                    ...prevState,
+                                    name: name.trim(),
+                                    avatarName: selectedAvatar,
+                                    userPreferences: {
+                                        ...prevState.userPreferences,
+                                        defaultStrategy: preferredStrategy,
+                                        taskRemindersEnabled: remindersOn,
+                                    },
+                                    onboarded: true,
+                                }));
+                                
+                                console.log('✅ All onboarding data saved successfully');
+                                
+                                // Navigate to main app
+                                console.log('🏠 Navigating to main app...');
+                                navigation.replace('MainTabs');
+                                
+                            } catch (error) {
+                                console.error('⚠️ Failed to save onboarding data:', error);
+                                // Still navigate to main app even if API calls fail
+                                console.log('📊 Current appState in error case:', {
+                                    savedSchedulesCount: appState.savedSchedules?.length,
+                                    activeSchedule: appState.activeSchedule?.name,
+                                    onboarded: appState.onboarded
+                                });
+                                
+                                setAppState(prevState => ({
+                                    ...prevState,
+                                    name: name.trim(),
+                                    avatarName: selectedAvatar,
+                                    onboarded: true, // Mark onboarding as complete even on error
+                                    userPreferences: {
+                                        ...prevState.userPreferences,
+                                        defaultStrategy: preferredStrategy,
+                                        taskRemindersEnabled: remindersOn,
+                                    }
+                                }));
+                                
+                                // Navigate to main app even if there was an error
+                                console.log('🏠 Navigating to main app despite error...');
+                                navigation.replace('MainTabs');
                             }
-                        }));
-                        navigation.replace('Walkthrough');
+                        };
+                        
+                        saveOnboardingData();
                     }
                 }}
                 disabled={isButtonDisabled()}
@@ -268,6 +389,38 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginBottom: 12,
+    },
+    avatarGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 4,
+    },
+    avatarOption: {
+        width: '30%',
+        aspectRatio: 1,
+        marginBottom: 12,
+        borderRadius: 12,
+        padding: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    selectedAvatarOption: {
+        borderWidth: 2,
+    },
+    avatarImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 40,
+        marginBottom: 4,
+    },
+    avatarText: {
+        fontSize: 10,
+        fontFamily: 'AlbertSans',
+        textAlign: 'center',
+        fontWeight: '500',
     },
 });
 

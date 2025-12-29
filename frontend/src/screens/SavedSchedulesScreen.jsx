@@ -41,7 +41,10 @@ const SavedSchedulesScreen = ({ navigation }) => {
                                             <View>
                                                 <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
                                                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
-                                                    {item.schedule.getFirstDate().getDateString()} onwards
+                                                    {item?.schedule?.getFirstDate ? 
+                                                        `${item.schedule.getFirstDate().getDateString()} onwards` : 
+                                                        'Schedule details loading...'
+                                                    }
                                                 </Text>
                                             </View>
                                         </View>

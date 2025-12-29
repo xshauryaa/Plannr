@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import Rescheduler from '../model/Rescheduler.js';
@@ -19,6 +20,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 
 const RescheduleScreen = ({ route, navigation }) => {
     const { appState, setAppState } = useAppState();
+    const { getSchedules, updateSchedule, convertScheduleToBackendJSON } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedule } = route.params;
 
@@ -35,31 +37,80 @@ const RescheduleScreen = ({ route, navigation }) => {
     const [deps, setDeps] = useState(new EventDependencies(rescheduler.dependencies.getDependencies()));
     const [showReschedulingModal, setShowReschedulingModal] = useState(false);
 
-    const ReplaceWithRescheduled = (newSchedule) => {
-        if (schedule.isActive) {
-            setAppState(prevState => ({
-                ...prevState,
-                activeSchedule: { name: schedule.name, schedule: newSchedule, active: true },
-                savedSchedules: prevState.savedSchedules.map(s => 
-                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: true } : s
-                )
-            }));
-        } else {
-            setAppState(prevState => ({
-                ...prevState,
-                savedSchedules: prevState.savedSchedules.map(s => 
-                    s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: false } : s
-                )
-            }));
+    const ReplaceWithRescheduled = async (newSchedule) => {
+        try {
+            // 1. Get all schedules to find the current schedule's ID by name
+            const allSchedules = await getSchedules();
+            const currentSchedule = allSchedules.find(s => s.title === schedule.name);
+            
+            if (!currentSchedule) {
+                console.error('Schedule not found in database:', schedule.name);
+                return;
+            }
+
+            // 2. Convert the rescheduled schedule to backend format
+            const scheduleBackendData = convertScheduleToBackendJSON(newSchedule);
+            
+            if (!scheduleBackendData) {
+                console.error('Failed to convert rescheduled schedule to backend format');
+                return;
+            }
+
+            // 3. Update the schedule in database
+            await updateSchedule(currentSchedule.id, {
+                ...scheduleBackendData,
+                title: schedule.name, // Keep original title
+                isActive: currentSchedule.isActive, // Keep current active state
+                lastModified: new Date().toISOString(),
+            });
+
+            // 4. Update local state
+            if (schedule.isActive) {
+                setAppState(prevState => ({
+                    ...prevState,
+                    activeSchedule: { name: schedule.name, schedule: newSchedule, backendId: currentSchedule.id, active: true },
+                    savedSchedules: prevState.savedSchedules.map(s => 
+                        s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, backendId: currentSchedule.id, isActive: true } : s
+                    )
+                }));
+            } else {
+                setAppState(prevState => ({
+                    ...prevState,
+                    savedSchedules: prevState.savedSchedules.map(s => 
+                        s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, backendId: currentSchedule.id, isActive: false } : s
+                    )
+                }));
+            }
+
+            console.log('Schedule rescheduled and synced to database successfully');
+        } catch (error) {
+            console.error('Failed to sync rescheduled schedule to database:', error);
+            // Still update local state as fallback
+            if (schedule.isActive) {
+                setAppState(prevState => ({
+                    ...prevState,
+                    activeSchedule: { name: schedule.name, schedule: newSchedule, active: true },
+                    savedSchedules: prevState.savedSchedules.map(s => 
+                        s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: true } : s
+                    )
+                }));
+            } else {
+                setAppState(prevState => ({
+                    ...prevState,
+                    savedSchedules: prevState.savedSchedules.map(s => 
+                        s.name === schedule.name ? { name: schedule.name, schedule: newSchedule, isActive: false } : s
+                    )
+                }));
+            }
         }
     }
     
-    const RescheduleSelection = (index) => {
+    const RescheduleSelection = async (index) => {
         setMethod(index);
         if (index === 0) {
             // Handle Missed Task Shifting
             rescheduled = rescheduler.missedTaskShifting(schedule.schedule);
-            ReplaceWithRescheduled(rescheduled);
+            await ReplaceWithRescheduled(rescheduled);
             setShowReschedulingModal(true);
         } else {
             // Handle Add New Tasks & Breaks or Switch Strategies
@@ -90,7 +141,7 @@ const RescheduleScreen = ({ route, navigation }) => {
         setReschedStage(5);
     }
 
-    const CompleteAddBlocks = (startT, endT, strategy) => {
+    const CompleteAddBlocks = async (startT, endT, strategy) => {
         schedule.schedule.setStartTime(startT);
         schedule.schedule.setEndTime(endT);
         rescheduler.strategy = strategy;
@@ -103,15 +154,15 @@ const RescheduleScreen = ({ route, navigation }) => {
         ];
 
         rescheduled = rescheduler.addNewTimeBlocks(schedule.schedule, addedEvents, addedBreaks, repeatedBreaks, deps);
-        ReplaceWithRescheduled(rescheduled);
+        await ReplaceWithRescheduled(rescheduled);
         setShowReschedulingModal(true);
     }
 
-    const CompleteStrategySwitch = (startT, endT, strategy) => {
+    const CompleteStrategySwitch = async (startT, endT, strategy) => {
         schedule.schedule.setStartTime(startT);
         schedule.schedule.setEndTime(endT);
         rescheduled = rescheduler.strategySwitch(schedule.schedule, strategy);
-        ReplaceWithRescheduled(rescheduled);
+        await ReplaceWithRescheduled(rescheduled);
         setShowReschedulingModal(true);
     }
 

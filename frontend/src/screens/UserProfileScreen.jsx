@@ -257,9 +257,9 @@ const UserProfileScreen = ({ navigation }) => {
                     <LinearGradient style={{ height: 164, width: 164, alignSelf: 'center', borderRadius: 120 }} colors={[theme.GRADIENT_START, theme.GRADIENT_END]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
                     <View style={{ height: 156, width: 156, borderRadius: 120, backgroundColor: theme.BACKGROUND, zIndex: 1, position: 'absolute', top: 4, left: 4 }}/>
                     <View style={{ height: 148, width: 148, borderRadius: 120, backgroundColor: theme.FOREGROUND, zIndex: 2, position: 'absolute', top: 8, left: 8, overflow: 'hidden' }}>
-                        {userProfile?.avatarName ? (
+                        {appState.avatarName ? (
                             <Image 
-                                source={getAvatarImageSource(userProfile.avatarName)} 
+                                source={getAvatarImageSource(appState.avatarName)} 
                                 style={{ width: '100%', height: '100%', borderRadius: 120 }}
                                 resizeMode="cover"
                             />

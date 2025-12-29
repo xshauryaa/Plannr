@@ -242,7 +242,7 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                                 setShowWarning(true)
                             } else {
                                 setShowWarning(false)
-                                onClick(name, type, duration, priority, deadline)
+                                onClick(name, type, parseInt(duration), priority, deadline)
                                 setToDefaults();
                             }
                         }}

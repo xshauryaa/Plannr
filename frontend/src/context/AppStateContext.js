@@ -11,10 +11,14 @@ import EventDependencies from '../model/EventDependencies';
 import CircularDependencyError from '../model/exceptions/CircularDependencyError';
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
+import { useAuth } from '@clerk/clerk-expo';
 
 export const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
+    const { isSignedIn } = useAuth();
+    const { loadCompleteAppState, loadCompleteAppStateWithSchedules } = useAuthenticatedAPI();
 
     function testScheduler(firstDate) {
         const date1 = firstDate;
@@ -111,6 +115,7 @@ export const AppStateProvider = ({ children }) => {
     
     const [appState, setAppState] = useState({
         name: '',
+        avatarName: 'cat', // Default avatar
         userPreferences: {
             theme: 'light',
             defaultStrategy: 'earliest-fit',
@@ -135,27 +140,65 @@ export const AppStateProvider = ({ children }) => {
         const loadAppState = async () => {
             console.log("Loading state")
             try {
-                const raw = await AsyncStorage.getItem('appState');
-                const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-                if (parsed !== null) {
-                    setAppState(parsed);
-                } else if (parsed == null) {
-                    if (appState.firstLaunch) {
-                        console.log("First launch detected, initializing app state");
-                        setAppState({
-                            ...appState,
-                            firstLaunch: false
-                        });
+                if (isSignedIn) {
+                    console.log('Loading app state from database...');
+                    // Try to load from database first (database is source of truth)
+                    try {
+                        // Option 1: Fast loading without Schedule objects (recommended for app startup)
+                        const databaseState = await loadCompleteAppState();
+                        
+                        // Option 2: Full loading with Schedule objects (use when needed)
+                        // const databaseState = await loadCompleteAppStateWithSchedules();
+                        
+                        console.log('Loaded from database:', databaseState);
+                        setAppState(prevState => ({
+                            ...prevState,
+                            ...databaseState
+                        }));
+                    } catch (dbError) {
+                        console.warn('Failed to load from database, falling back to AsyncStorage:', dbError);
+                        // Fallback to AsyncStorage if database fails
+                        const raw = await AsyncStorage.getItem('appState');
+                        const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
+                        
+                        if (parsed !== null) {
+                            setAppState(parsed);
+                        } else if (parsed == null) {
+                            if (appState.firstLaunch) {
+                                console.log("First launch detected, initializing app state");
+                                setAppState({
+                                    ...appState,
+                                    firstLaunch: false
+                                });
+                            }
+                        }
+                    }
+                } else {
+                    console.log('User not signed in, loading from AsyncStorage only...');
+                    // If not signed in, only use AsyncStorage
+                    const raw = await AsyncStorage.getItem('appState');
+                    const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
+                    
+                    if (parsed !== null) {
+                        setAppState(parsed);
+                    } else if (parsed == null) {
+                        if (appState.firstLaunch) {
+                            console.log("First launch detected, initializing app state");
+                            setAppState({
+                                ...appState,
+                                firstLaunch: false
+                            });
+                        }
                     }
                 }
             } catch (e) {
-                console.error('Failed to load app state from storage', e);
+                console.error('Failed to load app state:', e);
             } finally {
                 setStorageLoaded(true);
             }
         };
         loadAppState();
-    }, []);
+    }, [isSignedIn]); // Re-run when authentication status changes
 
     useEffect(() => {
         console.log("Writing state")
@@ -178,13 +221,21 @@ const serializeAppState = (appState) => {
 
     return {
         name: appState.name,
+        avatarName: appState.avatarName,
+        timeOfUpdate: appState.timeOfUpdate,
         userPreferences: appState.userPreferences,
         savedSchedules: appState.savedSchedules.map(schedule => ({
             name: schedule.name,
-            schedule: serializeSchedule(schedule.schedule),
+            backendId: schedule.backendId,
+            schedule: schedule.schedule ? serializeSchedule(schedule.schedule) : null,
             isActive: schedule.isActive
         })),
-        activeSchedule: appState.activeSchedule ? { name: appState.activeSchedule.name, schedule: serializeSchedule(appState.activeSchedule.schedule), isActive: appState.activeSchedule.active } : null,
+        activeSchedule: appState.activeSchedule ? { 
+            name: appState.activeSchedule.name, 
+            backendId: appState.activeSchedule.backendId,
+            schedule: appState.activeSchedule.schedule ? serializeSchedule(appState.activeSchedule.schedule) : null, 
+            isActive: appState.activeSchedule.active 
+        } : null,
         onboarded: appState.onboarded,
         firstLaunch: appState.firstLaunch
     };
@@ -197,13 +248,21 @@ const parseAppState = (rawObj) => {
 
     return {
         name: rawObj.name,
+        avatarName: rawObj.avatarName || 'cat', // Default fallback
+        timeOfUpdate: rawObj.timeOfUpdate || new Date().toISOString(),
         userPreferences: rawObj.userPreferences,
         savedSchedules: rawObj.savedSchedules.map(sched => ({
             name: sched.name,
-            schedule: parseSchedule(sched.schedule),
+            backendId: sched.backendId,
+            schedule: sched.schedule ? parseSchedule(sched.schedule) : null,
             isActive: sched.isActive
         })),
-        activeSchedule: rawObj.activeSchedule ? {name: rawObj.activeSchedule.name, schedule: parseSchedule(rawObj.activeSchedule.schedule), isActive: rawObj.activeSchedule.active} : null,
+        activeSchedule: rawObj.activeSchedule ? {
+            name: rawObj.activeSchedule.name, 
+            backendId: rawObj.activeSchedule.backendId,
+            schedule: rawObj.activeSchedule.schedule ? parseSchedule(rawObj.activeSchedule.schedule) : null, 
+            isActive: rawObj.activeSchedule.active
+        } : null,
         onboarded: rawObj.onboarded,
         firstLaunch: rawObj.firstLaunch
     };

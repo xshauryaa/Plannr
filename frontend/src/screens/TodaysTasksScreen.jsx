@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList } from 'react-native'
 import Checkbox from '../components/Checkbox';
 import ActivityTypeIcons from '../model/ActivityTypeIcons'
 import { useAppState } from '../context/AppStateContext.js'
+import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import useCurrentTime from '../utils/useCurrentTime.js'
 import Other from '../../assets/type-icons/Other.svg'
@@ -17,6 +18,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const TodaysTasksScreen = () => {
     
     const { appState, setAppState } = useAppState();
+    const { markBlockComplete } = useAuthenticatedAPI();
     const currentTime = useCurrentTime();
 
     const todaysDate = convertDateToScheduleDate(currentTime);
@@ -93,58 +95,89 @@ const TodaysTasksScreen = () => {
                                 </View>
                                 <Checkbox 
                                     checked={item.completed}
-                                    onChange={() => {
-                                        // 1. Update local UI
-                                        const updatedTasks = [...taskData];
-                                        const updatedTask = { ...updatedTasks[index] };
-                                        updatedTask.completed = !updatedTask.completed;
-                                        updatedTasks[index] = updatedTask;
-                                        setTaskData(updatedTasks);
-                                      
-                                        // 2. Update appState.activeSchedule.schedule
-                                        const currentDaySchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
-                                      
-                                        const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
-                                        const updatedBlock = { ...updatedTimeBlocks[index] };
-                                        updatedBlock.completed = !updatedBlock.completed;
-                                        updatedTimeBlocks[index] = updatedBlock;
-                                      
-                                        const updatedDaySchedule = new currentDaySchedule.constructor(
-                                          currentDaySchedule.day,
-                                          currentDaySchedule.date,
-                                          currentDaySchedule.minGap,
-                                          currentDaySchedule.workingHoursLimit,
-                                          currentDaySchedule.events,
-                                          currentDaySchedule.breaks,
-                                          updatedTimeBlocks
-                                        );
-                                      
-                                        const updatedScheduleMap = new Map(appState.activeSchedule.schedule.schedule);
-                                        updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
-                                      
-                                        const updatedSchedule = new appState.activeSchedule.schedule.constructor(
-                                          appState.activeSchedule.schedule.numDays,
-                                          appState.activeSchedule.schedule.minGap,
-                                          appState.activeSchedule.schedule.day1Date,
-                                          appState.activeSchedule.schedule.day1Day,
-                                          appState.activeSchedule.schedule.workingHoursLimit,
-                                          appState.activeSchedule.schedule.eventDependencies,
-                                          updatedScheduleMap,
-                                          appState.activeSchedule.schedule.strategy,
-                                          appState.activeSchedule.schedule.startTime,
-                                          appState.activeSchedule.schedule.endTime,
-                                        );
-                                      
-                                        setAppState(prev => {
-                                            const saved = prev.savedSchedules;
-                                            saved[prev.activeSchedule.name] = { name: prev.activeSchedule.name, schedule: updatedSchedule, active: true };
-                                            return ({
-                                                ...prev,
-                                                activeSchedule: { ...appState.activeSchedule, schedule: updatedSchedule},
-                                                savedSchedules: saved
-                                            })
-                                        });
-                                      }}
+                                    onChange={async () => {
+                                        try {
+                                            console.log('🔄 Updating task completion:', item.name);
+                                            
+                                            // 1. Update local UI immediately
+                                            const updatedTasks = [...taskData];
+                                            const updatedTask = { ...updatedTasks[index] };
+                                            const newCompletedState = !updatedTask.completed;
+                                            updatedTask.completed = newCompletedState;
+                                            updatedTasks[index] = updatedTask;
+                                            setTaskData(updatedTasks);
+                                          
+                                            // 2. Update database if schedule has backend ID
+                                            if (appState.activeSchedule?.backendId && item.backendId) {
+                                                console.log('🗄️ Syncing to database...', {
+                                                    scheduleId: appState.activeSchedule.backendId,
+                                                    blockId: item.backendId,
+                                                    completed: newCompletedState
+                                                });
+                                                
+                                                try {
+                                                    await markBlockComplete(
+                                                        appState.activeSchedule.backendId, 
+                                                        item.backendId, 
+                                                        newCompletedState
+                                                    );
+                                                    console.log('✅ Task completion synced to database');
+                                                } catch (dbError) {
+                                                    console.error('⚠️ Failed to sync task completion to database:', dbError);
+                                                    // Don't revert UI - user sees immediate feedback even if DB fails
+                                                }
+                                            } else {
+                                                console.log('ℹ️ No backend IDs available, skipping database sync');
+                                            }
+                                          
+                                            // 3. Update appState.activeSchedule.schedule
+                                            const currentDaySchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
+                                          
+                                            const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
+                                            const updatedBlock = { ...updatedTimeBlocks[index] };
+                                            updatedBlock.completed = newCompletedState;
+                                            updatedTimeBlocks[index] = updatedBlock;
+                                          
+                                            const updatedDaySchedule = new currentDaySchedule.constructor(
+                                              currentDaySchedule.day,
+                                              currentDaySchedule.date,
+                                              currentDaySchedule.minGap,
+                                              currentDaySchedule.workingHoursLimit,
+                                              currentDaySchedule.events,
+                                              currentDaySchedule.breaks,
+                                              updatedTimeBlocks
+                                            );
+                                          
+                                            const updatedScheduleMap = new Map(appState.activeSchedule.schedule.schedule);
+                                            updatedScheduleMap.set(todaysDate.getId(), updatedDaySchedule);
+                                          
+                                            const updatedSchedule = new appState.activeSchedule.schedule.constructor(
+                                              appState.activeSchedule.schedule.numDays,
+                                              appState.activeSchedule.schedule.minGap,
+                                              appState.activeSchedule.schedule.day1Date,
+                                              appState.activeSchedule.schedule.day1Day,
+                                              appState.activeSchedule.schedule.workingHoursLimit,
+                                              appState.activeSchedule.schedule.eventDependencies,
+                                              updatedScheduleMap,
+                                              appState.activeSchedule.schedule.strategy,
+                                              appState.activeSchedule.schedule.startTime,
+                                              appState.activeSchedule.schedule.endTime,
+                                            );
+
+                                            setAppState(prevState => ({
+                                                ...prevState,
+                                                activeSchedule: { ...prevState.activeSchedule, schedule: updatedSchedule },
+                                                savedSchedules: prevState.savedSchedules.map(s =>
+                                                    s.name === prevState.activeSchedule.name
+                                                        ? { ...s, schedule: updatedSchedule }
+                                                        : s
+                                                )
+                                            }));
+
+                                        } catch (error) {
+                                            console.error('💥 Error updating task completion:', error);
+                                        }
+                                    }}
                                 />
                             </View>
                         )

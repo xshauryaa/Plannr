@@ -70,8 +70,15 @@ const ManageAccountScreen = () => {
     // Handle avatar selection
     const selectAvatar = async (avatarName) => {
         try {
+            // Update local state immediately for responsive UI
             setSelectedAvatar(avatarName);
             
+            // Update AppState immediately so avatar reflects across all screens
+            setAppState(prevState => ({
+                ...prevState,
+                avatarName: avatarName
+            }));
+
             console.log('🐾 Updating avatar to:', avatarName);
             
             if (authenticatedAPI?.updateAvatar) {
@@ -83,13 +90,25 @@ const ManageAccountScreen = () => {
                 } else {
                     console.error('❌ Failed to update avatar:', result);
                     Alert.alert('Error', 'Failed to update avatar. Please try again.');
+                    // Revert AppState on failure
+                    setAppState(prevState => ({
+                        ...prevState,
+                        avatarName: appState.avatarName || 'cat' // fallback to previous or default
+                    }));
+                    setSelectedAvatar(appState.avatarName || 'cat');
                 }
             } else {
                 console.warn('⚠️ updateAvatar API not available');
             }
         } catch (error) {
-            console.error('� Error updating avatar:', error);
+            console.error('💥 Error updating avatar:', error);
             Alert.alert('Error', 'Failed to update avatar. Please try again.');
+            // Revert AppState on error
+            setAppState(prevState => ({
+                ...prevState,
+                avatarName: appState.avatarName || 'cat'
+            }));
+            setSelectedAvatar(appState.avatarName || 'cat');
         }
     };
 

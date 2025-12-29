@@ -2,7 +2,6 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import UserProfileScreen from '../screens/UserProfileScreen.jsx';
-import PreferencesScreen from '../screens/PreferencesScreen.jsx';
 import SavedSchedulesScreen from '../screens/SavedSchedulesScreen.jsx';
 import ManageAccountScreen from '../screens/ManageAccountScreen.jsx';
 import ProductivityAnalyticsScreen from '../screens/ProductivityAnalyticsScreen.jsx';
@@ -16,7 +15,6 @@ export default function UserProfileStack() {
       initialRouteName="UserProfile"
     >
       <Stack.Screen name="UserProfile" component={UserProfileScreen} />
-      <Stack.Screen name="Preferences" component={PreferencesScreen} />
       <Stack.Screen name="SavedSchedules" component={SavedSchedulesScreen} />
       <Stack.Screen name="ManageAccount" component={ManageAccountScreen} />
       <Stack.Screen name="ProductivityAnalytics" component={ProductivityAnalyticsScreen} />
