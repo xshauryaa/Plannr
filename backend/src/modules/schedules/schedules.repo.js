@@ -1,5 +1,5 @@
 import { db } from '../../config/db.js';
-import { schedules, blocks, users } from '../../db/schema.js';
+import { schedules, blocks, users, days } from '../../db/schema.js';
 import { eq, and, gte, lte, isNull, desc, asc, sql } from 'drizzle-orm';
 
 /**
@@ -220,10 +220,11 @@ export const deleteSchedule = async (scheduleId) => {
     }
 };
 
-// Block operations
+// Block operations (LEGACY - for backward compatibility with auto-migration)
 export const createBlock = async (blockData) => {
     const {
-        scheduleId,
+        scheduleId, // Legacy field - needs to be converted to dayId
+        dayId, // New field - preferred
         type,
         title,
         startAt,
@@ -240,56 +241,109 @@ export const createBlock = async (blockData) => {
     } = blockData;
 
     try {
-        // Use blockDate or date field
-        const dateValue = blockDate || date;
-        
-        const insertData = {
-            scheduleId,
-            type,
-            title,
-            startAt: parseTime24(startAt),
-            endAt: parseTime24(endAt),
-            category,
-            metadata,
-            priority,
-            duration,
-            frontendId,
-            completed
-        };
-
-        // Handle date - support both ScheduleDate object and ISO string
-        if (dateValue) {
-            insertData.blockDate = formatDateForDb(dateValue);
-            // Store ScheduleDate object if provided
-            if (typeof dateValue === 'object' && dateValue.date && dateValue.month && dateValue.year) {
-                insertData.dateObject = dateValue;
-            }
-        } else {
-            // Default to today if no date provided
-            insertData.blockDate = new Date();
+        // If dayId is provided, use the new structure
+        if (dayId) {
+            return createBlockForDay(blockData);
         }
 
-        // Handle deadline - support both ScheduleDate object and ISO string
-        if (deadline) {
-            insertData.deadline = formatDateForDb(deadline);
-            // Store ScheduleDate object if provided
-            if (typeof deadline === 'object' && deadline.date && deadline.month && deadline.year) {
-                insertData.deadlineObject = deadline;
-            }
+        // Legacy support: if scheduleId is provided but no dayId
+        if (scheduleId && !dayId) {
+            // Auto-create or find day for this block
+            const dateValue = blockDate || date || new Date().toISOString().split('T')[0];
+            const dayForBlock = await findOrCreateDayForDate(scheduleId, dateValue);
+            
+            // Create block with the found/created dayId
+            const blockDataWithDay = {
+                ...blockData,
+                dayId: dayForBlock.id
+            };
+            delete blockDataWithDay.scheduleId; // Remove legacy field
+            
+            return createBlockForDay(blockDataWithDay);
         }
 
-        const [newBlock] = await db.insert(blocks).values(insertData).returning();
-
-        return newBlock;
+        throw new Error('Either dayId or scheduleId must be provided');
     } catch (error) {
         throw new Error(`Failed to create block: ${error.message}`);
     }
 };
 
+// Helper function to find or create a day for a given date
+export const findOrCreateDayForDate = async (scheduleId, dateString) => {
+    try {
+        // First, try to find existing day for this date
+        const [existingDay] = await db
+            .select()
+            .from(days)
+            .where(and(
+                eq(days.scheduleId, scheduleId),
+                eq(days.date, dateString)
+            ))
+            .limit(1);
+
+        if (existingDay) {
+            return existingDay;
+        }
+
+        // If no day exists, create one
+        const date = new Date(dateString + 'T00:00:00.000Z');
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        
+        // Get schedule to determine day number
+        const schedule = await getScheduleById(scheduleId);
+        const existingDays = await getDaysByScheduleId(scheduleId);
+        const dayNumber = existingDays.length + 1;
+
+        // Create ScheduleDate object
+        const dateObject = {
+            date: date.getDate(),
+            month: date.getMonth() + 1,
+            year: date.getFullYear()
+        };
+
+        const newDayData = {
+            scheduleId,
+            dayNumber,
+            dayName,
+            date: dateString,
+            dateObject,
+            isWeekend: date.getDay() === 0 || date.getDay() === 6,
+            minGap: schedule?.minGap || 15,
+            metadata: {}
+        };
+
+        return createDay(newDayData);
+    } catch (error) {
+        throw new Error(`Failed to find or create day: ${error.message}`);
+    }
+};
+
 export const createMultipleBlocks = async (blocksData) => {
     try {
-        const newBlocks = await db.insert(blocks).values(blocksData).returning();
-        return newBlocks;
+        // Check if blocks have dayId or need legacy handling
+        if (blocksData.length > 0 && blocksData[0].dayId) {
+            return createMultipleBlocksForDay(blocksData);
+        } else if (blocksData.length > 0 && blocksData[0].scheduleId) {
+            // Legacy support with auto-migration
+            const processedBlocks = [];
+            
+            for (const blockData of blocksData) {
+                const dateValue = blockData.blockDate || blockData.date || new Date().toISOString().split('T')[0];
+                const dayForBlock = await findOrCreateDayForDate(blockData.scheduleId, dateValue);
+                
+                const processedBlock = {
+                    ...blockData,
+                    dayId: dayForBlock.id
+                };
+                delete processedBlock.scheduleId; // Remove legacy field
+                
+                processedBlocks.push(processedBlock);
+            }
+            
+            return createMultipleBlocksForDay(processedBlocks);
+        } else {
+            throw new Error('Blocks data must include either dayId or scheduleId');
+        }
     } catch (error) {
         throw new Error(`Failed to create multiple blocks: ${error.message}`);
     }
@@ -297,16 +351,8 @@ export const createMultipleBlocks = async (blocksData) => {
 
 export const getBlocksByScheduleId = async (scheduleId) => {
     try {
-        const scheduleBlocks = await db
-            .select()
-            .from(blocks)
-            .where(and(
-                eq(blocks.scheduleId, scheduleId),
-                isNull(blocks.deletedAt)
-            ))
-            .orderBy(asc(blocks.blockDate), asc(blocks.startAt));
-
-        return scheduleBlocks;
+        // Now blocks are associated with schedule through days relationship
+        return getAllBlocksForSchedule(scheduleId);
     } catch (error) {
         throw new Error(`Failed to get blocks: ${error.message}`);
     }
@@ -405,16 +451,43 @@ export const getScheduleWithOwner = async (scheduleId) => {
 
 export const getBlocksInDateRange = async (scheduleId, startDate, endDate) => {
     try {
+        // Get blocks within date range through days relationship
         const scheduleBlocks = await db
-            .select()
+            .select({
+                id: blocks.id,
+                dayId: blocks.dayId,
+                type: blocks.type,
+                title: blocks.title,
+                startAt: blocks.startAt,
+                endAt: blocks.endAt,
+                blockDate: blocks.blockDate,
+                dateObject: blocks.dateObject,
+                category: blocks.category,
+                metadata: blocks.metadata,
+                priority: blocks.priority,
+                deadline: blocks.deadline,
+                deadlineObject: blocks.deadlineObject,
+                duration: blocks.duration,
+                frontendId: blocks.frontendId,
+                completed: blocks.completed,
+                version: blocks.version,
+                deletedAt: blocks.deletedAt,
+                createdAt: blocks.createdAt,
+                updatedAt: blocks.updatedAt,
+                // Include day information
+                dayNumber: days.dayNumber,
+                dayName: days.dayName,
+                dayDate: days.date
+            })
             .from(blocks)
+            .innerJoin(days, eq(blocks.dayId, days.id))
             .where(and(
-                eq(blocks.scheduleId, scheduleId),
+                eq(days.scheduleId, scheduleId),
                 isNull(blocks.deletedAt),
-                gte(blocks.blockDate, formatDateForDb(startDate)),
-                lte(blocks.blockDate, formatDateForDb(endDate))
+                gte(days.date, startDate), // Use day date instead of block date
+                lte(days.date, endDate)
             ))
-            .orderBy(asc(blocks.blockDate), asc(blocks.startAt));
+            .orderBy(asc(days.dayNumber), asc(blocks.startAt));
 
         return scheduleBlocks;
     } catch (error) {
@@ -439,5 +512,334 @@ export const markBlockAsCompleted = async (blockId, completed = true) => {
         return updatedBlock;
     } catch (error) {
         throw new Error(`Failed to mark block as completed: ${error.message}`);
+    }
+};
+
+// =============================================================================
+// DAY OPERATIONS
+// =============================================================================
+
+export const getDaysByScheduleId = async (scheduleId) => {
+    try {
+        const scheduleDays = await db
+            .select()
+            .from(days)
+            .where(eq(days.scheduleId, scheduleId))
+            .orderBy(asc(days.dayNumber));
+
+        return scheduleDays;
+    } catch (error) {
+        throw new Error(`Failed to get days: ${error.message}`);
+    }
+};
+
+export const createDay = async (dayData) => {
+    const {
+        scheduleId,
+        dayNumber,
+        dayName,
+        date,
+        dateObject,
+        dayStartTime,
+        dayEndTime,
+        isWeekend = false,
+        isHoliday = false,
+        maxWorkingHours,
+        minGap = 15,
+        metadata = {}
+    } = dayData;
+
+    try {
+        const insertData = {
+            scheduleId,
+            dayNumber,
+            dayName,
+            date, // Expecting YYYY-MM-DD format
+            dateObject, // ScheduleDate object {date: 7, month: 10, year: 2025}
+            isWeekend,
+            isHoliday,
+            minGap,
+            metadata
+        };
+
+        // Optional fields
+        if (dayStartTime !== undefined) {
+            insertData.dayStartTime = parseTime24(dayStartTime);
+        }
+        if (dayEndTime !== undefined) {
+            insertData.dayEndTime = parseTime24(dayEndTime);
+        }
+        if (maxWorkingHours !== undefined) {
+            insertData.maxWorkingHours = maxWorkingHours;
+        }
+
+        const [newDay] = await db.insert(days).values(insertData).returning();
+        return newDay;
+    } catch (error) {
+        throw new Error(`Failed to create day: ${error.message}`);
+    }
+};
+
+export const getDayById = async (dayId, includeBlocks = false) => {
+    try {
+        const [day] = await db
+            .select()
+            .from(days)
+            .where(eq(days.id, dayId))
+            .limit(1);
+
+        if (!day) return null;
+
+        if (includeBlocks) {
+            const dayBlocks = await getBlocksByDayId(dayId);
+            return {
+                ...day,
+                blocks: dayBlocks
+            };
+        }
+
+        return day;
+    } catch (error) {
+        throw new Error(`Failed to get day: ${error.message}`);
+    }
+};
+
+export const updateDay = async (dayId, updateData) => {
+    try {
+        const updateFields = { updatedAt: new Date() };
+        
+        // Handle each field with proper conversion
+        if (updateData.dayNumber !== undefined) updateFields.dayNumber = updateData.dayNumber;
+        if (updateData.dayName !== undefined) updateFields.dayName = updateData.dayName;
+        if (updateData.date !== undefined) updateFields.date = updateData.date;
+        if (updateData.dateObject !== undefined) updateFields.dateObject = updateData.dateObject;
+        if (updateData.dayStartTime !== undefined) updateFields.dayStartTime = parseTime24(updateData.dayStartTime);
+        if (updateData.dayEndTime !== undefined) updateFields.dayEndTime = parseTime24(updateData.dayEndTime);
+        if (updateData.isWeekend !== undefined) updateFields.isWeekend = updateData.isWeekend;
+        if (updateData.isHoliday !== undefined) updateFields.isHoliday = updateData.isHoliday;
+        if (updateData.maxWorkingHours !== undefined) updateFields.maxWorkingHours = updateData.maxWorkingHours;
+        if (updateData.minGap !== undefined) updateFields.minGap = updateData.minGap;
+        if (updateData.metadata !== undefined) updateFields.metadata = updateData.metadata;
+
+        const [updatedDay] = await db
+            .update(days)
+            .set(updateFields)
+            .where(eq(days.id, dayId))
+            .returning();
+
+        return updatedDay;
+    } catch (error) {
+        throw new Error(`Failed to update day: ${error.message}`);
+    }
+};
+
+export const deleteDay = async (dayId) => {
+    try {
+        // Delete day (this will cascade delete all blocks due to foreign key constraint)
+        const [deletedDay] = await db
+            .delete(days)
+            .where(eq(days.id, dayId))
+            .returning();
+
+        return deletedDay;
+    } catch (error) {
+        throw new Error(`Failed to delete day: ${error.message}`);
+    }
+};
+
+// =============================================================================
+// DAY-BASED BLOCK OPERATIONS
+// =============================================================================
+
+export const getBlocksByDayId = async (dayId) => {
+    try {
+        const dayBlocks = await db
+            .select()
+            .from(blocks)
+            .where(and(
+                eq(blocks.dayId, dayId),
+                isNull(blocks.deletedAt)
+            ))
+            .orderBy(asc(blocks.startAt));
+
+        return dayBlocks;
+    } catch (error) {
+        throw new Error(`Failed to get blocks by day: ${error.message}`);
+    }
+};
+
+export const createBlockForDay = async (blockData) => {
+    const {
+        dayId,
+        type,
+        title,
+        startAt,
+        endAt,
+        blockDate,
+        dateObject,
+        category,
+        metadata = {},
+        priority,
+        deadline,
+        deadlineObject,
+        duration,
+        frontendId,
+        completed = false
+    } = blockData;
+
+    try {
+        const insertData = {
+            dayId,
+            type,
+            title,
+            startAt: parseTime24(startAt),
+            endAt: parseTime24(endAt),
+            category,
+            metadata,
+            priority,
+            duration,
+            frontendId,
+            completed
+        };
+
+        // Optional date fields (backward compatibility)
+        if (blockDate) {
+            insertData.blockDate = formatDateForDb(blockDate);
+        }
+        if (dateObject) {
+            insertData.dateObject = dateObject;
+        }
+
+        // Handle deadline
+        if (deadline) {
+            insertData.deadline = formatDateForDb(deadline);
+        }
+        if (deadlineObject) {
+            insertData.deadlineObject = deadlineObject;
+        }
+
+        const [newBlock] = await db.insert(blocks).values(insertData).returning();
+        return newBlock;
+    } catch (error) {
+        throw new Error(`Failed to create block for day: ${error.message}`);
+    }
+};
+
+export const createMultipleBlocksForDay = async (blocksData) => {
+    try {
+        // Process each block to ensure proper format
+        const processedBlocks = blocksData.map(blockData => ({
+            dayId: blockData.dayId,
+            type: blockData.type,
+            title: blockData.title,
+            startAt: parseTime24(blockData.startAt),
+            endAt: parseTime24(blockData.endAt),
+            blockDate: blockData.blockDate ? formatDateForDb(blockData.blockDate) : null,
+            dateObject: blockData.dateObject || null,
+            category: blockData.category,
+            metadata: blockData.metadata || {},
+            priority: blockData.priority,
+            deadline: blockData.deadline ? formatDateForDb(blockData.deadline) : null,
+            deadlineObject: blockData.deadlineObject || null,
+            duration: blockData.duration,
+            frontendId: blockData.frontendId,
+            completed: blockData.completed || false
+        }));
+
+        const newBlocks = await db.insert(blocks).values(processedBlocks).returning();
+        return newBlocks;
+    } catch (error) {
+        throw new Error(`Failed to create multiple blocks for day: ${error.message}`);
+    }
+};
+
+// =============================================================================
+// UPDATED BLOCK OPERATIONS FOR DAY SUPPORT
+// =============================================================================
+
+// Update existing createBlock to support both dayId and legacy scheduleId
+export const createBlockWithDaySupport = async (blockData) => {
+    if (blockData.dayId) {
+        return createBlockForDay(blockData);
+    } else {
+        return createBlock(blockData); // Use existing legacy function
+    }
+};
+
+// Update existing createMultipleBlocks to support both dayId and legacy scheduleId
+export const createMultipleBlocksWithDaySupport = async (blocksData) => {
+    if (blocksData.length > 0 && blocksData[0].dayId) {
+        return createMultipleBlocksForDay(blocksData);
+    } else {
+        return createMultipleBlocks(blocksData); // Use existing legacy function
+    }
+};
+
+// =============================================================================
+// MIGRATION SUPPORT FUNCTIONS
+// =============================================================================
+
+// Helper function to get all blocks for a schedule (through days relationship)
+export const getAllBlocksForSchedule = async (scheduleId) => {
+    try {
+        // Get all blocks through the days relationship
+        const scheduleBlocks = await db
+            .select({
+                id: blocks.id,
+                dayId: blocks.dayId,
+                type: blocks.type,
+                title: blocks.title,
+                startAt: blocks.startAt,
+                endAt: blocks.endAt,
+                blockDate: blocks.blockDate,
+                dateObject: blocks.dateObject,
+                category: blocks.category,
+                metadata: blocks.metadata,
+                priority: blocks.priority,
+                deadline: blocks.deadline,
+                deadlineObject: blocks.deadlineObject,
+                duration: blocks.duration,
+                frontendId: blocks.frontendId,
+                completed: blocks.completed,
+                version: blocks.version,
+                deletedAt: blocks.deletedAt,
+                createdAt: blocks.createdAt,
+                updatedAt: blocks.updatedAt,
+                // Include day information
+                dayNumber: days.dayNumber,
+                dayName: days.dayName,
+                dayDate: days.date
+            })
+            .from(blocks)
+            .innerJoin(days, eq(blocks.dayId, days.id))
+            .where(and(
+                eq(days.scheduleId, scheduleId),
+                isNull(blocks.deletedAt)
+            ))
+            .orderBy(asc(days.dayNumber), asc(blocks.startAt));
+
+        return scheduleBlocks;
+    } catch (error) {
+        throw new Error(`Failed to get all blocks for schedule: ${error.message}`);
+    }
+};
+
+// Helper function to check schedule structure and day setup
+export const getScheduleStructureInfo = async (scheduleId) => {
+    try {
+        const schedule = await getScheduleById(scheduleId);
+        const scheduleDays = await getDaysByScheduleId(scheduleId);
+        const scheduleBlocks = await getAllBlocksForSchedule(scheduleId);
+        
+        return {
+            schedule,
+            daysCount: scheduleDays.length,
+            blocksCount: scheduleBlocks.length,
+            days: scheduleDays,
+            hasBlocks: scheduleBlocks.length > 0,
+            hasDays: scheduleDays.length > 0
+        };
+    } catch (error) {
+        throw new Error(`Failed to get schedule structure info: ${error.message}`);
     }
 };

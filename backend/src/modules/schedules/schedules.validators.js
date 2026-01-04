@@ -165,6 +165,53 @@ export const scheduleAndBlockIdParamSchema = z.object({
     blockId: z.string().uuid('Valid block ID is required')
 });
 
+// New parameter validation schemas for day-based routing
+export const dayIdParamSchema = z.object({
+    dayId: z.string().uuid('Valid day ID is required')
+});
+
+export const scheduleAndDayIdParamSchema = z.object({
+    id: z.string().uuid('Valid schedule ID is required'),
+    dayId: z.string().uuid('Valid day ID is required')
+});
+
+export const scheduleAndDayAndBlockIdParamSchema = z.object({
+    id: z.string().uuid('Valid schedule ID is required'),
+    dayId: z.string().uuid('Valid day ID is required'),
+    blockId: z.string().uuid('Valid block ID is required')
+});
+
+// Day validation schemas
+export const createDaySchema = z.object({
+    dayNumber: z.number().int().min(1).max(365), // 1, 2, 3, etc.
+    dayName: z.string().min(1, 'Day name is required'), // "Monday", "Tuesday", etc.
+    date: FlexibleDateSchema, // YYYY-MM-DD format
+    dateObject: ScheduleDateSchema, // ScheduleDate object {date: 7, month: 10, year: 2025}
+    // Day-level scheduling metadata (optional overrides)
+    dayStartTime: Time24Schema.optional(), // Override schedule default start time
+    dayEndTime: Time24Schema.optional(), // Override schedule default end time  
+    isWeekend: z.boolean().optional().default(false),
+    isHoliday: z.boolean().optional().default(false),
+    // Day-level preferences and constraints
+    maxWorkingHours: z.number().int().min(0).max(24).optional(), // Override schedule default
+    minGap: z.number().int().min(0).optional().default(15), // Minimum gap for this day
+    metadata: z.object({}).optional() // Store day-specific settings
+});
+
+export const updateDaySchema = z.object({
+    dayNumber: z.number().int().min(1).max(365).optional(),
+    dayName: z.string().min(1).optional(),
+    date: FlexibleDateSchema.optional(),
+    dateObject: ScheduleDateSchema.optional(),
+    dayStartTime: Time24Schema.optional(),
+    dayEndTime: Time24Schema.optional(),
+    isWeekend: z.boolean().optional(),
+    isHoliday: z.boolean().optional(),
+    maxWorkingHours: z.number().int().min(0).max(24).optional(),
+    minGap: z.number().int().min(0).optional(),
+    metadata: z.object({}).optional()
+});
+
 // Validation middleware functions
 export const validateCreateSchedule = (req, res, next) => {
     try {
