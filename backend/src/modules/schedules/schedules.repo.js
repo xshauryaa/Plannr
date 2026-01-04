@@ -57,7 +57,7 @@ export const createSchedule = async (scheduleData) => {
         numDays: scheduleData.numDays || 7,
         minGap: scheduleData.minGap || 15,
         workingHoursLimit: scheduleData.workingHoursLimit || 8,
-        strategy: scheduleData.strategy || 'EarliestFit',
+        strategy: scheduleData.strategy || 'earliest-fit',
         startTime: parseTime24(scheduleData.startTime) || 900,
         endTime: parseTime24(scheduleData.endTime) || 1700,
         metadata: scheduleData.metadata || {}
@@ -122,7 +122,7 @@ export const getSchedulesByUserId = async (userId, options = {}) => {
         limit = 20, 
         cursor, 
         isActive,
-        includeBlocks = false 
+        includeBlocks = true 
     } = options;
     
     try {
@@ -158,7 +158,7 @@ export const getSchedulesByUserId = async (userId, options = {}) => {
                     const scheduleBlocks = await getBlocksByScheduleId(schedule.id);
                     return {
                         ...schedule,
-                        blocks: scheduleBlocks
+                        schedule: scheduleBlocks
                     };
                 })
             );

@@ -20,7 +20,7 @@ export const useAuthenticatedAPI = () => {
             }
 
             // Make the API request with the token
-            const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+            const apiBaseUrl = 'http://localhost:5001'; // process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
             const response = await fetch(`${apiBaseUrl}${endpoint}`, {
                 ...options,
                 headers: {
@@ -151,7 +151,7 @@ export const useAuthenticatedAPI = () => {
             method: 'POST',
             body: JSON.stringify(data),
         }),
-        getScheduleById: (id, includeBlocks = false) => makeAuthenticatedRequest(`/api/schedules/${id}?includeBlocks=${includeBlocks}`),
+        getScheduleById: (id, includeBlocks = true) => makeAuthenticatedRequest(`/api/schedules/${id}?includeBlocks=${includeBlocks}`),
         updateSchedule: (id, data) => makeAuthenticatedRequest(`/api/schedules/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
@@ -399,19 +399,19 @@ export const useAuthenticatedAPI = () => {
         loadCompleteAppStateWithSchedules: async () => {
             try {
                 // First load basic app state using the helper defined above
-                const basicAppState = await (() => {
+                const basicAppState = await (async () => {
                     // Inline call to loadCompleteAppState logic
                     return makeAuthenticatedRequest('/api/users/profile')
                         .then(async (userProfile) => {
-                            const [preferences, schedules] = await Promise.all([
-                                makeAuthenticatedRequest('/api/preferences'),
-                                makeAuthenticatedRequest('/api/schedules')
-                            ]);
-                            
+                            const preferences = await makeAuthenticatedRequest('/api/preferences');
+                            console.log('Preferences fetched:', preferences);
+                            const schedules = await makeAuthenticatedRequest('/api/schedules');
+                            console.log('Schedules fetched:', schedules);
+
                             return {
-                                name: userProfile.displayName || '',
-                                avatarName: userProfile.avatarName || 'cat',
-                                onboarded: Boolean(userProfile.onboarded),
+                                name: userProfile.data.displayName || '',
+                                avatarName: userProfile.data.avatarName || 'cat',
+                                onboarded: Boolean(userProfile.data.onboarded),
                                 firstLaunch: false,
                                 userPreferences: {
                                     theme: preferences.uiMode === 'dark' ? 'dark' : 'light',
@@ -421,14 +421,14 @@ export const useAuthenticatedAPI = () => {
                                     taskRemindersEnabled: Boolean(preferences.notificationsEnabled ?? true),
                                     leadMinutes: String(preferences.leadMinutes || 30),
                                 },
-                                savedSchedules: schedules.map(schedule => ({
+                                savedSchedules: schedules.data.map(schedule => ({
                                     name: schedule.title,
                                     backendId: schedule.id,
                                     schedule: null,
                                     isActive: Boolean(schedule.isActive || false)
                                 })),
-                                activeSchedule: schedules.find(s => s.isActive) ? (() => {
-                                    const activeSchedule = schedules.find(s => s.isActive);
+                                activeSchedule: schedules.data.find(s => s.isActive) ? (() => {
+                                    const activeSchedule = schedules.data.find(s => s.isActive);
                                     return {
                                         name: activeSchedule.title,
                                         backendId: activeSchedule.id,
@@ -448,7 +448,9 @@ export const useAuthenticatedAPI = () => {
                         throw new Error('Failed to fetch schedule data from database');
                     }
 
-                    const { schedule, blocks } = scheduleData.data;
+                    const schedule = scheduleData.data;
+
+                    console.log('Schedule Data for ID', scheduleId, ':', schedule);
 
                     const serializedSchedule = {
                         numDays: schedule.numDays,
@@ -457,19 +459,19 @@ export const useAuthenticatedAPI = () => {
                         minGap: schedule.minGap,
                         workingHoursLimit: schedule.workingHoursLimit,
                         strategy: schedule.strategy,
-                        startTime: { hour: Math.floor(schedule.startTime / 100), minute: schedule.startTime % 100 },
-                        endTime: { hour: Math.floor(schedule.endTime / 100), minute: schedule.endTime % 100 },
+                        startTime: schedule.startTime,
+                        endTime: schedule.endTime,
                         eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
                         schedule: []
                     };
 
-                    const blocksByDate = {};
-                    blocks.forEach(block => {
+                    const blocksByDate = [];
+                    schedule.blocks.forEach(block => {
                         const dateKey = block.blockDate;
                         if (!blocksByDate[dateKey]) {
                             blocksByDate[dateKey] = [];
                         }
-                        
+
                         blocksByDate[dateKey].push({
                             name: block.title,
                             date: block.dateObject || { 
@@ -497,6 +499,7 @@ export const useAuthenticatedAPI = () => {
                         { timeBlocks: blocks }
                     ]);
 
+                    console.log("Parsed Schedule:", parseSchedule(serializedSchedule));
                     return parseSchedule(serializedSchedule);
                 };
                 

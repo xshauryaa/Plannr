@@ -1,0 +1,1 @@
+ALTER TABLE "preferences" ALTER COLUMN "ui_mode" SET DEFAULT 'light';

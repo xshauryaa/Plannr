@@ -68,7 +68,7 @@ export const getSchedules = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            data: schedules,
+            data: schedules || [],
             message: 'Schedules retrieved successfully'
         });
     } catch (error) {

@@ -29,14 +29,21 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    // Return null if no schedule is available
+    if (!schedule) {
+        return null;
+    }
+
     const [rowHeight, setRowHeight] = useState(60);
     // Removed Reanimated shared value for Expo Go compatibility
 
     const timeBlocks = schedule.getScheduleForDate(date).getTimeBlocks();
+    console.log("Rendering ScheduleCalendarView for date:", date, "with", timeBlocks.length, "time blocks.");
     const start = schedule.startTime.getHour();
     const HOURS = Array.from({ length: 24 - start }, (_, i) => i + start);
 
     // Removed pinch gesture for Expo Go compatibility - can be re-enabled in production build
+
 
     return ((isVisible == true) 
         ? <ScrollView
@@ -44,6 +51,7 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
                 contentContainerStyle={{ flexDirection: 'row' }}
                 showsVerticalScrollIndicator={false}
             >
+                <Text>HOLA BABACITO</Text>
                 {/* Left column: clock labels */}
                 <View style={styles.timeColumn}>
                     {HOURS.map(hour => (

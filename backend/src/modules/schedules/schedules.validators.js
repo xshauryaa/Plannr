@@ -49,7 +49,7 @@ export const createScheduleSchema = z.object({
     numDays: z.number().int().min(1).max(365).optional().default(7),
     minGap: z.number().int().min(0).optional().default(15),
     workingHoursLimit: z.number().int().min(1).max(24).optional().default(8),
-    strategy: z.enum(['EarliestFit', 'BalancedWork', 'DeadlineOriented']).optional().default('EarliestFit'),
+    strategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional().default('earliest-fit'),
     startTime: Time24Schema.optional().default(900), // 9:00 AM
     endTime: Time24Schema.optional().default(1700), // 5:00 PM
     metadata: z.object({}).optional()
@@ -72,7 +72,7 @@ export const updateScheduleSchema = z.object({
     numDays: z.number().int().min(1).max(365).optional(),
     minGap: z.number().int().min(0).optional(),
     workingHoursLimit: z.number().int().min(1).max(24).optional(),
-    strategy: z.enum(['EarliestFit', 'BalancedWork', 'DeadlineOriented']).optional(),
+    strategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional(),
     startTime: Time24Schema.optional(),
     endTime: Time24Schema.optional(),
     metadata: z.object({}).optional()

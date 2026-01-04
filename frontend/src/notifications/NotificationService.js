@@ -41,7 +41,7 @@ const NotificationService = {
             const notificationTime = combineScheduleDateAndTime24(date, triggerTime24);
 
             if (notificationTime <= new Date()) {
-                console.warn(`Skipping "${name}" reminder — trigger time is in the past.`);
+                // console.warn(`Skipping "${name}" reminder — trigger time is in the past.`);
                 return null;
             }
 
@@ -58,7 +58,7 @@ const NotificationService = {
                 },
             });
 
-            console.log(`Notification scheduled for "${name}" → ID: ${notificationId}`);
+            // console.log(`Notification scheduled for "${name}" → ID: ${notificationId}`);
             return notificationId;
         } catch (error) {
             console.error(`Error scheduling reminder for "${timeBlock.name}":`, error);
@@ -76,7 +76,7 @@ const NotificationService = {
             const notificationTime = combineScheduleDateAndTime24(date, triggerTime24);
 
             if (notificationTime <= new Date()) {
-                console.warn(`Skipping "Break" reminder — trigger time is in the past.`);
+                // console.warn(`Skipping "Break" reminder — trigger time is in the past.`);
                 return null;
             }
 
@@ -93,7 +93,7 @@ const NotificationService = {
                 },
             });
 
-            console.log(`Notification scheduled for "Break" ${startTime.to12HourString()} → ID: ${notificationId}`);
+            // console.log(`Notification scheduled for "Break" ${startTime.to12HourString()} → ID: ${notificationId}`);
             return notificationId;
         } catch (error) {
             console.error(`Error scheduling reminder for "${timeBlock.name}":`, error);
@@ -164,7 +164,6 @@ const NotificationService = {
         // clear all pending notifications
         try {
             await Notifications.cancelAllScheduledNotificationsAsync();
-            console.log('✅ All scheduled notifications cancelled.');
         } catch (error) {
             console.error('❌ Failed to cancel all notifications:', error);
         }
