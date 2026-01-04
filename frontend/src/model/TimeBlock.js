@@ -11,7 +11,7 @@ class TimeBlock {
    * Constructs a TimeBlock from a RigidEvent.
    * @param {RigidEvent} event 
    */
-  constructor(name, type, duration, date, startTime, endTime, activityType, priority, deadline, isCompleted) {
+  constructor(name, type, duration, date, startTime, endTime, activityType, priority, deadline, isCompleted, backendId = null) {
     this.name = name;
     this.type = type; // "rigid", "flexible", "break"
     this.date = date;
@@ -22,6 +22,7 @@ class TimeBlock {
     this.priority = priority;
     this.deadline = deadline;
     this.completed = isCompleted;
+    this.backendId = backendId; // Backend database ID for syncing
   }
 
   /** @returns {string} name of the time block */
@@ -74,6 +75,19 @@ class TimeBlock {
     return this.completed;
   }
 
+  /** @returns {string|null} backend database ID */
+  getBackendId() {
+    return this.backendId;
+  }
+
+  /** 
+   * Sets the backend ID for this time block.
+   * @param {string|null} backendId 
+   */
+  setBackendId(backendId) {
+    this.backendId = backendId;
+  }
+
   /**
    * Sets the completion status of this time block.
    * @param {boolean} completed 
@@ -123,7 +137,7 @@ class TimeBlock {
     return `${uid}@plannr.scheduler`.toLowerCase();
   }
 
-  static fromRigidEvent(event, isCompleted = false) {
+  static fromRigidEvent(event, isCompleted = false, backendId = null) {
     return new TimeBlock(
         event.getName(),
         'rigid',
@@ -134,11 +148,12 @@ class TimeBlock {
         event.getType(),
         Priority.HIGH,
         event.getDate(),
-        isCompleted
+        isCompleted,
+        backendId
     )
   }
 
-  static fromFlexibleEvent(event, date, startTime, endTime, isCompleted = false) {
+  static fromFlexibleEvent(event, date, startTime, endTime, isCompleted = false, backendId = null) {
     return new TimeBlock(
         event.getName(),
         'flexible',
@@ -149,11 +164,12 @@ class TimeBlock {
         event.getType(),
         event.getPriority(),
         event.getDeadline(),
-        isCompleted
+        isCompleted,
+        backendId
     )
   }
 
-  static fromBreak(breakObj, date, isCompleted = false) {
+  static fromBreak(breakObj, date, isCompleted = false, backendId = null) {
     return new TimeBlock(
         'Break',
         'break',
@@ -164,7 +180,8 @@ class TimeBlock {
         ActivityType.BREAK,
         Priority.LOW,
         date,
-        isCompleted
+        isCompleted,
+        backendId
     )
   }
 }

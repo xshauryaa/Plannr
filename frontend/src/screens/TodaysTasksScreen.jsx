@@ -20,32 +20,43 @@ const TodaysTasksScreen = () => {
     
     const { appState, setAppState } = useAppState();
     const { logUserAction, logError } = useActionLogger('TodaysTasks');
-    const { markBlockComplete } = useAuthenticatedAPI();
+    const { markBlockCompleteInDay, getDaysByScheduleId } = useAuthenticatedAPI();
     const currentTime = useCurrentTime();
 
     const todaysDate = convertDateToScheduleDate(currentTime);
-    let tasks = []
 
-    // Check if the user has an active schedule
-    const loadTodaysTask = () => {
+    // State for today's tasks
+    const [taskData, setTaskData] = useState([]);
+    const [allCompleted, setAllComplete] = useState(false);
+
+    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+
+    // Function to load today's tasks and update state
+    const loadTodaysTasks = () => {
+        let tasks = [];
         if (appState.activeSchedule !== null && appState.activeSchedule.schedule !== null) {
             const todaysSchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
             if (todaysSchedule !== undefined) {
                 tasks = todaysSchedule.getTimeBlocks();
             }
         }
-    }
+        setTaskData(tasks); // Update state to trigger re-render
+        return tasks;
+    };
 
-    loadTodaysTask();
-
+    // Load tasks initially
     useEffect(() => {
-        loadTodaysTask();
-    }, [appState]);
+        loadTodaysTasks();
+    }, [appState.activeSchedule, todaysDate.getId()]);
 
-    const [taskData, setTaskData] = useState(tasks)
-    const [allCompleted, setAllComplete] = useState(false)
+    // Update tasks every 2 seconds
+    useEffect(() => {
+        const timer = setInterval(() => {
+            loadTodaysTasks();
+        }, 2000); // Update every 2 seconds
 
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+        return () => clearInterval(timer);
+    }, [appState.activeSchedule, todaysDate.getId()]);
 
     useEffect( () => {
         const check = taskData.every(task => task.completed)
@@ -126,12 +137,28 @@ const TodaysTasksScreen = () => {
                                                 });
                                                 
                                                 try {
-                                                    await markBlockComplete(
-                                                        appState.activeSchedule.backendId, 
-                                                        item.backendId, 
-                                                        newCompletedState
-                                                    );
-                                                    console.log('✅ Task completion synced to database');
+                                                    // Get days for the schedule to find today's dayId
+                                                    const daysResponse = await getDaysByScheduleId(appState.activeSchedule.backendId);
+                                                    
+                                                    if (daysResponse.success) {
+                                                        // Find today's day by date
+                                                        const todayDateString = `${todaysDate.year}-${String(todaysDate.month).padStart(2, '0')}-${String(todaysDate.date).padStart(2, '0')}`;
+                                                        const todaysDay = daysResponse.data.find(day => day.date === todayDateString);
+                                                        
+                                                        if (todaysDay) {
+                                                            await markBlockCompleteInDay(
+                                                                appState.activeSchedule.backendId,
+                                                                todaysDay.id,
+                                                                item.backendId,
+                                                                newCompletedState
+                                                            );
+                                                            console.log('✅ Task completion synced to database via days API');
+                                                        } else {
+                                                            console.warn('⚠️ Could not find today\'s day in schedule days');
+                                                        }
+                                                    } else {
+                                                        console.warn('⚠️ Failed to get days for schedule');
+                                                    }
                                                 } catch (dbError) {
                                                     console.error('⚠️ Failed to sync task completion to database:', dbError);
                                                     // Don't revert UI - user sees immediate feedback even if DB fails

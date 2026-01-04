@@ -21,7 +21,8 @@ export const serializeTimeBlock = (timeBlock) => {
         duration: timeBlock.duration,
         completed: timeBlock.completed,
         deadline: serializeScheduleDate(timeBlock.deadline),
-        type: timeBlock.type
+        type: timeBlock.type,
+        backendId: timeBlock.backendId || null
     };
 }
 
@@ -45,7 +46,8 @@ export const parseTimeBlock = (rawObj) => {
             parseScheduleDate(rawObj.date),
             parseTime24(rawObj.startTime).toInt(),
             parseTime24(rawObj.endTime).toInt(),
-            isCompleted
+            isCompleted,
+            rawObj.backendId || null
         );
     } else if (rawObj.type === 'rigid') {
         const event = new RigidEvent(
@@ -56,7 +58,7 @@ export const parseTimeBlock = (rawObj) => {
             parseTime24(rawObj.startTime).toInt(),
             parseTime24(rawObj.endTime).toInt()
         );
-        return TimeBlock.fromRigidEvent(event, isCompleted);
+        return TimeBlock.fromRigidEvent(event, isCompleted, rawObj.backendId || null);
     } else if (rawObj.type === 'break') {
         const breakObj = new Break(
             rawObj.duration,
@@ -66,7 +68,8 @@ export const parseTimeBlock = (rawObj) => {
         return TimeBlock.fromBreak(
             breakObj,
             parseScheduleDate(rawObj.date),
-            isCompleted
+            isCompleted,
+            rawObj.backendId || null
         );
     }
 }

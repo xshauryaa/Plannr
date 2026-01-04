@@ -50,7 +50,7 @@ const UpcomingTasks = ({ onClick }) => {
                 return curr.isBefore(task.endTime)
             })
             setUpcomingTasks(tasksLeft)
-          }, 1000);
+          }, 500);
       
         return () => clearInterval(timer);
         }, [todaysTasks, appState])

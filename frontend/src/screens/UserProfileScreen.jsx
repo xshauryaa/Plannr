@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Image, TouchableOpacity, Switch, TextInput, Alert } from 'react-native';
 import { useClerk } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,7 @@ import { TokenCacheUtils } from '../../cache.js';
 
 import LoadingScreen from './LoadingScreen.jsx';
 import MenuButton from '../components/MenuButton.jsx';
+import ComingSoonBottomSheet from '../components/ComingSoonBottomSheet.jsx';
 
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
@@ -41,6 +42,9 @@ const UserProfileScreen = ({ navigation }) => {
     const [showMinGapWarning, setShowMinGapWarning] = useState(false);
     const [showMaxHoursWarning, setShowMaxHoursWarning] = useState(false);
     const [showLeadMinutesWarning, setShowLeadMinutesWarning] = useState(false);
+    
+    // Ref for coming soon bottom sheet
+    const comingSoonSheetRef = useRef();
     
     // Early return if storage not loaded
     if (!storageLoaded) {
@@ -301,7 +305,7 @@ const UserProfileScreen = ({ navigation }) => {
                         broad={false}
                         title="Your Productivity Analytics"
                         icon="Productivity"
-                        navTo={() => { navigation.navigate("ProductivityAnalytics") }}
+                        navTo={() => { comingSoonSheetRef.current?.show() }}
                     />
                 </View>
                 {/* Theme and Reminders Settings */}
@@ -519,6 +523,12 @@ const UserProfileScreen = ({ navigation }) => {
                     <Text style={{ ...styles.destructiveButtonText, color: '#FF2222' }}>Delete Account</Text>
                 </TouchableOpacity>
             </ScrollView>
+            
+            {/* Coming Soon Bottom Sheet */}
+            <ComingSoonBottomSheet 
+                ref={comingSoonSheetRef}
+                theme={theme}
+            />
         </View>
     );
 }

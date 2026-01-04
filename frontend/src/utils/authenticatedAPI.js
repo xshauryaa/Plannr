@@ -1,6 +1,8 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler';
 import { serializeTimeBlock, parseTimeBlock } from '../persistence/TimeBlockHandler';
+import { serializeScheduleDate } from '../persistence/ScheduleDateHandler';
+import ScheduleDate from '../model/ScheduleDate';
 
 /**
  * API utility for making authenticated requests to your backend
@@ -193,37 +195,6 @@ export const useAuthenticatedAPI = () => {
             body: JSON.stringify({ completed }),
         }),
 
-        // Legacy Block operations (for backward compatibility - requires finding dayId first)
-        markBlockComplete: async (scheduleId, blockId, completed = true) => {
-            try {
-                // First get all days for the schedule to find which day contains this block
-                const daysResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`);
-                if (!daysResponse.success) {
-                    throw new Error('Failed to get days for schedule');
-                }
-                
-                // Search through each day to find the block
-                for (const day of daysResponse.data) {
-                    const blocksResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${day.id}/blocks`);
-                    if (blocksResponse.success) {
-                        const blockExists = blocksResponse.data.some(block => block.id === blockId);
-                        if (blockExists) {
-                            // Found the day containing this block
-                            return makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${day.id}/blocks/${blockId}/complete`, {
-                                method: 'PATCH',
-                                body: JSON.stringify({ completed }),
-                            });
-                        }
-                    }
-                }
-                
-                throw new Error(`Block ${blockId} not found in any day of schedule ${scheduleId}`);
-            } catch (error) {
-                console.error('Legacy markBlockComplete failed:', error);
-                throw error;
-            }
-        },
-        
         // Preferences operations
         getPreferences: () => makeAuthenticatedRequest('/api/preferences'),
         updatePreferences: (data) => makeAuthenticatedRequest('/api/preferences', {
@@ -270,16 +241,23 @@ export const useAuthenticatedAPI = () => {
                 const datesList = scheduleObject.getAllDatesInOrder();
                 const createdDays = [];
 
+                // Helper function to convert date ID string back to ScheduleDate object
+                const parseScheduleDateId = (dateId) => {
+                    const parts = dateId.split('-');
+                    return new ScheduleDate(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+                };
+
                 for (let i = 0; i < datesList.length; i++) {
-                    const date = datesList[i];
-                    const daySchedule = scheduleObject.getScheduleForDate(date);
+                    const dateId = datesList[i]; // This is a string like "7-10-2025"
+                    const date = parseScheduleDateId(dateId); // Convert to ScheduleDate object
+                    const daySchedule = scheduleObject.getScheduleForDate(dateId);
                     
                     // Create day data
                     const dayData = {
                         dayNumber: i + 1,
                         dayName: daySchedule.day,
                         date: `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.date).padStart(2, '0')}`,
-                        dateObject: date,
+                        dateObject: serializeScheduleDate(date), // Properly serialize the ScheduleDate object
                         isWeekend: daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday',
                         minGap: daySchedule.minGap,
                         maxWorkingHours: daySchedule.workingHoursLimit,
@@ -316,11 +294,11 @@ export const useAuthenticatedAPI = () => {
                                 startAt: serialized.startTime,
                                 endAt: serialized.endTime,
                                 blockDate: dayData.date,
-                                dateObject: date,
+                                dateObject: serializeScheduleDate(date), // Properly serialize the ScheduleDate object
                                 category: serialized.activityType,
                                 priority: serialized.priority,
                                 deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
-                                deadlineObject: serialized.deadline,
+                                deadlineObject: serialized.deadline, // This is already serialized by serializeTimeBlock
                                 duration: serialized.duration,
                                 completed: serialized.completed || false,
                                 metadata: {
@@ -500,7 +478,8 @@ export const useAuthenticatedAPI = () => {
                             month: parseInt(block.deadline.split('-')[1] || 1),
                             year: parseInt(block.deadline.split('-')[0] || 2025)
                         } : null),
-                        type: block.type
+                        type: block.type,
+                        backendId: block.id // Include backend ID for syncing
                     };
 
                     blocksByDate[dateKey].push(serializedBlock);
@@ -640,7 +619,8 @@ export const useAuthenticatedAPI = () => {
                                                 month: parseInt(block.deadline?.split('-')[1] || 1),
                                                 year: parseInt(block.deadline?.split('-')[0] || 2025)
                                             } : null,
-                                            type: block.type
+                                            type: block.type,
+                                            backendId: block.id // Include backend ID for syncing
                                         });
                                     });
 
@@ -746,7 +726,8 @@ export const useAuthenticatedAPI = () => {
                             month: parseInt(block.deadline?.split('-')[1] || 1),
                             year: parseInt(block.deadline?.split('-')[0] || 2025)
                         } : null,
-                        type: block.type
+                        type: block.type,
+                        backendId: block.id // Include backend ID for syncing
                     });
                 });
 

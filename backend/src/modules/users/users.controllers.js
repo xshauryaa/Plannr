@@ -351,7 +351,7 @@ const handleUserCreated = async (userData) => {
         const newUser = await repo.createUser({
             clerkUserId: userData.id,
             email: primaryEmail.email_address,
-            displayName: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : null,
+            displayName: userData.first_name || null, // Use first name as display name
             avatarName: getRandomAvatar(), // Assign random avatar instead of using profile image
         });
         
@@ -372,7 +372,7 @@ const handleUserUpdated = async (userData) => {
         
         await repo.updateUser(user.id, {
             email: primaryEmail?.email_address || user.email,
-            displayName: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : user.displayName,
+            displayName: userData.first_name || user.displayName, // Use first name as display name
             // Keep existing avatar name, don't change it on updates
         });
     }

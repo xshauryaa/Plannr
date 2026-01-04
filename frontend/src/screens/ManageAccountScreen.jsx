@@ -25,12 +25,15 @@ const ManageAccountScreen = () => {
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const avatarPickerRef = useRef();
     
-    // Debug log to see what's returned
-    console.log('🔍 authenticatedAPI:', authenticatedAPI);
-
-    const [userFirstName, setUserFirstName] = useState(appState.name);
-    const [userLastName, setUserLastName] = useState(appState.name);
+    const [userName, setUserName] = useState(appState.name || '');
     const [userEmail, setUserEmail] = useState(user?.primaryEmailAddress?.emailAddress || '');
+    
+    // Track if name has been changed to show save button
+    const [nameChanged, setNameChanged] = useState(false);
+    const [isUpdatingName, setIsUpdatingName] = useState(false);
+    
+    // Track if user is actively editing to prevent backend data from overriding input
+    const [isEditingName, setIsEditingName] = useState(false);
     
     // Avatar selection state
     const [selectedAvatar, setSelectedAvatar] = useState('cat'); // Default avatar
@@ -41,14 +44,19 @@ const ManageAccountScreen = () => {
         const loadUserProfile = async () => {
             try {
                 if (authenticatedAPI?.getUserProfile) {
-                    console.log('🔄 Loading user profile for avatar...');
+                    // console.log('🔄 Loading user profile for avatar...');
                     const profileData = await authenticatedAPI.getUserProfile();
                     
                     if (profileData.success && profileData.data) {
                         setUserProfile(profileData.data);
                         if (profileData.data.avatarName) {
                             setSelectedAvatar(profileData.data.avatarName);
-                            console.log('🐾 Loaded current avatar:', profileData.data.avatarName);
+                            // console.log('🐾 Loaded current avatar:', profileData.data.avatarName);
+                        }
+                        
+                        // Only update name field if user is not actively editing it
+                        if (profileData.data.displayName && !isEditingName && !nameChanged) {
+                            setUserName(profileData.data.displayName);
                         }
                     }
                 } else {
@@ -60,16 +68,73 @@ const ManageAccountScreen = () => {
         };
 
         loadUserProfile();
-    }, [authenticatedAPI]);
-    
-    // Birth date state
-    const [birthDate, setBirthDate] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState(false);
+    }, [authenticatedAPI, isEditingName, nameChanged]);
 
     // Check if user has social login (SSO) enabled
     const hasSocialLogin = user?.externalAccounts && user.externalAccounts.length > 0;
 
-    // Handle avatar selection
+    // Handle name updates
+    const updateUserName = async () => {
+        if (!nameChanged) return;
+        
+        try {
+            setIsUpdatingName(true);
+            
+            const newDisplayName = userName.trim();
+            
+            console.log('🔄 Updating user name:', { displayName: newDisplayName });
+            
+            logSettingChange('user_name', newDisplayName, appState.name);
+            
+            const result = await authenticatedAPI.updateUserProfile({
+                displayName: newDisplayName
+            });
+            
+            if (result.success) {
+                console.log('✅ Name updated successfully:', result.data);
+                
+                // Update AppState with new name
+                setAppState(prevState => ({
+                    ...prevState,
+                    name: newDisplayName
+                }));
+                
+                setNameChanged(false);
+                setIsEditingName(false);
+                logUserAction('name_updated_success', { 
+                    displayName: newDisplayName 
+                });
+                Alert.alert('Success', 'Your name has been updated successfully!');
+            } else {
+                console.error('❌ Failed to update name:', result);
+                logError('name_update_failed', new Error('API call failed'), { 
+                    displayName: newDisplayName, 
+                    result 
+                });
+                Alert.alert('Error', 'Failed to update your name. Please try again.');
+            }
+        } catch (error) {
+            logError('name_update_error', error, { displayName: userName });
+            console.error('💥 Error updating name:', error);
+            Alert.alert('Error', 'Failed to update your name. Please try again.');
+        } finally {
+            setIsUpdatingName(false);
+        }
+    };
+
+    // Handle name change
+    const handleNameChange = (text) => {
+        setUserName(text);
+        setNameChanged(true);
+        if (!isEditingName) {
+            setIsEditingName(true);
+        }
+    };
+
+    // Handle when user finishes editing name
+    const handleNameEndEditing = () => {
+        setIsEditingName(false);
+    };
     const selectAvatar = async (avatarName) => {
         try {
             // Update local state immediately for responsive UI
@@ -119,22 +184,6 @@ const ManageAccountScreen = () => {
         }
     };
 
-    // Format birth date for display
-    const formatBirthDate = (date) => {
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
-
-    // Handle date picker change
-    const onDateChange = (event, selectedDate) => {
-        const currentDate = selectedDate || birthDate;
-        setShowDatePicker(Platform.OS === 'ios');
-        setBirthDate(currentDate);
-    };
-
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Your Account</Text>
@@ -160,21 +209,35 @@ const ManageAccountScreen = () => {
                     </Text>
                 </View>
 
-                {/* First and Last Name */}
+                {/* User Name */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Name</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: 8, color: theme.FOREGROUND }}>First Name</Text>
                     <TextInput
                         style={{ ...styles.input, color: theme.FOREGROUND, backgroundColor: theme.INPUT, marginBottom: 12 }}
-                        value={userFirstName}
-                        onChangeText={setUserFirstName}
+                        value={userName}
+                        onChangeText={handleNameChange}
+                        onFocus={() => setIsEditingName(true)}
+                        onEndEditing={handleNameEndEditing}
+                        placeholder="Enter your name"
+                        placeholderTextColor={theme.FOREGROUND_SECONDARY}
                     />
-                    <Text style={{ ...styles.subHeading, marginBottom: 8, color: theme.FOREGROUND }}>Last Name</Text>
-                    <TextInput
-                        style={{ ...styles.input, color: theme.FOREGROUND, backgroundColor: theme.INPUT }}
-                        value={userLastName}
-                        onChangeText={setUserLastName}
-                    />
+                    
+                    {/* Save Name Button - Always visible */}
+                    <TouchableOpacity 
+                        style={{ 
+                            ...styles.button,
+                            backgroundColor: isUpdatingName ? '#666' : '#000',
+                            opacity: isUpdatingName ? 0.6 : 1,
+                            marginTop: 4,
+                            marginBottom: 8
+                        }}
+                        onPress={updateUserName}
+                        disabled={isUpdatingName}
+                    >
+                        <Text style={{ ...styles.buttonText, color: '#FFFFFF' }}>
+                            {isUpdatingName ? 'Saving...' : 'Save Name'}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Email */}
@@ -198,41 +261,6 @@ const ManageAccountScreen = () => {
                         <Text style={{ ...styles.disabledText, color: theme.FOREGROUND_SECONDARY }}>
                             You cannot edit your email since you have social login connected to your Plannr account.
                         </Text>
-                    )}
-                </View>
-
-                {/* Birth Date */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, marginTop: 16 }}>Your Birth Date</Text>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                    <TouchableOpacity 
-                        style={{ ...styles.datePickerButton, backgroundColor: theme.INPUT }}
-                        onPress={() => setShowDatePicker(true)}
-                    >
-                        <Text style={{ ...styles.datePickerText, color: theme.FOREGROUND }}>
-                            {formatBirthDate(birthDate)}
-                        </Text>
-                    </TouchableOpacity>
-                    
-                    {showDatePicker && (
-                        <View>
-                            <DateTimePicker
-                                testID="dateTimePicker"
-                                value={birthDate}
-                                mode="date"
-                                is24Hour={true}
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={onDateChange}
-                                maximumDate={new Date()} // Can't select future dates
-                                minimumDate={new Date(1900, 0, 1)} // Reasonable minimum date
-                                themeVariant={appState.userPreferences.theme}
-                            />
-                            <TouchableOpacity 
-                                style={styles.doneButton}
-                                onPress={() => setShowDatePicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
                     )}
                 </View>
             </ScrollView>
@@ -369,6 +397,34 @@ const styles = StyleSheet.create({
         fontFamily: 'AlbertSans',
         opacity: 0.7,
         textAlign: 'center',
+    },
+    saveButton: {
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    saveButtonText: {
+        fontSize: typography.subHeadingSize,
+        fontFamily: 'AlbertSans',
+        fontWeight: '600',
+    },
+    button: {
+        width: '100%',
+        borderRadius: 12,
+        backgroundColor: '#000',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonText: {
+        fontSize: typography.subHeadingSize - 2,
+        fontFamily: 'AlbertSans',
+        fontWeight: '600',
+        color: '#FFFFFF',
     },
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '@clerk/clerk-expo';
 
@@ -13,14 +13,22 @@ export default function RootNavigator() {
   const { isLoaded, isSignedIn } = useAuth();
   const { appState, storageLoaded } = useAppState();
 
-  if (!storageLoaded) {
-    // Wait for Clerk to hydrate and storage to load
-    return <LoadingScreen />;
-  }
+  // Monitor authentication and storage state changes
+  useEffect(() => {
+    console.log('🔐 Auth State:', { 
+      isLoaded, 
+      isSignedIn, 
+      storageLoaded, 
+      onboarded: appState?.onboarded 
+    });
+  }, [isLoaded, isSignedIn, storageLoaded, appState?.onboarded]);
+
 
   return (
     <NavigationContainer>
-      { !isSignedIn ? (
+      { (!isLoaded || !storageLoaded) ? (
+        <LoadingScreen />
+      ) : !isSignedIn ? (
         <AuthStack />
       ) : !appState?.onboarded ? (
         <OnboardingStack />

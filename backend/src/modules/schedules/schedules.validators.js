@@ -87,6 +87,7 @@ export const createBlockSchema = z.object({
     // Support both ScheduleDate object and ISO string for date
     blockDate: FlexibleDateSchema.optional(),
     date: FlexibleDateSchema.optional(), // Alternative field name from frontend
+    dateObject: ScheduleDateSchema.optional(), // Support for ScheduleDate object
     category: ActivityTypeEnum.optional(),
     metadata: z.object({
         activityType: ActivityTypeEnum.optional(),
@@ -99,6 +100,7 @@ export const createBlockSchema = z.object({
     // Support for flexible event specific fields
     priority: PriorityEnum.optional(),
     deadline: FlexibleDateSchema.optional(),
+    deadlineObject: ScheduleDateSchema.optional(), // Support for ScheduleDate object for deadline
     // Support for duration (calculated from times but can be provided)
     duration: z.number().int().min(1).optional()
 });
@@ -114,6 +116,7 @@ export const updateBlockSchema = z.object({
     endAt: Time24Schema.optional(),
     blockDate: FlexibleDateSchema.optional(),
     date: FlexibleDateSchema.optional(),
+    dateObject: ScheduleDateSchema.optional(), // Support for ScheduleDate object
     category: ActivityTypeEnum.optional(),
     metadata: z.object({
         activityType: ActivityTypeEnum.optional(),
@@ -125,6 +128,7 @@ export const updateBlockSchema = z.object({
     completed: z.boolean().optional(),
     priority: PriorityEnum.optional(),
     deadline: FlexibleDateSchema.optional(),
+    deadlineObject: ScheduleDateSchema.optional(), // Support for ScheduleDate object for deadline
     duration: z.number().int().min(1).optional()
 });
 

@@ -94,8 +94,46 @@ const ScheduleViewScreen = ({ route }) => {
                         thumbColor={'#FFFFFF'}
                         ios_backgroundColor={'#C0C0C0'}
                         onValueChange={async () => { 
+                            const wasActive = schedule.isActive;
+                            
+                            // 🚀 OPTIMISTIC UPDATE: Update UI immediately
+                            if (wasActive) {
+                                // Deactivating current schedule
+                                setAppState({ 
+                                    ...appState, 
+                                    activeSchedule: null, 
+                                    savedSchedules: appState.savedSchedules.map(sched => {
+                                        if (sched.name === schedule.name) {
+                                            return { ...sched, isActive: false };
+                                        }
+                                        return sched;
+                                    }) 
+                                });
+                            } else {
+                                // Activating this schedule - deactivate all others
+                                setAppState({ 
+                                    ...appState, 
+                                    activeSchedule: { 
+                                        name: schedule.name, 
+                                        schedule: schedule.schedule, 
+                                        backendId: schedule.backendId,
+                                        isActive: true 
+                                    }, 
+                                    savedSchedules: appState.savedSchedules.map(sched => {
+                                        if (sched.name === schedule.name) {
+                                            return { ...sched, isActive: true };
+                                        }
+                                        return {
+                                            ...sched,
+                                            isActive: false
+                                        };
+                                    }) 
+                                });
+                            }
+                            
+                            // 🔄 BACKGROUND UPDATE: Handle backend request
                             try {
-                                if (schedule.isActive) {
+                                if (wasActive) {
                                     // Deactivating current schedule
                                     logScheduleAction('deactivate', {
                                         scheduleName: schedule.name,
@@ -103,17 +141,6 @@ const ScheduleViewScreen = ({ route }) => {
                                     });
                                     
                                     await updateSchedule(schedule.backendId, { isActive: false });
-                                    
-                                    setAppState({ 
-                                        ...appState, 
-                                        activeSchedule: null, 
-                                        savedSchedules: appState.savedSchedules.map(sched => {
-                                            if (sched.name === schedule.name) {
-                                                return { ...sched, isActive: false };
-                                            }
-                                            return sched;
-                                        }) 
-                                    });
                                 } else {
                                     // Activating this schedule - first deactivate all others
                                     logScheduleAction('activate', {
@@ -132,8 +159,22 @@ const ScheduleViewScreen = ({ route }) => {
                                             })
                                         )
                                     );
-                                    
-                                    // Update local state
+                                }
+                                
+                                console.log('✅ Schedule activation updated successfully in backend');
+                            } catch (error) {
+                                // 🚨 REVERT ON ERROR: If backend fails, revert the optimistic update
+                                console.error('❌ Failed to update schedule activation in backend, reverting UI:', error);
+                                
+                                logError('schedule_activation_failed', error, {
+                                    scheduleName: schedule.name,
+                                    scheduleId: schedule.backendId,
+                                    action: wasActive ? 'deactivate' : 'activate'
+                                });
+                                
+                                // Revert to original state
+                                if (wasActive) {
+                                    // Revert deactivation - make it active again
                                     setAppState({ 
                                         ...appState, 
                                         activeSchedule: { 
@@ -146,21 +187,25 @@ const ScheduleViewScreen = ({ route }) => {
                                             if (sched.name === schedule.name) {
                                                 return { ...sched, isActive: true };
                                             }
-                                            return {
-                                                ...sched,
-                                                isActive: false
-                                            };
+                                            return sched;
+                                        }) 
+                                    });
+                                } else {
+                                    // Revert activation - make it inactive again
+                                    setAppState({ 
+                                        ...appState, 
+                                        activeSchedule: appState.activeSchedule, // Keep previous active schedule
+                                        savedSchedules: appState.savedSchedules.map(sched => {
+                                            if (sched.name === schedule.name) {
+                                                return { ...sched, isActive: false };
+                                            }
+                                            return sched;
                                         }) 
                                     });
                                 }
-                            } catch (error) {
-                                logError('schedule_activation_failed', error, {
-                                    scheduleName: schedule.name,
-                                    scheduleId: schedule.backendId,
-                                    action: schedule.isActive ? 'deactivate' : 'activate'
-                                });
-                                console.error('Failed to update schedule activation:', error);
-                                // Could add error toast here
+                                
+                                // Could add error toast here to inform user
+                                // showErrorToast('Failed to update schedule. Please try again.');
                             }
                         }}
                         value={schedule.isActive}

@@ -57,6 +57,20 @@
       "when": 1767510155370,
       "tag": "0007_keen_shocker",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1767523423291,
+      "tag": "0008_lush_yellowjacket",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1767528274055,
+      "tag": "0009_dapper_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

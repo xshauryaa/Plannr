@@ -14,7 +14,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserProfileSchema = z.object({
-    displayName: z.string().min(1, 'Display name is required').optional(),
+    displayName: z.string().min(1, 'Display name is required').max(100, 'Display name must be less than 100 characters').optional(),
     avatarName: z.enum(['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'], {
         errorMap: () => ({ message: 'Invalid avatar name' })
     }).optional(),
