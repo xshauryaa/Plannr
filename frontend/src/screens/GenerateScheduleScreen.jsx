@@ -331,10 +331,6 @@ const GenerateScheduleScreen = ({ navigation }) => {
 
                 // Override title with user's chosen name
                 backendSchedule.title = name;
-                backendSchedule.strategy = (backendSchedule.strategy === 'earliest-fit') ? 'EarliestFit'
-                    : (backendSchedule.strategy === 'balanced-work') ? 'BalancedWork'
-                    : (backendSchedule.strategy === 'deadline-oriented') ? 'DeadlineOriented'
-                    : 'EarliestFit';
 
                 console.log('📤 Saving schedule to backend...', { backendSchedule });
                 

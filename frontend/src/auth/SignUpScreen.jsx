@@ -51,6 +51,7 @@ const SignUpScreen = ({ navigation }) => {
 
 
     const handleSignUp = async () => {
+        console.log("Beginning sign-up process");
         if (!email || !password) {
             Alert.alert("Please enter both email and password.");
             return;

@@ -5,7 +5,7 @@ import { z } from 'zod';
  */
 
 export const updatePreferencesSchema = z.object({
-    theme: z.enum(['light', 'dark', 'system']).optional(),
+    theme: z.enum(['light', 'dark']).optional(),
     defaultStrategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional(),
     defaultMinGap: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 0, 'Must be a valid number').optional(),
     defaultMaxWorkingHours: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 1 && val <= 24, 'Must be between 1 and 24 hours').optional(),
@@ -18,7 +18,7 @@ export const updatePreferencesSchema = z.object({
 // Mapping function to convert frontend preferences to backend format
 export const mapFrontendToBackend = (frontendPrefs) => {
     return {
-        uiMode: frontendPrefs.theme || 'system',
+        uiMode: frontendPrefs.theme || 'light',
         notificationsEnabled: frontendPrefs.taskRemindersEnabled ?? true,
         leadMinutes: frontendPrefs.leadMinutes ? parseInt(frontendPrefs.leadMinutes) : 30,
         minGapMinutes: frontendPrefs.defaultMinGap ? parseInt(frontendPrefs.defaultMinGap) : 15,
@@ -32,7 +32,7 @@ export const mapFrontendToBackend = (frontendPrefs) => {
 // Mapping function to convert backend preferences to frontend format
 export const mapBackendToFrontend = (backendPrefs) => {
     return {
-        theme: backendPrefs.uiMode || 'system',
+        theme: backendPrefs.uiMode || 'light',
         defaultStrategy: backendPrefs.defaultStrategy || 'earliest-fit',
         defaultMinGap: backendPrefs.minGapMinutes?.toString() || '15',
         defaultMaxWorkingHours: backendPrefs.maxWorkHoursPerDay?.toString() || '8',

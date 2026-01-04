@@ -60,19 +60,6 @@ const HomeScreen = ({ navigation }) => {
                         }}
                     />
                 </View>
-                {/* <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>More Options</Text>
-                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}> 
-                    <MenuButton
-                        title="View Your Saved Schedules"
-                        icon="Saved"
-                        navTo={() => { navigation.navigate("Saved") }}
-                    />
-                    <MenuButton
-                        title="Change Preferences"
-                        icon="Preferences"
-                        navTo={() => { navigation.navigate("Preferences") }}
-                    />
-                </View> */}
             </ScrollView>
         </View>
     )

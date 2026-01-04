@@ -53,7 +53,7 @@ const ScheduleViewScreen = ({ route }) => {
     }, [schedule, schedName]);
 
     // Early return for missing schedule to prevent hooks errors
-    if (!schedule) {
+    if (!schedule.schedule) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.BACKGROUND }}>
                 <Text style={{ fontFamily: 'AlbertSans', fontSize: 20, color: theme.FOREGROUND }}>Schedule not found.</Text>
@@ -123,7 +123,7 @@ const ScheduleViewScreen = ({ route }) => {
                                     
                                     // Update all schedules in database
                                     await Promise.all(
-                                        allSchedules.map(sched => 
+                                        allSchedules.data.map(sched => 
                                             updateSchedule(sched.id, { 
                                                 isActive: sched.id === schedule.backendId 
                                             })

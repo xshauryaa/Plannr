@@ -20,6 +20,15 @@ const Insights = ({ version, schedule }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    // Return placeholder if no schedule is available
+    if (!schedule) {
+        return (
+            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>No schedule data available</Text>
+            </View>
+        );
+    }
+
     const Type1 = (schedule) => {
         const datesList = schedule.getAllDatesInOrder();
         const currentDate = convertDateToScheduleDate(useCurrentTime()).getId();

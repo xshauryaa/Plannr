@@ -72,7 +72,7 @@ export const createPreferences = async (userId, preferencesData = {}) => {
             .insert(preferences)
             .values({
                 userId,
-                uiMode: preferencesData.theme || 'system',
+                uiMode: preferencesData.theme || 'light',
                 notificationsEnabled: preferencesData.taskRemindersEnabled ?? true,
                 leadMinutes: parseInt(preferencesData.leadMinutes) || 30,
                 minGapMinutes: parseInt(preferencesData.defaultMinGap) || 15,
@@ -94,7 +94,7 @@ export const resetPreferences = async (userId) => {
         const [resetPreferences] = await db
             .update(preferences)
             .set({
-                uiMode: 'system',
+                uiMode: 'light',
                 notificationsEnabled: true,
                 leadMinutes: 30,
                 minGapMinutes: 15,

@@ -12,12 +12,12 @@ import CircularDependencyError from '../model/exceptions/CircularDependencyError
 import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler.js';
 import useScheduleNotificationSync from '../notifications/useScheduleNotificationSync.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
-import { useAuth } from '@clerk/clerk-expo';
+import { useUser } from '@clerk/clerk-expo';
 
 export const AppStateContext = createContext();
 
 export const AppStateProvider = ({ children }) => {
-    const { isSignedIn } = useAuth();
+    const { isSignedIn } = useUser();
     const { loadCompleteAppState, loadCompleteAppStateWithSchedules } = useAuthenticatedAPI();
 
     function testScheduler(firstDate) {
@@ -144,11 +144,8 @@ export const AppStateProvider = ({ children }) => {
                     console.log('Loading app state from database...');
                     // Try to load from database first (database is source of truth)
                     try {
-                        // Option 1: Fast loading without Schedule objects (recommended for app startup)
-                        const databaseState = await loadCompleteAppState();
-                        
-                        // Option 2: Full loading with Schedule objects (use when needed)
-                        // const databaseState = await loadCompleteAppStateWithSchedules();
+                        // Full loading with Schedule objects 
+                        const databaseState = await loadCompleteAppStateWithSchedules();
                         
                         console.log('Loaded from database:', databaseState);
                         setAppState(prevState => ({

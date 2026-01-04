@@ -19,6 +19,8 @@ const SchedulingCenterScreen = ({ navigation }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const bottomSheetRef = useRef();
 
+    console.log(appState.activeSchedule);
+
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Plannr Center</Text>
@@ -26,7 +28,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
 
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
                 {
-                (!appState.activeSchedule)
+                (!appState.activeSchedule || !appState.activeSchedule.schedule)
                     ? <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>You currently have no active schedule.</Text>
                     </View>

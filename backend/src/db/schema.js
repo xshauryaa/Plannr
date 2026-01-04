@@ -28,7 +28,7 @@ export const schedules = pgTable("schedules", {
   numDays: integer("num_days").notNull().default(7),
   minGap: integer("min_gap").notNull().default(15), // minutes
   workingHoursLimit: integer("working_hours_limit").notNull().default(8),
-  strategy: text("strategy").notNull().default("EarliestFit"), // 'EarliestFit'|'BalancedWork'|'DeadlineOriented'
+  strategy: text("strategy").notNull().default("earliest-fit"), // 'earliest-fit'|'balanced-work'|'deadline-oriented'
   startTime: integer("start_time").notNull().default(900), // Time24 format (e.g., 900 = 9:00 AM)
   endTime: integer("end_time").notNull().default(1700), // Time24 format (e.g., 1700 = 5:00 PM)
   metadata: jsonb("metadata"),
@@ -41,18 +41,48 @@ export const schedules = pgTable("schedules", {
   index("schedules_owner_updated_idx").on(t.ownerId, t.updatedAt),
 ]);
 
+export const days = pgTable("days", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  scheduleId: uuid("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),
+  dayNumber: integer("day_number").notNull(), // 1, 2, 3, etc. (relative to schedule start)
+  dayName: text("day_name").notNull(), // "Monday", "Tuesday", etc.
+  date: date("date").notNull(), // YYYY-MM-DD format for database queries
+  dateObject: jsonb("date_object").notNull(), // ScheduleDate as {date: 7, month: 10, year: 2025}
+  // Day-level scheduling metadata
+  dayStartTime: integer("day_start_time"), // Override schedule default start time for this day
+  dayEndTime: integer("day_end_time"), // Override schedule default end time for this day
+  isWeekend: boolean("is_weekend").notNull().default(false),
+  isHoliday: boolean("is_holiday").notNull().default(false),
+  // Day-level preferences and constraints
+  maxWorkingHours: integer("max_working_hours"), // Override schedule default for this day
+  minGap: integer("min_gap").notNull().default(15), // Minimum gap between events for this day in minutes
+  // Metadata for day-level features
+  metadata: jsonb("metadata"), // Store day-specific settings, preferences, etc.
+  version: integer("version").notNull().default(1),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => [
+  // Ensure unique day numbers within a schedule
+  uniqueIndex("days_schedule_day_number_idx").on(t.scheduleId, t.dayNumber),
+  // Ensure unique dates within a schedule (prevent duplicate days)
+  uniqueIndex("days_schedule_date_idx").on(t.scheduleId, t.date),
+  // Index for efficient day lookups by schedule
+  index("days_schedule_updated_idx").on(t.scheduleId, t.updatedAt),
+  // Index for date-based queries
+  index("days_date_idx").on(t.date),
+]);
 
 export const blocks = pgTable("blocks", {
   id: uuid("id").defaultRandom().primaryKey(),
-  scheduleId: uuid("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),
+  dayId: uuid("day_id").notNull().references(() => days.id, { onDelete: "cascade" }),
   type: text("type").notNull(), // 'rigid' | 'flexible' | 'break'
   title: text("title").notNull(), // Maps to 'name' in frontend
   // Time24 format for times
   startAt: integer("start_at").notNull(), // Time24 format (e.g., 930 = 9:30 AM)
   endAt: integer("end_at").notNull(), // Time24 format (e.g., 1030 = 10:30 AM)
-  // Support both simple date and ScheduleDate object
-  blockDate: date("block_date"), // Simple date for database queries
-  dateObject: jsonb("date_object"), // ScheduleDate as {date: 7, month: 10, year: 2025}
+  // Support both simple date and ScheduleDate object (kept for backwards compatibility during migration)
+  blockDate: date("block_date"), // Simple date for database queries - will be deprecated after migration
+  dateObject: jsonb("date_object"), // ScheduleDate as {date: 7, month: 10, year: 2025} - will be moved to days table
   category: text("category"), // ActivityType enum
   // Enhanced metadata for frontend compatibility
   metadata: jsonb("metadata"), // Stores: activityType, priority, deadline, duration, frontendId
@@ -68,15 +98,17 @@ export const blocks = pgTable("blocks", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (t) => [
-  index("blocks_schedule_date_start_idx").on(t.scheduleId, t.blockDate, t.startAt),
-  index("blocks_schedule_updated_idx").on(t.scheduleId, t.updatedAt),
+  index("blocks_day_start_idx").on(t.dayId, t.startAt), // Primary index for day-based queries
+  index("blocks_day_updated_idx").on(t.dayId, t.updatedAt), // For sorting blocks by update time within a day
   index("blocks_frontend_id_idx").on(t.frontendId),
+  // Keep legacy date index temporarily for migration compatibility
+  index("blocks_date_start_idx").on(t.blockDate, t.startAt),
 ]);
 
 export const preferences = pgTable("preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
-  uiMode: text("ui_mode").notNull().default("system"), // 'light'|'dark'|'system'
+  uiMode: text("ui_mode").notNull().default("light"), // 'light'|'dark'
   notificationsEnabled: boolean("notifications_enabled").notNull().default(true),
   leadMinutes: integer("lead_minutes").notNull().default(10),
   minGapMinutes: integer("min_gap_minutes").notNull().default(15),

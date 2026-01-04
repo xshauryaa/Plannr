@@ -28,7 +28,7 @@ const TodaysTasksScreen = () => {
 
     // Check if the user has an active schedule
     const loadTodaysTask = () => {
-        if (appState.activeSchedule !== null) {
+        if (appState.activeSchedule !== null && appState.activeSchedule.schedule !== null) {
             const todaysSchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
             if (todaysSchedule !== undefined) {
                 tasks = todaysSchedule.getTimeBlocks();
@@ -141,7 +141,8 @@ const TodaysTasksScreen = () => {
                                             }
                                           
                                             // 3. Update appState.activeSchedule.schedule
-                                            const currentDaySchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
+                                            if (appState.activeSchedule && appState.activeSchedule.schedule) {
+                                                const currentDaySchedule = appState.activeSchedule.schedule.getScheduleForDate(todaysDate.getId());
                                           
                                             const updatedTimeBlocks = [...currentDaySchedule.timeBlocks];
                                             const updatedBlock = { ...updatedTimeBlocks[index] };
@@ -183,6 +184,7 @@ const TodaysTasksScreen = () => {
                                                         : s
                                                 )
                                             }));
+                                            }
 
                                         } catch (error) {
                                             logError('task_completion_failed', error, {

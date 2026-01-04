@@ -11,8 +11,8 @@ export default function AuthStack() {
       screenOptions={{ headerShown: false }}
       initialRouteName="SignIn"
     >
-      <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="SignIn" component={SignInScreen} />
     </Stack.Navigator>
   );
 }

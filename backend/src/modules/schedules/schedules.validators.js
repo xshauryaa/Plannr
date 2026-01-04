@@ -49,7 +49,7 @@ export const createScheduleSchema = z.object({
     numDays: z.number().int().min(1).max(365).optional().default(7),
     minGap: z.number().int().min(0).optional().default(15),
     workingHoursLimit: z.number().int().min(1).max(24).optional().default(8),
-    strategy: z.enum(['EarliestFit', 'BalancedWork', 'DeadlineOriented']).optional().default('EarliestFit'),
+    strategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional().default('earliest-fit'),
     startTime: Time24Schema.optional().default(900), // 9:00 AM
     endTime: Time24Schema.optional().default(1700), // 5:00 PM
     metadata: z.object({}).optional()
@@ -72,7 +72,7 @@ export const updateScheduleSchema = z.object({
     numDays: z.number().int().min(1).max(365).optional(),
     minGap: z.number().int().min(0).optional(),
     workingHoursLimit: z.number().int().min(1).max(24).optional(),
-    strategy: z.enum(['EarliestFit', 'BalancedWork', 'DeadlineOriented']).optional(),
+    strategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional(),
     startTime: Time24Schema.optional(),
     endTime: Time24Schema.optional(),
     metadata: z.object({}).optional()
@@ -163,6 +163,53 @@ export const blockIdParamSchema = z.object({
 export const scheduleAndBlockIdParamSchema = z.object({
     id: z.string().uuid('Valid schedule ID is required'),
     blockId: z.string().uuid('Valid block ID is required')
+});
+
+// New parameter validation schemas for day-based routing
+export const dayIdParamSchema = z.object({
+    dayId: z.string().uuid('Valid day ID is required')
+});
+
+export const scheduleAndDayIdParamSchema = z.object({
+    id: z.string().uuid('Valid schedule ID is required'),
+    dayId: z.string().uuid('Valid day ID is required')
+});
+
+export const scheduleAndDayAndBlockIdParamSchema = z.object({
+    id: z.string().uuid('Valid schedule ID is required'),
+    dayId: z.string().uuid('Valid day ID is required'),
+    blockId: z.string().uuid('Valid block ID is required')
+});
+
+// Day validation schemas
+export const createDaySchema = z.object({
+    dayNumber: z.number().int().min(1).max(365), // 1, 2, 3, etc.
+    dayName: z.string().min(1, 'Day name is required'), // "Monday", "Tuesday", etc.
+    date: FlexibleDateSchema, // YYYY-MM-DD format
+    dateObject: ScheduleDateSchema, // ScheduleDate object {date: 7, month: 10, year: 2025}
+    // Day-level scheduling metadata (optional overrides)
+    dayStartTime: Time24Schema.optional(), // Override schedule default start time
+    dayEndTime: Time24Schema.optional(), // Override schedule default end time  
+    isWeekend: z.boolean().optional().default(false),
+    isHoliday: z.boolean().optional().default(false),
+    // Day-level preferences and constraints
+    maxWorkingHours: z.number().int().min(0).max(24).optional(), // Override schedule default
+    minGap: z.number().int().min(0).optional().default(15), // Minimum gap for this day
+    metadata: z.object({}).optional() // Store day-specific settings
+});
+
+export const updateDaySchema = z.object({
+    dayNumber: z.number().int().min(1).max(365).optional(),
+    dayName: z.string().min(1).optional(),
+    date: FlexibleDateSchema.optional(),
+    dateObject: ScheduleDateSchema.optional(),
+    dayStartTime: Time24Schema.optional(),
+    dayEndTime: Time24Schema.optional(),
+    isWeekend: z.boolean().optional(),
+    isHoliday: z.boolean().optional(),
+    maxWorkingHours: z.number().int().min(0).max(24).optional(),
+    minGap: z.number().int().min(0).optional(),
+    metadata: z.object({}).optional()
 });
 
 // Validation middleware functions
