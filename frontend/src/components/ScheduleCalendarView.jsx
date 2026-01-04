@@ -38,7 +38,6 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
     // Removed Reanimated shared value for Expo Go compatibility
 
     const timeBlocks = schedule.getScheduleForDate(date).getTimeBlocks();
-    console.log("Rendering ScheduleCalendarView for date:", date, "with", timeBlocks.length, "time blocks.");
     const start = schedule.startTime.getHour();
     const HOURS = Array.from({ length: 24 - start }, (_, i) => i + start);
 
@@ -51,7 +50,6 @@ const ScheduleCalendarView = ({ schedule, date, isVisible, onBlockSelect }) => {
                 contentContainerStyle={{ flexDirection: 'row' }}
                 showsVerticalScrollIndicator={false}
             >
-                <Text>HOLA BABACITO</Text>
                 {/* Left column: clock labels */}
                 <View style={styles.timeColumn}>
                     {HOURS.map(hour => (

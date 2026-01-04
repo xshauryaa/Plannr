@@ -159,23 +159,70 @@ export const useAuthenticatedAPI = () => {
         deleteSchedule: (id) => makeAuthenticatedRequest(`/api/schedules/${id}`, {
             method: 'DELETE',
         }),
-        
-        // Blocks operations
-        addBlocksToSchedule: (scheduleId, blocks) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks`, {
+
+        // Days operations
+        getDaysByScheduleId: (scheduleId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`),
+        createDay: (scheduleId, dayData) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`, {
             method: 'POST',
-            body: JSON.stringify({ blocks }),
+            body: JSON.stringify(dayData),
         }),
-        updateBlock: (scheduleId, blockId, data) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}`, {
+        getDayById: (scheduleId, dayId, includeBlocks = false) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}${includeBlocks ? '?includeBlocks=true' : ''}`),
+        updateDay: (scheduleId, dayId, data) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         }),
-        deleteBlock: (scheduleId, blockId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}`, {
+        deleteDay: (scheduleId, dayId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}`, {
             method: 'DELETE',
         }),
-        markBlockComplete: (scheduleId, blockId, completed = true) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/blocks/${blockId}/complete`, {
+
+        // Day-based Block operations (new architecture)
+        getBlocksByDayId: (scheduleId, dayId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks`),
+        addBlocksToDay: (scheduleId, dayId, blocks) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks`, {
             method: 'POST',
+            body: JSON.stringify({ blocks }),
+        }),
+        updateBlockInDay: (scheduleId, dayId, blockId, data) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks/${blockId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        deleteBlockFromDay: (scheduleId, dayId, blockId) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks/${blockId}`, {
+            method: 'DELETE',
+        }),
+        markBlockCompleteInDay: (scheduleId, dayId, blockId, completed = true) => makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks/${blockId}/complete`, {
+            method: 'PATCH',
             body: JSON.stringify({ completed }),
         }),
+
+        // Legacy Block operations (for backward compatibility - requires finding dayId first)
+        markBlockComplete: async (scheduleId, blockId, completed = true) => {
+            try {
+                // First get all days for the schedule to find which day contains this block
+                const daysResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`);
+                if (!daysResponse.success) {
+                    throw new Error('Failed to get days for schedule');
+                }
+                
+                // Search through each day to find the block
+                for (const day of daysResponse.data) {
+                    const blocksResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${day.id}/blocks`);
+                    if (blocksResponse.success) {
+                        const blockExists = blocksResponse.data.some(block => block.id === blockId);
+                        if (blockExists) {
+                            // Found the day containing this block
+                            return makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${day.id}/blocks/${blockId}/complete`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ completed }),
+                            });
+                        }
+                    }
+                }
+                
+                throw new Error(`Block ${blockId} not found in any day of schedule ${scheduleId}`);
+            } catch (error) {
+                console.error('Legacy markBlockComplete failed:', error);
+                throw error;
+            }
+        },
         
         // Preferences operations
         getPreferences: () => makeAuthenticatedRequest('/api/preferences'),
@@ -184,137 +231,195 @@ export const useAuthenticatedAPI = () => {
             body: JSON.stringify(data),
         }),
 
-        // Schedule/TimeBlock conversion helpers
-        convertScheduleToBackendJSON: (scheduleObject) => {
-            if (!scheduleObject) return null;
-            
-            // Use existing serialization handler
-            const serialized = serializeSchedule(scheduleObject);
-            
-            if (!serialized) return null;
-
-            // Transform to backend format matching the schedules table schema
-            return {
-                title: `Schedule ${new Date().toISOString().split('T')[0]}`, // Default title, can be overridden
-                numDays: serialized.numDays,
-                day1Date: serialized.day1Date, // JSONB field stores ScheduleDate object
-                day1Day: serialized.day1Day,
-                minGap: serialized.minGap,
-                workingHoursLimit: serialized.workingHoursLimit,
-                strategy: serialized.strategy,
-                startTime: serialized.startTime || 900, // Already an integer from serializeTime24
-                endTime: serialized.endTime || 1700, // Already an integer from serializeTime24
-                metadata: {
-                    eventDependencies: serialized.eventDependencies,
-                    fullScheduleData: serialized.schedule, // Store complete schedule map
-                    serializedAt: new Date().toISOString()
-                }
-            };
-        },
-
-        convertTimeBlockToBackendJSON: (timeBlockObject) => {
-            if (!timeBlockObject) return null;
-            
-            // Use existing serialization handler  
-            const serialized = serializeTimeBlock(timeBlockObject);
-            
-            if (!serialized) return null;
-
-            // Transform to backend format matching the blocks table schema
-            return {
-                type: serialized.type, // 'rigid' | 'flexible' | 'break'
-                title: serialized.name,
-                startAt: serialized.startTime || 0, // Already an integer from serializeTime24
-                endAt: serialized.endTime || 0, // Already an integer from serializeTime24
-                blockDate: serialized.date ? `${serialized.date.year}-${String(serialized.date.month).padStart(2, '0')}-${String(serialized.date.date).padStart(2, '0')}` : null,
-                dateObject: serialized.date, // JSONB field stores ScheduleDate object
-                category: serialized.activityType,
-                priority: serialized.priority,
-                deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
-                deadlineObject: serialized.deadline, // JSONB field stores ScheduleDate object
-                duration: serialized.duration,
-                completed: serialized.completed || false,
-                metadata: {
-                    originalSerialized: serialized, // Keep full serialized data for reconstruction
-                    convertedAt: new Date().toISOString()
-                }
-            };
-        },
-
-        // Complete app state loading helper with exact AppState mapping
-        loadCompleteAppState: async () => {
+        // Days-based schedule saving (new architecture)
+        saveScheduleWithDays: async (scheduleObject, scheduleName, strategy = 'earliest-fit', startTime = 900, endTime = 1700) => {
             try {
-                const [userProfileResponse, preferencesResponse, schedulesResponse] = await Promise.all([
-                    makeAuthenticatedRequest('/api/users/profile'),
-                    makeAuthenticatedRequest('/api/preferences'),
-                    makeAuthenticatedRequest('/api/schedules')
-                ]);
-
-                // Extract data from API responses (handle both direct data and wrapped responses)
-                const userProfile = userProfileResponse?.data || userProfileResponse;
-                const preferences = preferencesResponse?.data || preferencesResponse;
-                const schedules = schedulesResponse?.data || schedulesResponse || [];
-
-                console.log('API Response Debug:', {
-                    userProfileType: typeof userProfile,
-                    preferencesType: typeof preferences,
-                    schedulesType: typeof schedules,
-                    schedulesIsArray: Array.isArray(schedules),
-                    userProfile,
-                    preferences,
-                    schedules
-                });
-
-                // Ensure schedules is an array
-                const schedulesArray = Array.isArray(schedules) ? schedules : [];
-
-                // Transform to exact AppState format with proper key-value mapping
-                const appStateData = {
-                    // User profile mapping
-                    name: userProfile?.displayName || '',
-                    avatarName: userProfile?.avatarName || 'cat',
-                    onboarded: Boolean(userProfile?.onboarded), // Ensure boolean type
-                    firstLaunch: false, // Set to false since user exists in DB
-                    
-                    // Preferences mapping - exact key matching with type conversion
-                    userPreferences: {
-                        theme: preferences?.uiMode === 'dark' ? 'dark' : 'light', // uiMode -> theme
-                        defaultStrategy: preferences?.defaultStrategy || 'earliest-fit', // direct mapping
-                        defaultMinGap: String(preferences?.minGapMinutes || 15), // integer -> string
-                        defaultMaxWorkingHours: String(preferences?.maxWorkHoursPerDay || 8), // integer -> string  
-                        taskRemindersEnabled: Boolean(preferences?.notificationsEnabled ?? true), // ensure boolean
-                        leadMinutes: String(preferences?.leadMinutes || 30), // integer -> string
-                    },
-                    
-                    // Schedules mapping with proper structure
-                    savedSchedules: schedulesArray.map(schedule => ({
-                        name: schedule.title, // title -> name
-                        backendId: schedule.id,
-                        schedule: null, // Will be populated by separate helper
-                        isActive: Boolean(schedule.isActive || false) // ensure boolean
-                    })),
-                    
-                    // Active schedule mapping
-                    activeSchedule: schedulesArray.find(s => s.isActive) ? (() => {
-                        const activeSchedule = schedulesArray.find(s => s.isActive);
-                        return {
-                            name: activeSchedule.title, // title -> name
-                            backendId: activeSchedule.id,
-                            schedule: null, // Will be populated by separate helper
-                            isActive: true
-                        };
-                    })() : null
+                console.log('📤 Saving schedule with days-based architecture...');
+                
+                // 1. Convert schedule to backend format and create the schedule
+                const scheduleData = {
+                    title: scheduleName,
+                    numDays: scheduleObject.numDays,
+                    day1Date: scheduleObject.day1Date, // ScheduleDate object
+                    day1Day: scheduleObject.day1Day,
+                    minGap: scheduleObject.minGap,
+                    workingHoursLimit: scheduleObject.workingHoursLimit,
+                    strategy: strategy,
+                    startTime: startTime,
+                    endTime: endTime,
+                    metadata: {
+                        eventDependencies: scheduleObject.eventDependencies,
+                        frontendGenerated: true,
+                        generatedAt: new Date().toISOString()
+                    }
                 };
 
-                console.log('✅ Successfully transformed app state:', appStateData);
-                return appStateData;
+                const scheduleResponse = await makeAuthenticatedRequest('/api/schedules', {
+                    method: 'POST',
+                    body: JSON.stringify(scheduleData),
+                });
+
+                if (!scheduleResponse.success) {
+                    throw new Error(`Failed to create schedule: ${scheduleResponse.message}`);
+                }
+
+                const scheduleId = scheduleResponse.data.id;
+                console.log('✅ Schedule created:', scheduleId);
+
+                // 2. Create days and add blocks
+                const datesList = scheduleObject.getAllDatesInOrder();
+                const createdDays = [];
+
+                for (let i = 0; i < datesList.length; i++) {
+                    const date = datesList[i];
+                    const daySchedule = scheduleObject.getScheduleForDate(date);
+                    
+                    // Create day data
+                    const dayData = {
+                        dayNumber: i + 1,
+                        dayName: daySchedule.day,
+                        date: `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.date).padStart(2, '0')}`,
+                        dateObject: date,
+                        isWeekend: daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday',
+                        minGap: daySchedule.minGap,
+                        maxWorkingHours: daySchedule.workingHoursLimit,
+                        metadata: {
+                            dayType: (daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday') ? 'weekend' : 'weekday',
+                            totalBlocks: daySchedule.timeBlocks.length,
+                            events: daySchedule.events.length,
+                            breaks: daySchedule.breaks.length
+                        }
+                    };
+
+                    // Create the day
+                    const dayResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`, {
+                        method: 'POST',
+                        body: JSON.stringify(dayData),
+                    });
+
+                    if (!dayResponse.success) {
+                        throw new Error(`Failed to create day ${i + 1}: ${dayResponse.message}`);
+                    }
+
+                    const dayId = dayResponse.data.id;
+                    createdDays.push({ id: dayId, date: date, daySchedule: daySchedule });
+                    console.log(`✅ Created day ${i + 1} (${daySchedule.day}):`, dayId);
+
+                    // Convert time blocks to backend format
+                    const timeBlocks = daySchedule.getTimeBlocks();
+                    if (timeBlocks.length > 0) {
+                        const blocksData = timeBlocks.map(block => {
+                            const serialized = serializeTimeBlock(block);
+                            return {
+                                type: serialized.type,
+                                title: serialized.name,
+                                startAt: serialized.startTime,
+                                endAt: serialized.endTime,
+                                blockDate: dayData.date,
+                                dateObject: date,
+                                category: serialized.activityType,
+                                priority: serialized.priority,
+                                deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
+                                deadlineObject: serialized.deadline,
+                                duration: serialized.duration,
+                                completed: serialized.completed || false,
+                                metadata: {
+                                    activityType: serialized.activityType,
+                                    priority: serialized.priority,
+                                    frontendId: `${serialized.type}-${serialized.name?.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
+                                    originalBlock: true
+                                }
+                            };
+                        });
+
+                        // Add blocks to the day
+                        const blocksResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks`, {
+                            method: 'POST',
+                            body: JSON.stringify({ blocks: blocksData }),
+                        });
+
+                        if (!blocksResponse.success) {
+                            throw new Error(`Failed to add blocks to day ${i + 1}: ${blocksResponse.message}`);
+                        }
+
+                        console.log(`✅ Added ${blocksData.length} blocks to day ${i + 1}`);
+                    }
+                }
+
+                console.log('✅ Successfully saved schedule with days-based architecture');
+                return {
+                    scheduleId,
+                    daysCreated: createdDays.length,
+                    success: true
+                };
+
             } catch (error) {
-                console.error('Failed to load complete app state from database:', error);
+                console.error('❌ Failed to save schedule with days:', error);
                 throw error;
             }
         },
 
-        // Schedule reconstruction from database with parsers
+        // Helper to convert Schedule object to days format for API
+        convertScheduleToAPIFormat: (scheduleObject) => {
+            try {
+                const datesList = scheduleObject.getAllDatesInOrder();
+                const daysData = [];
+
+                for (let i = 0; i < datesList.length; i++) {
+                    const date = datesList[i];
+                    const daySchedule = scheduleObject.getScheduleForDate(date);
+                    const timeBlocks = daySchedule.getTimeBlocks();
+
+                    const dayData = {
+                        dayNumber: i + 1,
+                        dayName: daySchedule.day,
+                        date: `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.date).padStart(2, '0')}`,
+                        dateObject: date,
+                        isWeekend: daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday',
+                        minGap: daySchedule.minGap,
+                        maxWorkingHours: daySchedule.workingHoursLimit,
+                        metadata: {
+                            dayType: (daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday') ? 'weekend' : 'weekday',
+                            totalBlocks: timeBlocks.length,
+                            events: daySchedule.events.length,
+                            breaks: daySchedule.breaks.length
+                        },
+                        timeBlocks: timeBlocks.map(block => {
+                            const serialized = serializeTimeBlock(block);
+                            return {
+                                type: serialized.type,
+                                title: serialized.name,
+                                startAt: serialized.startTime,
+                                endAt: serialized.endTime,
+                                blockDate: `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.date).padStart(2, '0')}`,
+                                dateObject: date,
+                                category: serialized.activityType,
+                                priority: serialized.priority,
+                                deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
+                                deadlineObject: serialized.deadline,
+                                duration: serialized.duration,
+                                completed: serialized.completed || false,
+                                metadata: {
+                                    activityType: serialized.activityType,
+                                    priority: serialized.priority,
+                                    frontendId: `${serialized.type}-${serialized.name?.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
+                                    originalBlock: true
+                                }
+                            };
+                        })
+                    };
+
+                    daysData.push(dayData);
+                }
+
+                return daysData;
+            } catch (error) {
+                console.error('Failed to convert schedule to API format:', error);
+                throw error;
+            }
+        },
+
+        // Schedule reconstruction from database with days-based architecture support
         loadScheduleFromDatabase: async (scheduleId) => {
             try {
                 // Get schedule with blocks from database
@@ -324,7 +429,35 @@ export const useAuthenticatedAPI = () => {
                     throw new Error('Failed to fetch schedule data from database');
                 }
 
-                const { schedule, blocks } = scheduleData.data;
+                const schedule = scheduleData.data;
+
+                // Check if this is the new days-based architecture or legacy blocks-based
+                let blocks = [];
+                if (schedule.blocks) {
+                    // Legacy blocks-based approach
+                    console
+                    blocks = schedule.blocks;
+                } else {
+                    // New days-based approach - get blocks through days
+                    const daysResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`);
+                    console.log("===========DAYS RESPONSE============", daysResponse);
+                    if (daysResponse.success) {
+                        const days = daysResponse.data;
+                        for (const day of days) {
+                            const dayBlocksResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${day.id}/blocks`);
+                            if (dayBlocksResponse.success) {
+                                blocks.push(...dayBlocksResponse.data.map(block => ({
+                                    ...block,
+                                    // Ensure we have the proper date information
+                                    blockDate: day.date,
+                                    dateObject: day.dateObject,
+                                    dayNumber: day.dayNumber,
+                                    dayName: day.dayName
+                                })));
+                            }
+                        }
+                    }
+                }
 
                 // Convert database format to serialized format expected by parseSchedule
                 const serializedSchedule = {
@@ -334,8 +467,8 @@ export const useAuthenticatedAPI = () => {
                     minGap: schedule.minGap,
                     workingHoursLimit: schedule.workingHoursLimit,
                     strategy: schedule.strategy,
-                    startTime: { hour: Math.floor(schedule.startTime / 100), minute: schedule.startTime % 100 }, // Convert integer to Time24 format
-                    endTime: { hour: Math.floor(schedule.endTime / 100), minute: schedule.endTime % 100 },
+                    startTime: schedule.startTime , // Convert integer to Time24 format
+                    endTime: schedule.endTime,
                     eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
                     schedule: [] // We'll build this from blocks
                 };
@@ -358,26 +491,45 @@ export const useAuthenticatedAPI = () => {
                         },
                         activityType: block.category,
                         priority: block.priority,
-                        startTime: { hour: Math.floor(block.startAt / 100), minute: block.startAt % 100 },
-                        endTime: { hour: Math.floor(block.endAt / 100), minute: block.endAt % 100 },
+                        startTime: block.startAt,
+                        endTime: block.endAt,
                         duration: block.duration,
                         completed: block.completed,
-                        deadline: block.deadlineObject || block.deadline ? { 
-                            date: parseInt(block.deadline?.split('-')[2] || 1),
-                            month: parseInt(block.deadline?.split('-')[1] || 1),
-                            year: parseInt(block.deadline?.split('-')[0] || 2025)
-                        } : null,
+                        deadline: block.deadlineObject || (block.deadline ? { 
+                            date: parseInt(block.deadline.split('-')[2] || 1),
+                            month: parseInt(block.deadline.split('-')[1] || 1),
+                            year: parseInt(block.deadline.split('-')[0] || 2025)
+                        } : null),
                         type: block.type
                     };
 
                     blocksByDate[dateKey].push(serializedBlock);
                 });
 
-                // Convert blocks map to the format expected by parseSchedule
-                serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => [
-                    dateKey,
-                    { timeBlocks: blocks } // DaySchedule format expected by parseDaySchedule
-                ]);
+                // Convert blocks map to the format expected by parseSchedule with complete DaySchedule objects
+                serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => {
+                    // Get day information from the first block (they all have the same date)
+                    const firstBlock = blocks[0];
+                    const dayName = firstBlock?.dayName || 'Monday'; // Fallback to Monday
+                    const dateObject = firstBlock?.dateObject || {
+                        date: parseInt(dateKey.split('-')[2]),
+                        month: parseInt(dateKey.split('-')[1]),
+                        year: parseInt(dateKey.split('-')[0])
+                    };
+
+                    // Create complete DaySchedule object with all required fields
+                    const daySchedule = {
+                        day: dayName,
+                        date: dateObject,
+                        minGap: schedule.minGap,
+                        workingHoursLimit: schedule.workingHoursLimit,
+                        events: [], // Events are separate from timeBlocks in the architecture
+                        breaks: [], // Breaks are separate from timeBlocks in the architecture  
+                        timeBlocks: blocks
+                    };
+
+                    return [dateKey, daySchedule];
+                });
 
                 // Use existing parseSchedule handler to reconstruct Schedule object
                 const reconstructedSchedule = parseSchedule(serializedSchedule);
@@ -398,117 +550,126 @@ export const useAuthenticatedAPI = () => {
         // Load complete app state with reconstructed Schedule objects
         loadCompleteAppStateWithSchedules: async () => {
             try {
-                // First load basic app state using the helper defined above
-                const basicAppState = await (async () => {
-                    // Inline call to loadCompleteAppState logic
-                    return makeAuthenticatedRequest('/api/users/profile')
-                        .then(async (userProfile) => {
-                            const preferences = await makeAuthenticatedRequest('/api/preferences');
-                            console.log('Preferences fetched:', preferences);
-                            const schedules = await makeAuthenticatedRequest('/api/schedules');
-                            console.log('Schedules fetched:', schedules);
+                // First load basic app state
+                const basicAppState = await makeAuthenticatedRequest('/api/users/profile')
+                    .then(async (userProfile) => {
+                        const preferences = await makeAuthenticatedRequest('/api/preferences');
+                        const schedules = await makeAuthenticatedRequest('/api/schedules');
 
-                            return {
-                                name: userProfile.data.displayName || '',
-                                avatarName: userProfile.data.avatarName || 'cat',
-                                onboarded: Boolean(userProfile.data.onboarded),
-                                firstLaunch: false,
-                                userPreferences: {
-                                    theme: preferences.uiMode === 'dark' ? 'dark' : 'light',
-                                    defaultStrategy: preferences.defaultStrategy || 'earliest-fit',
-                                    defaultMinGap: String(preferences.minGapMinutes || 15),
-                                    defaultMaxWorkingHours: String(preferences.maxWorkHoursPerDay || 8),
-                                    taskRemindersEnabled: Boolean(preferences.notificationsEnabled ?? true),
-                                    leadMinutes: String(preferences.leadMinutes || 30),
-                                },
-                                savedSchedules: schedules.data.map(schedule => ({
-                                    name: schedule.title,
-                                    backendId: schedule.id,
-                                    schedule: null,
-                                    isActive: Boolean(schedule.isActive || false)
-                                })),
-                                activeSchedule: schedules.data.find(s => s.isActive) ? (() => {
-                                    const activeSchedule = schedules.data.find(s => s.isActive);
-                                    return {
-                                        name: activeSchedule.title,
-                                        backendId: activeSchedule.id,
-                                        schedule: null,
-                                        isActive: true
-                                    };
-                                })() : null
-                            };
-                        });
-                })();
-                
-                // Create a reference to the loadScheduleFromDatabase function
-                const loadScheduleFromDatabase = async (scheduleId) => {
-                    const scheduleData = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}?includeBlocks=true`);
-                    
-                    if (!scheduleData.success || !scheduleData.data) {
-                        throw new Error('Failed to fetch schedule data from database');
-                    }
-
-                    const schedule = scheduleData.data;
-
-                    console.log('Schedule Data for ID', scheduleId, ':', schedule);
-
-                    const serializedSchedule = {
-                        numDays: schedule.numDays,
-                        day1Date: schedule.day1Date,
-                        day1Day: schedule.day1Day,
-                        minGap: schedule.minGap,
-                        workingHoursLimit: schedule.workingHoursLimit,
-                        strategy: schedule.strategy,
-                        startTime: schedule.startTime,
-                        endTime: schedule.endTime,
-                        eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
-                        schedule: []
-                    };
-
-                    const blocksByDate = [];
-                    schedule.blocks.forEach(block => {
-                        const dateKey = block.blockDate;
-                        if (!blocksByDate[dateKey]) {
-                            blocksByDate[dateKey] = [];
-                        }
-
-                        blocksByDate[dateKey].push({
-                            name: block.title,
-                            date: block.dateObject || { 
-                                date: parseInt(block.blockDate.split('-')[2]),
-                                month: parseInt(block.blockDate.split('-')[1]),
-                                year: parseInt(block.blockDate.split('-')[0])
+                        return {
+                            name: userProfile.data.displayName || '',
+                            avatarName: userProfile.data.avatarName || 'cat',
+                            onboarded: Boolean(userProfile.data.onboarded),
+                            firstLaunch: false,
+                            userPreferences: {
+                                theme: preferences.uiMode === 'dark' ? 'dark' : 'light',
+                                defaultStrategy: preferences.defaultStrategy || 'earliest-fit',
+                                defaultMinGap: String(preferences.minGapMinutes || 15),
+                                defaultMaxWorkingHours: String(preferences.maxWorkHoursPerDay || 8),
+                                taskRemindersEnabled: Boolean(preferences.notificationsEnabled ?? true),
+                                leadMinutes: String(preferences.leadMinutes || 30),
                             },
-                            activityType: block.category,
-                            priority: block.priority,
-                            startTime: { hour: Math.floor(block.startAt / 100), minute: block.startAt % 100 },
-                            endTime: { hour: Math.floor(block.endAt / 100), minute: block.endAt % 100 },
-                            duration: block.duration,
-                            completed: block.completed,
-                            deadline: block.deadlineObject || block.deadline ? { 
-                                date: parseInt(block.deadline?.split('-')[2] || 1),
-                                month: parseInt(block.deadline?.split('-')[1] || 1),
-                                year: parseInt(block.deadline?.split('-')[0] || 2025)
-                            } : null,
-                            type: block.type
-                        });
+                            savedSchedules: schedules.data.map(schedule => ({
+                                name: schedule.title,
+                                backendId: schedule.id,
+                                schedule: null,
+                                isActive: Boolean(schedule.isActive || false)
+                            })),
+                            activeSchedule: schedules.data.find(s => s.isActive) ? (() => {
+                                const activeSchedule = schedules.data.find(s => s.isActive);
+                                return {
+                                    name: activeSchedule.title,
+                                    backendId: activeSchedule.id,
+                                    schedule: null,
+                                    isActive: true
+                                };
+                            })() : null
+                        };
                     });
-
-                    serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => [
-                        dateKey,
-                        { timeBlocks: blocks }
-                    ]);
-
-                    console.log("Parsed Schedule:", parseSchedule(serializedSchedule));
-                    return parseSchedule(serializedSchedule);
-                };
                 
                 // Then load Schedule objects for saved schedules (parallel loading)
                 const schedulePromises = basicAppState.savedSchedules
                     .filter(s => s.backendId)
                     .map(async (savedSchedule) => {
                         try {
-                            const scheduleObject = await loadScheduleFromDatabase(savedSchedule.backendId);
+                            const scheduleObject = await makeAuthenticatedRequest(`/api/schedules/${savedSchedule.backendId}?includeBlocks=true`)
+                                .then(scheduleData => {
+                                    if (!scheduleData.success || !scheduleData.data) {
+                                        throw new Error('Failed to fetch schedule data from database');
+                                    }
+
+                                    const schedule = scheduleData.data;
+
+                                    // console.log('Schedule Data for ID', savedSchedule.backendId, ':', schedule);
+
+                                    const serializedSchedule = {
+                                        numDays: schedule.numDays,
+                                        day1Date: schedule.day1Date,
+                                        day1Day: schedule.day1Day,
+                                        minGap: schedule.minGap,
+                                        workingHoursLimit: schedule.workingHoursLimit,
+                                        strategy: schedule.strategy,
+                                        startTime: schedule.startTime,
+                                        endTime: schedule.endTime,
+                                        eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
+                                        schedule: []
+                                    };
+
+                                    const blocksByDate = {};
+                                    schedule.blocks.forEach(block => {
+                                        const dateKey = block.blockDate;
+                                        if (!blocksByDate[dateKey]) {
+                                            blocksByDate[dateKey] = [];
+                                        }
+
+                                        blocksByDate[dateKey].push({
+                                            name: block.title,
+                                            date: block.dateObject || { 
+                                                date: parseInt(block.blockDate.split('-')[2]),
+                                                month: parseInt(block.blockDate.split('-')[1]),
+                                                year: parseInt(block.blockDate.split('-')[0])
+                                            },
+                                            activityType: block.category,
+                                            priority: block.priority,
+                                            startTime: block.startAt,
+                                            endTime: block.endAt,
+                                            duration: block.duration,
+                                            completed: block.completed,
+                                            deadline: block.deadlineObject || block.deadline ? { 
+                                                date: parseInt(block.deadline?.split('-')[2] || 1),
+                                                month: parseInt(block.deadline?.split('-')[1] || 1),
+                                                year: parseInt(block.deadline?.split('-')[0] || 2025)
+                                            } : null,
+                                            type: block.type
+                                        });
+                                    });
+
+                                    serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => {
+                                        // Create complete DaySchedule object with all required fields
+                                        const dateObject = {
+                                            date: parseInt(dateKey.split('-')[2]),
+                                            month: parseInt(dateKey.split('-')[1]),
+                                            year: parseInt(dateKey.split('-')[0])
+                                        };
+
+                                        const reverseDateKey = `${String(dateObject.date)}-${String(dateObject.month)}-${String(dateObject.year)}`;
+
+                                        const daySchedule = {
+                                            day: 'Monday', // We don't have day name in legacy format, use default
+                                            date: dateObject,
+                                            minGap: schedule.minGap,
+                                            workingHoursLimit: schedule.workingHoursLimit,
+                                            events: [], // Events are separate from timeBlocks
+                                            breaks: [], // Breaks are separate from timeBlocks
+                                            timeBlocks: blocks
+                                        };
+
+                                        return [reverseDateKey, daySchedule];
+                                    });
+
+                                    // console.log("Parsed Schedule:", parseSchedule(serializedSchedule));
+                                    return parseSchedule(serializedSchedule);
+                                });
                             return {
                                 ...savedSchedule,
                                 schedule: scheduleObject
@@ -589,10 +750,26 @@ export const useAuthenticatedAPI = () => {
                     });
                 });
 
-                serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => [
-                    dateKey,
-                    { timeBlocks: blocks }
-                ]);
+                serializedSchedule.schedule = Object.entries(blocksByDate).map(([dateKey, blocks]) => {
+                    // Create complete DaySchedule object with all required fields
+                    const dateObject = {
+                        date: parseInt(dateKey.split('-')[2]),
+                        month: parseInt(dateKey.split('-')[1]),
+                        year: parseInt(dateKey.split('-')[0])
+                    };
+
+                    const daySchedule = {
+                        day: 'Monday', // We don't have day name in legacy format, use default
+                        date: dateObject,
+                        minGap: schedule.minGap,
+                        workingHoursLimit: schedule.workingHoursLimit,
+                        events: [], // Events are separate from timeBlocks
+                        breaks: [], // Breaks are separate from timeBlocks
+                        timeBlocks: blocks
+                    };
+
+                    return [dateKey, daySchedule];
+                });
 
                 const reconstructedSchedule = parseSchedule(serializedSchedule);
                 

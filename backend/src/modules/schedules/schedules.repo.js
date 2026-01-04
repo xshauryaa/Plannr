@@ -34,7 +34,7 @@ const formatDateForDb = (dateValue) => {
     
     // Convert ScheduleDate object or ISO string to Date object for database
     const isoString = convertScheduleDateToISO(dateValue);
-    return isoString ? new Date(isoString + 'T00:00:00.000Z') : null;
+    return isoString;
 };
 
 const convertDateToScheduleDate = (date) => {
@@ -66,7 +66,7 @@ export const createSchedule = async (scheduleData) => {
     // Handle period-based scheduling
     if (scheduleData.periodStart && scheduleData.periodEnd) {
         insertData.periodStart = formatDateForDb(scheduleData.periodStart);
-        insertData.periodEnd = formatDateForDb(scheduleData.periodEnd);
+        insertData.periodEnd = formatDateForDb(scheduleData.periodStart.getDateAfter(scheduleData.numDays - 1));
     }
 
     // Handle day1-based scheduling (your frontend Schedule model)

@@ -24,7 +24,7 @@ import Time24 from '../model/Time24.js'
 const GenerateScheduleScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logScheduleAction, logError } = useActionLogger('GenerateSchedule');
-    const { createSchedule, addBlocksToSchedule, convertScheduleToBackendJSON, convertTimeBlockToBackendJSON } = useAuthenticatedAPI();
+    const { saveScheduleWithDays, convertScheduleToBackendJSON, convertTimeBlockToBackendJSON } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [genStage, setGenStage] = useState(0);
@@ -42,6 +42,13 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const [isSavingToBackend, setIsSavingToBackend] = useState(false);
 
     const titles = ['I. Information', 'II. Breaks', 'III. Rigid Events', 'IV. Flexible Events', 'V. Dependencies', 'VI. Rounding Up']
+
+    // Strategy mapping for backend API
+    const strategyMap = {
+        'Earliest Fit': 'earliest-fit',
+        'Balanced Work': 'balanced-work', 
+        'Deadline Oriented': 'deadline-oriented'
+    };
 
     // Helper function to convert ScheduleDate to YYYY-MM-DD format
     const formatScheduleDateToISO = (scheduleDate) => {
@@ -285,122 +292,46 @@ const GenerateScheduleScreen = ({ navigation }) => {
             };
             setAppState({ ...appState, savedSchedules: [...appState.savedSchedules, localScheduleEntry]});
             
-            // Convert to backend format and save to database
+            // Convert to backend format and save to database using new days-based API
             setIsSavingToBackend(true);
-            console.log('💾 Converting schedule to backend format...');
+            console.log('💾 Saving schedule with days-based architecture...');
             
             try {
-                // Create a temporary schedule object with proper Time24 objects for backend conversion
-                const startTimeObj = (typeof startTime === 'object' && startTime.toInt) 
-                    ? startTime 
-                    : new Time24(Math.floor(startTime / 100), startTime % 100);
+                // Use the new saveScheduleWithDays function which handles everything
+                const startTimeInt = (typeof startTime === 'object' && startTime.toInt) 
+                    ? startTime.toInt() 
+                    : startTime;
                     
-                const endTimeObj = (typeof endTime === 'object' && endTime.toInt) 
-                    ? endTime 
-                    : new Time24(Math.floor(endTime / 100), endTime % 100);
+                const endTimeInt = (typeof endTime === 'object' && endTime.toInt) 
+                    ? endTime.toInt() 
+                    : endTime;
                 
-                console.log('🔍 Converting times for backend:', {
+                console.log('🔍 Saving with times:', {
                     originalStartTime: startTime,
                     originalEndTime: endTime,
-                    startTimeObj: startTimeObj,
-                    endTimeObj: endTimeObj,
-                    startTimeHasToInt: typeof startTimeObj.toInt === 'function',
-                    endTimeHasToInt: typeof endTimeObj.toInt === 'function'
+                    startTimeInt,
+                    endTimeInt,
+                    strategy: strategyMap[strategy] || 'earliest-fit'
                 });
                 
-                // Create a temporary schedule-like object with the Time24 objects
-                const scheduleForBackend = {
-                    ...schedule,
-                    startTime: startTimeObj,
-                    endTime: endTimeObj
-                };
+                const saveResult = await saveScheduleWithDays(
+                    schedule, 
+                    name,
+                    strategyMap[strategy] || 'earliest-fit',
+                    startTimeInt,
+                    endTimeInt
+                );
                 
-                console.log('🔍 Schedule for backend conversion:', {
-                    hasStartTime: !!scheduleForBackend.startTime,
-                    hasEndTime: !!scheduleForBackend.endTime,
-                    startTimeType: typeof scheduleForBackend.startTime,
-                    endTimeType: typeof scheduleForBackend.endTime
-                });
-                
-                // Use the conversion helper with the schedule that has proper Time24 objects
-                const backendSchedule = convertScheduleToBackendJSON(schedule);
-                
-                if (!backendSchedule) {
-                    throw new Error('Failed to convert schedule to backend format');
-                }
-
-                // Override title with user's chosen name
-                backendSchedule.title = name;
-
-                console.log('📤 Saving schedule to backend...', { backendSchedule });
-                
-                // Create schedule in backend
-                const savedSchedule = await createSchedule(backendSchedule);
-                console.log('✅ Schedule saved to backend:', savedSchedule);
+                console.log('✅ Schedule and days saved to backend:', saveResult);
                 
                 // Update local schedule with backend ID
-                if (savedSchedule.success && savedSchedule.data) {
-                    const scheduleId = savedSchedule.data.id;
-                    
+                if (saveResult.success && saveResult.scheduleId) {
                     setAppState(prevState => ({
                         ...prevState,
                         savedSchedules: prevState.savedSchedules.map(s => 
-                            s.name === name ? { ...s, backendId: scheduleId } : s
+                            s.name === name ? { ...s, backendId: saveResult.scheduleId } : s
                         )
                     }));
-                    
-                    // Now save all the time blocks to the blocks table
-                    console.log('💾 Saving time blocks to backend...');
-                    try {
-                        // Extract all time blocks from the schedule
-                        const allTimeBlocks = [];
-                        const datesList = schedule.getAllDatesInOrder();
-                        
-                        console.log('🔍 DEBUG: Starting time block extraction...');
-                        console.log(`📅 Found ${datesList.length} dates in schedule:`, datesList.map(d => d.toString()));
-                        
-                        for (const date of datesList) {
-                            const dailySchedule = schedule.getScheduleForDate(date);
-                            const timeBlocks = dailySchedule.getTimeBlocks();
-                            
-                            console.log(`📋 ${date.toString()}: Found ${timeBlocks.length} blocks`);
-                            
-                            for (const block of timeBlocks) {
-                                console.log('🔍 Processing block:', {
-                                    name: block.name,
-                                    type: block.type,
-                                    startTime: block.startTime?.toString(),
-                                    endTime: block.endTime?.toString(),
-                                    date: block.date?.toString(),
-                                    hasRequiredProps: !!(block.name && block.type && block.startTime && block.endTime && block.date)
-                                });
-                                
-                                // Convert each TimeBlock to backend format
-                                const backendBlock = convertTimeBlockToBackendJSON(block);
-                                console.log('🔄 Converted block:', backendBlock);
-                                
-                                if (backendBlock) {
-                                    allTimeBlocks.push(backendBlock);
-                                } else {
-                                    console.warn('⚠️ Failed to convert block:', block);
-                                }
-                            }
-                        }
-                        
-                        console.log(`📤 Total converted blocks: ${allTimeBlocks.length}`);
-                        console.log('📦 All blocks to save:', allTimeBlocks);
-                        
-                        if (allTimeBlocks.length > 0) {
-                            const blocksResult = await addBlocksToSchedule(scheduleId, allTimeBlocks);
-                            console.log('✅ Time blocks saved to backend:', blocksResult);
-                        } else {
-                            console.warn('⚠️ No time blocks to save to backend');
-                        }
-                        
-                    } catch (blocksError) {
-                        console.error('⚠️ Failed to save time blocks to backend:', blocksError);
-                        // Don't fail the entire process if block saving fails
-                    }
                 }
                 
             } catch (backendError) {

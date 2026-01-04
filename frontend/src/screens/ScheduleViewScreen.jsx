@@ -63,8 +63,11 @@ const ScheduleViewScreen = ({ route }) => {
 
     useEffect(() => {
         if (!schedule || !selectedDate) return; // ✅ Guard against null values
-        
+
+        console.log("Selected date:", selectedDate);
+        console.log("All dates in order:", schedule.schedule.getAllDatesInOrder());
         const index = schedule.schedule.getAllDatesInOrder().indexOf(selectedDate);
+        console.log("Index:", index);
         const xPosition = index * (2 * PADDING_HORIZONTAL + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
@@ -193,7 +196,7 @@ const ScheduleViewScreen = ({ route }) => {
                             <Indicator width={INDICATOR_DIM} height={INDICATOR_DIM} color={theme.FOREGROUND} />
                         </Animated.View>
                         {schedule.schedule.getAllDatesInOrder().map((date, index) => {
-                            const dateString = date.split("-", 1);
+                            const dateString = date.split("-")[0];
 
                             return (
                                 <TouchableOpacity style={{ width: ICON_DIM, margin: PADDING_HORIZONTAL, alignItems: 'center' }} key={index} onPress={() => setSelectedDate(date)}>
@@ -242,6 +245,11 @@ const styles = StyleSheet.create({
         fontSize: typography.headingSize,
         fontFamily: 'AlbertSans',
         marginBottom: SPACE,
+    },
+    bodySize: {
+        fontSize: ICON_DIM/1.5,
+        fontFamily: 'AlbertSans',
+        lineHeight: ICON_DIM,
     },
     indicator: {
         position: 'absolute',
