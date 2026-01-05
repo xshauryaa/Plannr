@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HomeScreen
+export default HomeScreen;
