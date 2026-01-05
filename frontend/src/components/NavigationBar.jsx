@@ -18,6 +18,7 @@ const { width, height } = Dimensions.get('window');
 
 const BAR_HEIGHT = (width > 400) ? 64 : (width > 380) ? 56 : 48; // 64px for 430px width screen
 const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
+const TOUCHABLE_DIM = INDICATOR_DIM;
 const ICON_DIM = INDICATOR_DIM / 2;
 const PADDING_HORIZONTAL = 5/6 * ICON_DIM;
 const OFFSET = (BAR_HEIGHT - INDICATOR_DIM) / 2;
@@ -85,6 +86,7 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
                         <TouchableOpacity
                             key={route.key}
                             onPress={handleTabPress}
+                            style={{ width: TOUCHABLE_DIM, height: TOUCHABLE_DIM, justifyContent: 'center', alignItems: 'center' }}
                         >
                             <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
                         </TouchableOpacity>
@@ -110,7 +112,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
-        padding: PADDING_HORIZONTAL,
+        padding: OFFSET,
+
     },
     indicator: {
         position: 'absolute',
