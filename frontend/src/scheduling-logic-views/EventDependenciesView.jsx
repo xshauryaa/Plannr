@@ -85,6 +85,7 @@ const EventDependenciesView = ({ onNext, events, depsInput }) => {
             <AddDependencyModal
                 isVisible={showModal}
                 onClick={ (events, prereqs) => addEventDependency(events, prereqs) }
+                onClose={() => setShowModal(false)}
                 events={events}
             />
         </View>

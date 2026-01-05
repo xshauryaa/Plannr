@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
+import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -25,8 +25,12 @@ const InfoView = ({ onNext }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     return (
-        <View style={styles.subContainer}>
-            <ScrollView>
+        <KeyboardAvoidingView 
+            style={styles.subContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, enter some information about what you'd like from the schedule.</Text>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What's the name of this schedule</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -117,7 +121,7 @@ const InfoView = ({ onNext }) => {
                     {showMaxHoursWarning && <Text style={styles.warning}>Maximum working hours must be between 0 and 24</Text>}
                 </View>
             </ScrollView>
-                <TouchableOpacity 
+            <TouchableOpacity 
                 style={styles.button}
                 onPress={() => {
                     // Reset all warnings first
@@ -168,7 +172,7 @@ const InfoView = ({ onNext }) => {
             >
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
             </TouchableOpacity>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 

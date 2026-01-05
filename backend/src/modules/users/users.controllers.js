@@ -1,4 +1,5 @@
 import * as repo from './users.repo.js';
+import { clerkClient } from '../../config/clerk.js';
 
 /**
  * User Controllers
@@ -127,6 +128,151 @@ export const updateUserProfile = async (req, res, next) => {
                 updatedAt: updatedUser.updatedAt,
             }
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateUserEmail = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
+        const { email } = req.validatedData;
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email is required'
+            });
+        }
+
+        // Get user from database
+        const user = await repo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        try {
+            // Get the current user from Clerk to find their primary email
+            const clerkUser = await clerkClient.users.getUser(clerkUserId);
+            
+            // Find the current primary email address
+            const currentPrimaryEmail = clerkUser.emailAddresses.find(email => 
+                email.id === clerkUser.primaryEmailAddressId
+            );
+            
+            if (!currentPrimaryEmail) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'No primary email address found'
+                });
+            }
+
+            // Check if the user has external accounts (social logins)
+            const hasExternalAccounts = clerkUser.externalAccounts && clerkUser.externalAccounts.length > 0;
+            
+            if (hasExternalAccounts) {
+                // For users with social logins, we need to create a new email address
+                // instead of updating the existing one
+                try {
+                    // First, create a new email address
+                    const newEmailAddress = await clerkClient.emailAddresses.createEmailAddress({
+                        userId: clerkUserId,
+                        emailAddress: email,
+                        verified: false
+                    });
+                    
+                    // Then set it as primary
+                    await clerkClient.users.updateUser(clerkUserId, {
+                        primaryEmailAddressId: newEmailAddress.id
+                    });
+                    
+                    console.log('Created new email address for social login user:', newEmailAddress.id);
+                } catch (createError) {
+                    console.error('Failed to create new email address:', createError);
+                    throw createError;
+                }
+            } else {
+                // For regular users, update the existing email address
+                const updatedEmailAddress = await clerkClient.emailAddresses.updateEmailAddress(
+                    currentPrimaryEmail.id,
+                    {
+                        emailAddress: email,
+                        verified: false // Will require verification
+                    }
+                );
+            }
+
+            // Update email in our database (optional, since we primarily use Clerk)
+            const updatedUser = await repo.updateUser(user.id, { email });
+
+            res.status(200).json({
+                success: true,
+                message: 'Email update initiated. Please check your new email for verification.',
+                data: {
+                    id: updatedUser.id,
+                    clerkUserId: updatedUser.clerkUserId,
+                    email: email, // Return the new email
+                    displayName: updatedUser.displayName,
+                    avatarName: updatedUser.avatarName,
+                    emailVerificationRequired: true,
+                    updatedAt: updatedUser.updatedAt,
+                }
+            });
+        } catch (clerkError) {
+            console.error('Clerk email update error:', clerkError);
+            
+            // Handle specific Clerk errors
+            if (clerkError.status === 422 || clerkError.errors) {
+                const errorMessage = clerkError.errors?.[0]?.message || clerkError.message || 'Invalid email address or email already in use';
+                return res.status(400).json({
+                    success: false,
+                    message: errorMessage,
+                    error: errorMessage
+                });
+            }
+            
+            if (clerkError.status === 403) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Not authorized to update this email address',
+                    error: clerkError.message
+                });
+            }
+            
+            // Handle "Breaks instance invariant" error specifically
+            if (clerkError.message && clerkError.message.includes('Breaks instance invariant')) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cannot update email address. This may be because the account is linked to a social login (Google, Apple, etc.). Please contact support for assistance.',
+                    error: 'Email update not allowed for this account type'
+                });
+            }
+            
+            // Handle email already in use
+            if (clerkError.message && clerkError.message.toLowerCase().includes('email')) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'This email address is already in use by another account',
+                    error: clerkError.message
+                });
+            }
+            
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to update email in authentication system',
+                error: clerkError.message || 'Unknown error occurred'
+            });
+        }
     } catch (error) {
         next(error);
     }

@@ -1,5 +1,6 @@
 import React from 'react' 
 import { Text, StyleSheet, TouchableOpacity } from 'react-native'
+import * as Haptics from 'expo-haptics';
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg'
 import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg'
 import PreferencesIcon from '../../assets/nav-icons/PreferencesIcon.svg'
@@ -18,7 +19,7 @@ const { width, height } = Dimensions.get('window');
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_2 : spacing.SPACING_1
 
-const MenuButton = ({ broad, title, icon, navTo }) => {
+const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -32,16 +33,23 @@ const MenuButton = ({ broad, title, icon, navTo }) => {
         Productivity: <ProductivityAnalyticsIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
     }
 
+    const handlePress = () => {
+        if (enableHaptic) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        }
+        navTo();
+    };
+
     if (broad) {
         return (
-            <TouchableOpacity style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
+            <TouchableOpacity style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }} onPress={handlePress}>
                 <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 { ICONS[icon] || null }
             </TouchableOpacity>
         )
     }
     return (
-        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={() => navTo()}>
+        <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={handlePress}>
             <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
             { ICONS[icon] || null }
         </TouchableOpacity>

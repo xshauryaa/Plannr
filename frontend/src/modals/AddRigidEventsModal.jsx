@@ -1,5 +1,5 @@
-import React, { useState } from 'react' 
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import React, { useState, useEffect } from 'react' 
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView } from 'react-native'
 import Modal from 'react-native-modal'
 
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -14,7 +14,7 @@ import { useAppState } from '../context/AppStateContext.js'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 
-const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
+const AddRigidEventsModal = ({ isVisible, onClick, onClose, minDate, numDays }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -27,6 +27,18 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [warning, setWarning] = useState('')
     const [showWarning, setShowWarning] = useState(false)
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    // Keyboard visibility listeners
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+        
+        return () => {
+            keyboardDidShowListener?.remove();
+            keyboardDidHideListener?.remove();
+        };
+    }, []);
 
     let maxDate = minDate;
     for (let i = 0; i < numDays - 1; i++) {
@@ -107,6 +119,16 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
         setShowWarning(false)
     }
 
+    const handleOutsidePress = () => {
+        if (keyboardVisible) {
+            Keyboard.dismiss(); // Just dismiss keyboard, keep modal open
+        } else {
+            // Keyboard is already dismissed, close modal
+            setToDefaults();
+            onClose && onClose();
+        }
+    };
+
     return (
         <Modal
             isVisible={isVisible} 
@@ -114,8 +136,14 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
+            <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
+                <View style={styles.modalOverlay}>
+                    <KeyboardAvoidingView 
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        keyboardVerticalOffset={20}
+                    >
+                        <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()} accessible={false}>
+                            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     {/* Panel 1 - Name + Activity Type */}
                     {Panel1()}
 
@@ -205,6 +233,9 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
                     >
                         <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add</Text>
                     </TouchableOpacity>
+                        </View>
+                    </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
                 </View>
             </TouchableWithoutFeedback>
         </Modal>
@@ -212,6 +243,13 @@ const AddRigidEventsModal = ({ isVisible, onClick, minDate, numDays }) => {
 }
 
 const styles = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+    },
     card: {
         width: '99%',
         borderRadius: 12,

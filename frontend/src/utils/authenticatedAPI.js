@@ -22,7 +22,7 @@ export const useAuthenticatedAPI = () => {
             }
 
             // Make the API request with the token
-            const apiBaseUrl = 'http://localhost:5001'; // process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
+            const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
             const response = await fetch(`${apiBaseUrl}${endpoint}`, {
                 ...options,
                 headers: {
@@ -133,6 +133,10 @@ export const useAuthenticatedAPI = () => {
         // User profile operations
         getUserProfile: () => makeAuthenticatedRequest('/api/users/profile'),
         updateUserProfile: (data) => makeAuthenticatedRequest('/api/users/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        updateUserEmail: (data) => makeAuthenticatedRequest('/api/users/email', {
             method: 'PUT',
             body: JSON.stringify(data),
         }),

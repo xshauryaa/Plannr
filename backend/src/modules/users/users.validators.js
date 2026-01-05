@@ -26,6 +26,10 @@ export const updateAvatarSchema = z.object({
     }),
 });
 
+export const updateUserEmailSchema = z.object({
+    email: z.string().email('Valid email address is required').min(1, 'Email is required'),
+});
+
 export const clerkWebhookSchema = z.object({
     type: z.string(),
     data: z.object({
@@ -78,6 +82,19 @@ export const validateUpdateUserProfile = (req, res, next) => {
 export const validateUpdateAvatar = (req, res, next) => {
     try {
         req.validatedData = updateAvatarSchema.parse(req.body);
+        next();
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation failed',
+            errors: error.errors,
+        });
+    }
+};
+
+export const validateUpdateUserEmail = (req, res, next) => {
+    try {
+        req.validatedData = updateUserEmailSchema.parse(req.body);
         next();
     } catch (error) {
         return res.status(400).json({

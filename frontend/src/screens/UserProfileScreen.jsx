@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Image, TouchableOpacity, Switch, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Image, TouchableOpacity, Switch, TextInput, Alert, Linking } from 'react-native';
 import { useClerk } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 
 import { useAppState } from '../context/AppStateContext.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
@@ -189,6 +190,25 @@ const UserProfileScreen = ({ navigation }) => {
         );
     };
 
+    const handleOpenExternalLink = async (url) => {
+        try {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            const supported = await Linking.canOpenURL(url);
+            
+            if (supported) {
+                await Linking.openURL(url);
+                logAction('external_link_opened', { url });
+            } else {
+                Alert.alert('Error', 'Unable to open this link. Please try again later.');
+                logError('external_link_failed', new Error('URL not supported'), { url });
+            }
+        } catch (error) {
+            console.error('Error opening external link:', error);
+            logError('external_link_error', error, { url });
+            Alert.alert('Error', 'Unable to open this link. Please try again later.');
+        }
+    };
+
     // Separate function for saving preferences to backend
     const savePreferences = async (updatedPreferences = null) => {
         try {
@@ -314,6 +334,7 @@ const UserProfileScreen = ({ navigation }) => {
                     <TouchableOpacity 
                         style={(appState.userPreferences.theme == 'light') ? { ...styles.uiModeButtonSelected, borderColor: theme.FOREGROUND} : { ...styles.uiModeButtonDefault, borderColor: (theme.FOREGROUND + '1A')}}
                         onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                             const newPrefs = { ...appState.userPreferences, theme: 'light' };
                             setAppState({ ...appState, userPreferences: newPrefs });
                             setTimeout(() => savePreferences(newPrefs), 300);
@@ -327,6 +348,7 @@ const UserProfileScreen = ({ navigation }) => {
                     <TouchableOpacity 
                         style={(appState.userPreferences.theme == 'dark') ? { ...styles.uiModeButtonSelected, borderColor: theme.FOREGROUND} : { ...styles.uiModeButtonDefault, borderColor: (theme.FOREGROUND + '1A')}}
                         onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                             const newPrefs = { ...appState.userPreferences, theme: 'dark' };
                             setAppState({ ...appState, userPreferences: newPrefs });
                             setTimeout(() => savePreferences(newPrefs), 300);
@@ -444,6 +466,7 @@ const UserProfileScreen = ({ navigation }) => {
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
                             onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                 const newPrefs = { ...appState.userPreferences, defaultStrategy: 'earliest-fit' };
                                 console.log('🎯 Setting strategy to earliest-fit, new prefs:', newPrefs);
                                 setAppState({ ...appState, userPreferences: newPrefs });
@@ -459,6 +482,7 @@ const UserProfileScreen = ({ navigation }) => {
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'balanced-work') ? theme.SELECTION : theme.INPUT }}
                             onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                 const newPrefs = { ...appState.userPreferences, defaultStrategy: 'balanced-work' };
                                 console.log('🎯 Setting strategy to balanced-work, new prefs:', newPrefs);
                                 setAppState({ ...appState, userPreferences: newPrefs });
@@ -474,6 +498,7 @@ const UserProfileScreen = ({ navigation }) => {
                         <TouchableOpacity
                             style={{ ...styles.choiceButton, backgroundColor: (appState.userPreferences.defaultStrategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT }}
                             onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                 const newPrefs = { ...appState.userPreferences, defaultStrategy: 'deadline-oriented' };
                                 console.log('🎯 Setting strategy to deadline-oriented, new prefs:', newPrefs);
                                 setAppState({ ...appState, userPreferences: newPrefs });
@@ -488,23 +513,19 @@ const UserProfileScreen = ({ navigation }) => {
                 {/* Links */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: 16 }}>Support & Community</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                    <TouchableOpacity style={styles.linkButton} onPress={() => {}}>
+                    <TouchableOpacity 
+                        style={styles.linkButton} 
+                        onPress={() => handleOpenExternalLink('https://useplannr.co')}
+                    >
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>About Plannr</Text>
                         <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
                     </TouchableOpacity>
                     <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }} />
-                    <TouchableOpacity style={styles.linkButton} onPress={() => {}}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Support & FAQs</Text>
-                        <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
-                    </TouchableOpacity>
-                    <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }} />
-                    <TouchableOpacity style={styles.linkButton} onPress={() => {}}>
+                    <TouchableOpacity 
+                        style={styles.linkButton} 
+                        onPress={() => handleOpenExternalLink('https://plannr.featurebase.app')}
+                    >
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Request a Feature</Text>
-                        <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
-                    </TouchableOpacity>
-                    <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }} />
-                    <TouchableOpacity style={styles.linkButton} onPress={() => {}}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Join Beta</Text>
                         <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
                     </TouchableOpacity>
                 </View>

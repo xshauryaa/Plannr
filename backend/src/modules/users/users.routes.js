@@ -4,7 +4,8 @@ import {
     validateCreateUser, 
     validateUpdateUserProfile, 
     validateClerkWebhook,
-    validateUpdateAvatar
+    validateUpdateAvatar,
+    validateUpdateUserEmail
 } from './users.validators.js';
 
 const router = express.Router();
@@ -22,6 +23,9 @@ router.get('/profile', ctrl.getUserProfile);
 
 // PUT /users/profile - update user profile
 router.put('/profile', validateUpdateUserProfile, ctrl.updateUserProfile);
+
+// PUT /users/email - update user email
+router.put('/email', validateUpdateUserEmail, ctrl.updateUserEmail);
 
 // DELETE /users/profile - delete user account
 router.delete('/profile', ctrl.deleteUser);

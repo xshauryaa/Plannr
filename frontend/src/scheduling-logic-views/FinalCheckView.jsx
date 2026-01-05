@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform } from 'react-native' 
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform, TouchableWithoutFeedback, Keyboard, ScrollView, KeyboardAvoidingView } from 'react-native' 
 import { useAppState } from '../context/AppStateContext';
 import TimePicker from '../components/TimePicker.jsx';
 import convertTimeToTime24 from '../utils/timeConversion';
@@ -22,73 +22,81 @@ const FinalCheckView = ({ onNext, buttonText = 'Generate Schedule' }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     return (
-        <View style={styles.subContainer}>
-            <View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - some final preferences</Text>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Timings</Text>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
-                        <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
+        <KeyboardAvoidingView 
+            style={styles.subContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={0}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>One more thing - some final preferences</Text>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily Timings</Text>
+                    <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
+                            <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
+                            <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
+                        </View>
+                        {showWarning && <Text style={styles.warning}>{warning}</Text>}
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
-                        <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Scheduling Strategy</Text>
+                    <View style={{ ...styles.card, gap: 12, backgroundColor: theme.COMP_COLOR }}>
+                        <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
+                            <EarliestFitIcon width={20} height={20}/>
+                            <TouchableOpacity
+                                style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
+                                onPress={() => { setStrategy('earliest-fit') }}
+                            >
+                                    <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
+                            <BalancedWorkIcon width={20} height={20}/>
+                            <TouchableOpacity
+                                style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? theme.SELECTION : theme.INPUT  }}
+                                onPress={() => { setStrategy('balanced-work') }}
+                            >
+                                    <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
+                            <DeadlineOrientedIcon width={20} height={20}/>
+                            <TouchableOpacity
+                                style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT  }}
+                                onPress={() => { setStrategy('deadline-oriented') }}
+                            >
+                                    <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    {showWarning && <Text style={styles.warning}>{warning}</Text>}
+                </ScrollView>
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => {
+                        if (endTime.isBefore(startTime) || endTime.equals(startTime)) {
+                            setShowWarning(true);
+                        } else {
+                            setShowWarning(false);
+                            onNext(startTime.toInt(), endTime.toInt(), strategy);
+                        }
+                    }}
+                >
+                    {(buttonText === 'Generate Schedule') 
+                        ? <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                            {buttonText}
+                        </Text> 
+                        : <View style={{ flexDirection: 'row', gap: 12 }}>
+                            <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: typography.subHeadingSize }}>Reschedule</Text>
+                            <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
+                        </View>}
+                </TouchableOpacity>
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Scheduling Strategy</Text>
-                <View style={{ ...styles.card, gap: 12, backgroundColor: theme.COMP_COLOR }}>
-                    <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <EarliestFitIcon width={20} height={20}/>
-                        <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
-                            onPress={() => { setStrategy('earliest-fit') }}
-                        >
-                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <BalancedWorkIcon width={20} height={20}/>
-                        <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? theme.SELECTION : theme.INPUT  }}
-                            onPress={() => { setStrategy('balanced-work') }}
-                        >
-                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
-                        <DeadlineOrientedIcon width={20} height={20}/>
-                        <TouchableOpacity
-                            style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT  }}
-                            onPress={() => { setStrategy('deadline-oriented') }}
-                        >
-                                <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-            <TouchableOpacity 
-                style={styles.button}
-                onPress={() => {
-                    if (endTime.isBefore(startTime) || endTime.equals(startTime)) {
-                        setShowWarning(true);
-                    } else {
-                        setShowWarning(false);
-                        onNext(startTime.toInt(), endTime.toInt(), strategy);
-                    }
-                }}
-            >
-                {(buttonText === 'Generate Schedule') 
-                    ? <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
-                        {buttonText}
-                    </Text> 
-                    : <View style={{ flexDirection: 'row', gap: 12 }}>
-                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: typography.subHeadingSize }}>Reschedule</Text>
-                        <RescheduleIcon width={16} height={16} color={'#FFFFFF'} />
-                    </View>}
-            </TouchableOpacity>
-        </View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 }
 

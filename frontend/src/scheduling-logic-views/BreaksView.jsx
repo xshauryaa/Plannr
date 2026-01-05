@@ -103,6 +103,7 @@ const BreaksView = ({ onNext, minDate, numDays, breaksInput, repeatedBreaksInput
             <AddBreaksModal
                 isVisible={showModal}
                 onClick={addBreak}
+                onClose={() => setShowModal(false)}
                 minDate={minDate}
                 numDays={numDays}
             />

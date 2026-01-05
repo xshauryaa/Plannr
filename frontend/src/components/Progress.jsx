@@ -58,12 +58,6 @@ const Progress = () => {
                         style={{ ...styles.progressBarFront, width: `${progress}%` }}
                     />
                 </View>
-                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.COMP_COLOR }}>
-                    <Text style={{ ...styles.bottomText, color: theme.FOREGROUND }}>View your current schedule</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('View', { schedName: appState.activeSchedule.name })}>
-                        <GoIcon style={styles.icon} width={18} height={18} color={theme.FOREGROUND} />
-                    </TouchableOpacity>
-                </View>
             </View>
         )
     }
@@ -92,7 +86,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     topText: {
-        fontSize: 12,
+        fontSize: 16,
         fontFamily: 'AlbertSans',
         marginBottom: 8,
     },
@@ -100,7 +94,7 @@ const styles = StyleSheet.create({
         height: 10,
         borderRadius: 16,
         backgroundColor: '#EAEAEA',
-        marginBottom: 8,
+        marginBottom: 4,
     },
     progressBarFront: {
         height: 10,

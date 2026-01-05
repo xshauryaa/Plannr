@@ -76,6 +76,7 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
             <AddRigidEventsModal
                 isVisible={showModal}
                 onClick={addRigidEvent}
+                onClose={() => setShowModal(false)}
                 minDate={minDate}
                 numDays={numDays}
             />

@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
 import { getAvatarImageSource } from '../utils/avatarUtils.js';
 import AvatarPickerBottomSheet from '../components/AvatarPickerBottomSheet.jsx';
@@ -21,12 +22,20 @@ const ManageAccountScreen = () => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logError, logSettingChange } = useActionLogger('ManageAccount');
     const { user } = useUser();
+    const { getToken } = useAuth();
     const authenticatedAPI = useAuthenticatedAPI();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const avatarPickerRef = useRef();
     
     const [userName, setUserName] = useState(appState.name || '');
     const [userEmail, setUserEmail] = useState(user?.primaryEmailAddress?.emailAddress || '');
+    
+    // Sync email from Clerk user when it changes
+    useEffect(() => {
+        if (user?.primaryEmailAddress?.emailAddress) {
+            setUserEmail(user.primaryEmailAddress.emailAddress);
+        }
+    }, [user?.primaryEmailAddress?.emailAddress]);
     
     // Track if name has been changed to show save button
     const [nameChanged, setNameChanged] = useState(false);
@@ -58,6 +67,9 @@ const ManageAccountScreen = () => {
                         if (profileData.data.displayName && !isEditingName && !nameChanged) {
                             setUserName(profileData.data.displayName);
                         }
+                        
+                        // Note: We don't update email from database since it's encrypted
+                        // Email comes from Clerk's useUser hook instead
                     }
                 } else {
                     console.warn('⚠️ getUserProfile API not available');
@@ -69,9 +81,6 @@ const ManageAccountScreen = () => {
 
         loadUserProfile();
     }, [authenticatedAPI, isEditingName, nameChanged]);
-
-    // Check if user has social login (SSO) enabled
-    const hasSocialLogin = user?.externalAccounts && user.externalAccounts.length > 0;
 
     // Handle name updates
     const updateUserName = async () => {
@@ -135,6 +144,7 @@ const ManageAccountScreen = () => {
     const handleNameEndEditing = () => {
         setIsEditingName(false);
     };
+
     const selectAvatar = async (avatarName) => {
         try {
             // Update local state immediately for responsive UI
@@ -215,6 +225,7 @@ const ManageAccountScreen = () => {
                     <TextInput
                         style={{ ...styles.input, color: theme.FOREGROUND, backgroundColor: theme.INPUT, marginBottom: 12 }}
                         value={userName}
+                        autoCorrect={false}
                         onChangeText={handleNameChange}
                         onFocus={() => setIsEditingName(true)}
                         onEndEditing={handleNameEndEditing}
@@ -247,21 +258,18 @@ const ManageAccountScreen = () => {
                         style={{ 
                             ...styles.input, 
                             color: theme.FOREGROUND, 
-                            opacity: hasSocialLogin ? 0.6 : 1,
                             backgroundColor: theme.INPUT 
                         }}
                         value={userEmail}
-                        onChangeText={hasSocialLogin ? undefined : setUserEmail}
-                        editable={!hasSocialLogin}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
+                        editable={false}
+                        selectTextOnFocus={false}
+                        placeholder="Email address"
+                        placeholderTextColor={theme.FOREGROUND_SECONDARY}
                     />
-                    {hasSocialLogin && (
-                        <Text style={{ ...styles.disabledText, color: theme.FOREGROUND_SECONDARY }}>
-                            You cannot edit your email since you have social login connected to your Plannr account.
-                        </Text>
-                    )}
+                    
+                    <Text style={{ ...styles.disabledText, color: theme.FOREGROUND_SECONDARY }}>
+                        Emails cannot be changed.
+                    </Text>
                 </View>
             </ScrollView>
             

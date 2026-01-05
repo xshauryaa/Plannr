@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from '../../assets/nav-icons/HomeIcon.svg';
 import TasksIcon from '../../assets/nav-icons/TasksIcon.svg';
@@ -72,10 +73,18 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
                     const isActive = state.index === index;
                     const Icon = ICONS[route.name];
 
+                    const handleTabPress = () => {
+                        // Only trigger haptic feedback if we're switching to a different tab
+                        if (!isActive) {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        navigation.navigate(route.name);
+                    };
+
                     return (
                         <TouchableOpacity
                             key={route.key}
-                            onPress={() => navigation.navigate(route.name)}
+                            onPress={handleTabPress}
                         >
                             <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
                         </TouchableOpacity>

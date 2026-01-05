@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList, Pressable, Platform, KeyboardAvoidingView, Keyboard } from 'react-native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import MultiSelect from '../components/MultiSelect.jsx';
@@ -8,13 +8,25 @@ import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
 import { typography } from '../design/typography.js'
 
-const AddDependencyModal = ({ isVisible, onClick, events }) => {
+const AddDependencyModal = ({ isVisible, onClick, onClose, events }) => {
     const { appState } = useAppState();
     const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [prerequisiteEvents, setPrerequisiteEvents] = useState([]);
     const [showSelectedEventPicker, setShowSelectedEventPicker] = useState(false);
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    // Keyboard visibility listeners
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+        
+        return () => {
+            keyboardDidShowListener?.remove();
+            keyboardDidHideListener?.remove();
+        };
+    }, []);
 
 
     const setToDefaults = () => {
@@ -23,6 +35,16 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
         setShowSelectedEventPicker(false);
     }
 
+    const handleOutsidePress = () => {
+        if (keyboardVisible) {
+            Keyboard.dismiss(); // Just dismiss keyboard, keep modal open
+        } else {
+            // Keyboard is already dismissed, close modal
+            setToDefaults();
+            onClose && onClose();
+        }
+    };
+
     return (
         <Modal 
             isVisible={isVisible}
@@ -30,7 +52,11 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
             animationInTiming={500}
             animationOutTiming={500}
         >
-            <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
+            <KeyboardAvoidingView 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={20}
+            >
+                <View style={{ ...styles.card, backgroundColor: theme.BACKGROUND }}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Select an event</Text>
                 <Pressable style={{ ...styles.input, backgroundColor: theme.INPUT }} onPress={() => setShowSelectedEventPicker(true)}>
                     <Text style={{ fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize, color: theme.FOREGROUND }}>
@@ -91,6 +117,7 @@ const AddDependencyModal = ({ isVisible, onClick, events }) => {
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Dependency Set</Text>
                 </TouchableOpacity>
             </View>
+            </KeyboardAvoidingView>
         </Modal>
     );
 }

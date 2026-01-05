@@ -75,6 +75,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
             <AddFlexibleEventsModal
                 isVisible={showModal}
                 onClick={addFlexibleEvent}
+                onClose={() => setShowModal(false)}
                 minDate={minDate}
                 numDays={numDays}
             />
