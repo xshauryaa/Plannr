@@ -1,5 +1,5 @@
 import React from 'react' 
-import { Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import * as Haptics from 'expo-haptics';
 import SavedIcon from '../../assets/nav-icons/SavedIcon.svg'
 import PlannrCenterIcon from '../../assets/nav-icons/PlannrCenterIcon.svg'
@@ -8,12 +8,14 @@ import AddIcon from '../../assets/system-icons/AddIcon.svg'
 import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
 import ProfileIcon from '../../assets/nav-icons/ProfileIcon.svg'
 import ProductivityAnalyticsIcon from '../../assets/system-icons/ProductivityAnalyticsIcon.svg'
+import Link from '../../assets/system-icons/Link.svg'
 import { useAppState } from '../context/AppStateContext.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 import { spacing, padding } from '../design/spacing.js'
 import { typography } from '../design/typography.js'
 import { Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
@@ -31,6 +33,7 @@ const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
         Reschedule: <RescheduleIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
         Profile: <ProfileIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
         Productivity: <ProductivityAnalyticsIcon width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
+        Link: <Link width={24} height={24} color={theme.FOREGROUND} style={{position: 'absolute', top: 16, right: 16 }} />,
     }
 
     const handlePress = () => {
@@ -40,6 +43,17 @@ const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
         navTo();
     };
 
+    if (icon == 'Reschedule' && broad) {
+        return (
+            <TouchableOpacity style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }} disabled={true} onPress={handlePress}>
+                <LinearGradient colors={[theme.GRADIENT_START, theme.GRADIENT_START]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingVertical: 4, paddingHorizontal: 12, position: 'absolute', top: 16, left: 16, borderRadius: 24 }}>
+                    <Text style={{ fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize - 3, color: '#FFFFFF' }}>Coming Soon</Text>
+                </LinearGradient>
+                <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
+                { ICONS[icon] || null }
+            </TouchableOpacity>
+        );
+    }
     if (broad) {
         return (
             <TouchableOpacity style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }} onPress={handlePress}>
@@ -47,6 +61,17 @@ const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
                 { ICONS[icon] || null }
             </TouchableOpacity>
         )
+    }
+    if (icon == 'Link') {
+        return (
+            <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={handlePress}>
+                <LinearGradient colors={[theme.GRADIENT_START, theme.GRADIENT_START]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingVertical: 4, paddingHorizontal: 12, position: 'absolute', top: 16, left: 16, borderRadius: 24 }}>
+                    <Text style={{ fontFamily: 'AlbertSans', fontSize: typography.subHeadingSize - 3, color: '#FFFFFF' }}>New</Text>
+                </LinearGradient>
+                <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
+                { ICONS[icon] || null }
+            </TouchableOpacity>
+        );
     }
     return (
         <TouchableOpacity style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }} onPress={handlePress}>

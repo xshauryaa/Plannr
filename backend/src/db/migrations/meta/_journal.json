@@ -71,6 +71,13 @@
       "when": 1767528274055,
       "tag": "0009_dapper_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1767772354939,
+      "tag": "0010_windy_mojo",
+      "breakpoints": true
     }
   ]
 }

@@ -243,43 +243,6 @@ const UserProfileScreen = ({ navigation }) => {
         }
     };
 
-    const validateAndSave = () => {
-        // Reset all warnings
-        setShowMinGapWarning(false);
-        setShowMaxHoursWarning(false);
-        setShowLeadMinutesWarning(false);
-
-        let hasError = false;
-
-        // Validate min gap
-        const minGapInt = parseInt(appState.userPreferences.defaultMinGap);
-        if (isNaN(minGapInt) || minGapInt < 0) {
-            setShowMinGapWarning(true);
-            hasError = true;
-        }
-
-        // Validate max working hours
-        const maxHoursFloat = parseFloat(appState.userPreferences.defaultMaxWorkingHours);
-        if (isNaN(maxHoursFloat) || maxHoursFloat <= 0 || maxHoursFloat > 24) {
-            setShowMaxHoursWarning(true);
-            hasError = true;
-        }
-
-        // Validate lead minutes (only if task reminders are enabled)
-        if (appState.userPreferences.taskRemindersEnabled) {
-            const leadMinutesInt = parseInt(appState.userPreferences.leadMinutes);
-            if (isNaN(leadMinutesInt) || leadMinutesInt <= 0) {
-                setShowLeadMinutesWarning(true);
-                hasError = true;
-            }
-        }
-
-        // Only save if validation passes
-        if (!hasError) {
-            savePreferences();
-        }
-    };
-
     if (loading) {
         return <LoadingScreen />;
     }
@@ -308,12 +271,23 @@ const UserProfileScreen = ({ navigation }) => {
                         )}
                     </View>
                 </View>
-                <MenuButton
-                    broad={true}
-                    title="Manage Your Account"
-                    icon="Profile"
-                    navTo={() => { navigation.navigate("ManageAccount") }}
-                />
+                <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND, marginBottom: 4 }}>
+                    <MenuButton
+                        broad={false}
+                        title="Manage Your Account"
+                        icon="Profile"
+                        navTo={() => { navigation.navigate("ManageAccount") }}
+                    />
+                    <MenuButton
+                        broad={false}
+                        title="Integrations"
+                        icon="Link"
+                        navTo={() => { 
+                            logAction('integrations_button_clicked');
+                            navigation.navigate("Integrations") 
+                        }}
+                    />
+                </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={false}
@@ -406,6 +380,7 @@ const UserProfileScreen = ({ navigation }) => {
                         </View>
                     )}
                 </View>
+
                 {/* Default Scheduling Preferences */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: 16 }}>Default Scheduling Preferences</Text>
                 <View style={{ ...styles.card, gap: 16, backgroundColor: theme.COMP_COLOR }}>
@@ -510,6 +485,7 @@ const UserProfileScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
+
                 {/* Links */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: 16 }}>Support & Community</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -529,6 +505,7 @@ const UserProfileScreen = ({ navigation }) => {
                         <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
                     </TouchableOpacity>
                 </View>
+
                 {/* Logout Button */}
                 <TouchableOpacity 
                     style={{ ...styles.destructiveButton, backgroundColor: '#FF222220', marginTop: 12, borderColor: '#FF2222' }}
@@ -536,6 +513,7 @@ const UserProfileScreen = ({ navigation }) => {
                 >
                     <Text style={{ ...styles.destructiveButtonText, color: '#FF2222' }}>Sign Out</Text>
                 </TouchableOpacity>
+
                 {/* Delete Account Button */}
                 <TouchableOpacity 
                     style={{ ...styles.destructiveButton, backgroundColor: '#FF222220', borderColor: '#FF2222' }}

@@ -30,6 +30,16 @@ export const updateUserEmailSchema = z.object({
     email: z.string().email('Valid email address is required').min(1, 'Email is required'),
 });
 
+export const updateIntegrationsSchema = z.object({
+    googleCalendar: z.boolean().optional(),
+    todoist: z.boolean().optional(),
+    notion: z.boolean().optional(),
+    googleTasks: z.boolean().optional(),
+    microsoftTodo: z.boolean().optional(),
+}).refine(data => Object.keys(data).length > 0, {
+    message: "At least one integration field must be provided"
+});
+
 export const clerkWebhookSchema = z.object({
     type: z.string(),
     data: z.object({
@@ -95,6 +105,19 @@ export const validateUpdateAvatar = (req, res, next) => {
 export const validateUpdateUserEmail = (req, res, next) => {
     try {
         req.validatedData = updateUserEmailSchema.parse(req.body);
+        next();
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation failed',
+            errors: error.errors,
+        });
+    }
+};
+
+export const validateUpdateIntegrations = (req, res, next) => {
+    try {
+        req.validatedData = updateIntegrationsSchema.parse(req.body);
         next();
     } catch (error) {
         return res.status(400).json({

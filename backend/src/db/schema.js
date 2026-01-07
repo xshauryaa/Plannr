@@ -121,6 +121,21 @@ export const preferences = pgTable("preferences", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+// User integration connections tracking
+export const integrations = pgTable("integrations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  googleCalendar: boolean("google_calendar").notNull().default(false),
+  todoist: boolean("todoist").notNull().default(false),
+  notion: boolean("notion").notNull().default(false),
+  googleTasks: boolean("google_tasks").notNull().default(false),
+  microsoftTodo: boolean("microsoft_todo").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => [
+  index("integrations_user_idx").on(t.userId),
+]);
+
 // Provider connections for OAuth tokens (Microsoft To-Do import)
 export const providerConnections = pgTable("provider_connections", {
   id: uuid("id").defaultRandom().primaryKey(),

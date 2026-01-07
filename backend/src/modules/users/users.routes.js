@@ -5,7 +5,8 @@ import {
     validateUpdateUserProfile, 
     validateClerkWebhook,
     validateUpdateAvatar,
-    validateUpdateUserEmail
+    validateUpdateUserEmail,
+    validateUpdateIntegrations
 } from './users.validators.js';
 
 const router = express.Router();
@@ -50,6 +51,12 @@ router.put('/avatar', validateUpdateAvatar, ctrl.updateAvatar);
 
 // POST /users/onboarding/complete - Mark onboarding as complete
 router.post('/onboarding/complete', ctrl.markOnboardingComplete);
+
+// GET /users/integrations - Get user integrations status
+router.get('/integrations', ctrl.getUserIntegrations);
+
+// PUT /users/integrations - Update user integrations
+router.put('/integrations', validateUpdateIntegrations, ctrl.updateUserIntegrations);
 
 // GET /users/webhooks/test - Test webhook endpoint (for debugging)
 router.get('/webhooks/test', (req, res) => {

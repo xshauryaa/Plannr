@@ -138,7 +138,17 @@ const SignUpScreen = ({ navigation }) => {
         try {
             // Start the authentication process by calling `startSSOFlow()`
             const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-                strategy: 'oauth_google'
+                strategy: 'oauth_google',
+                redirectUrl: 'plannr://sso-callback',
+                scopes: [
+                    'openid',
+                    'https://www.googleapis.com/auth/userinfo.email',
+                    'https://www.googleapis.com/auth/userinfo.profile',
+                    // 'https://www.googleapis.com/auth/calendar.app.created',
+                    // 'https://www.googleapis.com/auth/calendar.calendars.readonly',
+                    // 'https://www.googleapis.com/auth/calendar.events',
+                    // 'https://www.googleapis.com/auth/calendar.events.readonly',
+                ],
             });
 
             // If sign in was successful, set the active session
@@ -240,7 +250,8 @@ const SignUpScreen = ({ navigation }) => {
         try {
             // Start the authentication process by calling `startSSOFlow()`
             const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-                strategy: 'oauth_apple'
+                strategy: 'oauth_apple',
+                redirectUrl: 'plannr://sso-callback',
             });
 
             // If sign in was successful, set the active session

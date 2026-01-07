@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 import Rescheduler from '../model/Rescheduler.js';
 import EventDependencies from '../model/EventDependencies.js';
 
@@ -15,6 +16,7 @@ import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx
 import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx';
 import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx';
 import GenerationModal from '../modals/GenerationModal.jsx';
+import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -250,7 +252,15 @@ const RescheduleScreen = ({ route, navigation }) => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Reschedule</Text>
+            <View style={styles.titleContainer}>
+                <TouchableOpacity 
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
+                </TouchableOpacity>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Reschedule</Text>
+            </View>
             {currentView}
             <GenerationModal
                 isVisible={showReschedulingModal}
@@ -274,10 +284,20 @@ const styles = StyleSheet.create({
         height: '90%',
     },
     title: {
-        fontSize: 32,
+        fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
+        marginBottom: SPACE,
+        flex: 1,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
+    },
+    backButton: {
+        marginRight: 16,
+        padding: 4,
     },
     subHeading: {
         fontSize: 16,

@@ -22,7 +22,7 @@ export const useAuthenticatedAPI = () => {
             }
 
             // Make the API request with the token
-            const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
+            const apiBaseUrl = 'http://localhost:5001' // process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
             const response = await fetch(`${apiBaseUrl}${endpoint}`, {
                 ...options,
                 headers: {
@@ -770,5 +770,203 @@ export const useAuthenticatedAPI = () => {
                 throw error;
             }
         },
+
+        // Google Calendar integration functions
+        checkGoogleCalendarStatus: async () => {
+            try {
+                const response = await makeAuthenticatedRequest('/api/integrations/google-calendar/status');
+                return response.data.connected;
+            } catch (error) {
+                console.error('Failed to check Google Calendar status:', error);
+                throw error;
+            }
+        },
+
+        exportScheduleToGoogleCalendar: async (schedule, userTimezone = 'UTC') => {
+            try {
+                console.log('🔄 Starting Google Calendar export...');
+                
+                if (!schedule || !schedule.getSchedule) {
+                    throw new Error('Invalid schedule object provided');
+                }
+
+                // Convert Schedule object to Google Calendar events format
+                const events = [];
+                const scheduleMap = schedule.getSchedule();
+
+                // Iterate through each day in the schedule
+                for (const [dayKey, daySchedule] of scheduleMap) {
+                    const timeBlocks = daySchedule.getTimeBlocks();
+                    
+                    // Skip empty days
+                    if (!timeBlocks || timeBlocks.length === 0) {
+                        continue;
+                    }
+
+                    for (const timeBlock of timeBlocks) {
+                        // Skip breaks or completed tasks if desired
+                        if (timeBlock.type === 'break') {
+                            continue;
+                        }
+
+                        // Convert TimeBlock to Google Calendar event format
+                        const event = convertTimeBlockToCalendarEvent(timeBlock, userTimezone);
+                        if (event) {
+                            events.push(event);
+                        }
+                    }
+                }
+
+                if (events.length === 0) {
+                    throw new Error('No events found in schedule to export');
+                }
+
+                console.log(`📅 Exporting ${events.length} events to Google Calendar`);
+
+                // Send to backend API
+                const response = await makeAuthenticatedRequest('/api/integrations/google-calendar/export', {
+                    method: 'POST',
+                    body: JSON.stringify({ events })
+                });
+
+                console.log('✅ Successfully exported to Google Calendar:', response.data);
+                return response.data;
+
+            } catch (error) {
+                console.error('❌ Google Calendar export failed:', error);
+                throw error;
+            }
+        },
+
+        // Integrations operations
+        getUserIntegrations: async () => {
+            try {
+                const response = await makeAuthenticatedRequest('/api/users/integrations');
+                return response.data;
+            } catch (error) {
+                console.error('Failed to get user integrations:', error);
+                throw error;
+            }
+        },
+
+        updateUserIntegrations: async (integrations) => {
+            try {
+                const response = await makeAuthenticatedRequest('/api/users/integrations', {
+                    method: 'PUT',
+                    body: JSON.stringify(integrations),
+                });
+                return response.data;
+            } catch (error) {
+                console.error('Failed to update user integrations:', error);
+                throw error;
+            }
+        },
     };
+};
+
+/**
+ * Convert a TimeBlock to Google Calendar event format
+ * @param {TimeBlock} timeBlock - The time block to convert
+ * @param {string} userTimezone - User's timezone (e.g., 'America/Vancouver')
+ * @returns {Object|null} Google Calendar event object or null if invalid
+ */
+const convertTimeBlockToCalendarEvent = (timeBlock, userTimezone = 'UTC') => {
+    try {
+        if (!timeBlock || !timeBlock.getName || !timeBlock.getDate || !timeBlock.getStartTime || !timeBlock.getEndTime) {
+            console.warn('Invalid timeBlock structure:', timeBlock);
+            return null;
+        }
+
+        const name = timeBlock.getName();
+        const date = timeBlock.getDate();
+        const startTime = timeBlock.getStartTime();
+        const endTime = timeBlock.getEndTime();
+
+        if (!name || !date || !startTime || !endTime) {
+            console.warn('Missing required timeBlock data:', { name, date, startTime, endTime });
+            return null;
+        }
+
+        // Create ISO datetime strings
+        const startDateTime = createISODateTime(date, startTime, userTimezone);
+        const endDateTime = createISODateTime(date, endTime, userTimezone);
+
+        if (!startDateTime || !endDateTime) {
+            console.warn('Failed to create datetime strings for timeBlock:', timeBlock.getName());
+            return null;
+        }
+
+        // Generate unique ID for the event (use backend ID if available, otherwise generate one)
+        const uid = timeBlock.backendId ? `plannr-${timeBlock.backendId}` : `plannr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Build description
+        let description = '';
+        if (timeBlock.getActivityType && timeBlock.getActivityType()) {
+            description += `Activity: ${timeBlock.getActivityType()}\n`;
+        }
+        if (timeBlock.priority && timeBlock.priority.toString && timeBlock.priority.toString() !== 'NONE') {
+            description += `Priority: ${timeBlock.priority.toString()}\n`;
+        }
+        if (timeBlock.deadline && timeBlock.deadline.getDateString) {
+            description += `Deadline: ${timeBlock.deadline.getDateString()}\n`;
+        }
+        description += `\nCreated by Plannr`;
+
+        return {
+            uid: uid,
+            title: name,
+            description: description.trim(),
+            start: startDateTime,
+            end: endDateTime,
+            timeZone: userTimezone
+        };
+
+    } catch (error) {
+        console.error('Error converting timeBlock to calendar event:', error);
+        return null;
+    }
+};
+
+/**
+ * Create ISO datetime string from ScheduleDate and Time24
+ * @param {ScheduleDate} scheduleDate - The date object
+ * @param {Time24} time24 - The time object  
+ * @param {string} timezone - Timezone string
+ * @returns {string|null} ISO datetime string or null if invalid
+ */
+const createISODateTime = (scheduleDate, time24, timezone) => {
+    try {
+        if (!scheduleDate || !time24) {
+            return null;
+        }
+
+        // Get date components
+        const year = scheduleDate.year || scheduleDate.getYear?.();
+        const month = scheduleDate.month || scheduleDate.getMonth?.();
+        const day = scheduleDate.date || scheduleDate.getDay?.();
+
+        if (!year || !month || !day) {
+            console.warn('Invalid date components:', { year, month, day });
+            return null;
+        }
+
+        // Get time components  
+        const hour = time24.hour || time24.getHour?.();
+        const minute = time24.minute || time24.getMinute?.();
+
+        if (hour === undefined || minute === undefined) {
+            console.warn('Invalid time components:', { hour, minute });
+            return null;
+        }
+
+        // Create JavaScript Date object (month is 0-indexed in JS Date)
+        const jsDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+
+        // Return ISO string
+        return jsDate.toISOString();
+
+    } catch (error) {
+        console.error('Error creating ISO datetime:', error);
+        return null;
+    }
 };

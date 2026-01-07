@@ -109,6 +109,15 @@ const SignInScreen = ({ navigation }) => {
             const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
                 strategy: 'oauth_google',
                 redirectUrl: AuthSession.makeRedirectUri(),
+                scopes: [
+                    'openid',
+                    'https://www.googleapis.com/auth/userinfo.email',
+                    'https://www.googleapis.com/auth/userinfo.profile',
+                    // 'https://www.googleapis.com/auth/calendar.app.created',
+                    // 'https://www.googleapis.com/auth/calendar.calendars.readonly',
+                    // 'https://www.googleapis.com/auth/calendar.events',
+                    // 'https://www.googleapis.com/auth/calendar.events.readonly',
+                ],
             });
 
             // If sign in was successful, set the active session

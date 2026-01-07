@@ -14,11 +14,12 @@ import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js';
 import useCurrentTime from '../utils/useCurrentTime.js';
+import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
 
-const ManageAccountScreen = () => {
+const ManageAccountScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logError, logSettingChange } = useActionLogger('ManageAccount');
     const { user } = useUser();
@@ -196,7 +197,15 @@ const ManageAccountScreen = () => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Your Account</Text>
+            <View style={styles.titleContainer}>
+                <TouchableOpacity 
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
+                </TouchableOpacity>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Your Account</Text>
+            </View>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
                 {/* Avatar Selection */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Avatar</Text>
@@ -297,9 +306,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
+        flex: 1,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: spacing.SPACING_16,
         marginBottom: SPACE,
         marginLeft: padding.SCREEN_PADDING,
+        marginRight: padding.SCREEN_PADDING,
+    },
+    backButton: {
+        marginRight: 16,
+        padding: 4,
     },
     subHeading: {
         fontSize: typography.subHeadingSize,

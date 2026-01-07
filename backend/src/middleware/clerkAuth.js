@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/clerk-sdk-node';
+import { clerkClient } from '../config/clerk.js';
 
 /**
  * Middleware to verify Clerk session tokens

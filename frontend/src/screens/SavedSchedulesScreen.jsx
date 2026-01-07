@@ -6,7 +6,8 @@ import { useActionLogger } from '../hooks/useActionLogger.js'
 
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
-import { padding } from '../design/spacing.js'
+import { padding, spacing } from '../design/spacing.js'
+import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const SavedSchedulesScreen = ({ navigation }) => {
     const { appState } = useAppState();
@@ -31,7 +32,15 @@ const SavedSchedulesScreen = ({ navigation }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <View>
-                <Text style={{ ...styles.title, marginTop: 64, color: theme.FOREGROUND }}>Saved Schedules</Text>
+                <View style={styles.titleContainer}>
+                    <TouchableOpacity 
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
+                    <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Saved Schedules</Text>
+                </View>
                 {
                     appState.savedSchedules.length === 0 
                     ? <View style={{ alignItems: 'center' }}>
@@ -81,6 +90,7 @@ const SavedSchedulesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         height: '100%',
+        paddingVertical: padding.SCREEN_PADDING,
     },
     subContainer: {
         height: '90%',
@@ -89,9 +99,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
-        marginTop: 16,
-        marginBottom: 8,
+        flex: 1,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.SPACING_16,
         marginLeft: padding.SCREEN_PADDING,
+        marginRight: padding.SCREEN_PADDING,
+        marginBottom: 16,
+    },
+    backButton: {
+        marginRight: 16,
+        padding: 4,
     },
     card: {
         width: '99%',

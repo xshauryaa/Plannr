@@ -1,16 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch, Alert } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
+import { useUser, useSSO } from '@clerk/clerk-expo';
 import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
+import { addScheduleToAppleCalendar } from '../utils/appleCalendarExport.ts';
 import Indicator from '../../assets/system-icons/Indicator.svg';
 import ScheduleCalendarView from '../components/ScheduleCalendarView.jsx';
 import EventInfoModal from '../modals/EventInfoModal.jsx';
+import ExportCalIcon from '../../assets/system-icons/ExportCalIcon.svg';
 import DeleteIcon from '../../assets/system-icons/DeleteIcon.svg';
 import DeleteScheduleModal from '../modals/DeleteScheduleModal.jsx';
+import ExportCalendarBottomSheet from '../components/ExportCalendarBottomSheet.jsx';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -22,7 +26,9 @@ const OFFSET = PADDING_HORIZONTAL - ((INDICATOR_DIM - ICON_DIM) / 2);
 const ScheduleViewScreen = ({ route }) => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logScheduleAction, logError } = useActionLogger('ScheduleView');
-    const { updateSchedule, getSchedules } = useAuthenticatedAPI();
+    const { updateSchedule, getSchedules, checkGoogleCalendarStatus, exportScheduleToGoogleCalendar } = useAuthenticatedAPI();
+    const { user } = useUser();
+    const { startSSOFlow } = useSSO();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedName } = route.params;
     
@@ -32,6 +38,7 @@ const ScheduleViewScreen = ({ route }) => {
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const indicatorX = useRef(new Animated.Value(0)).current;
+    const exportBottomSheetRef = useRef(null);
     
     // ✅ NOW we can safely check for schedule existence
     const schedule = appState.savedSchedules.find(sched => sched.name === schedName);
@@ -84,13 +91,179 @@ const ScheduleViewScreen = ({ route }) => {
         setShowInfoModal(false);
     }
 
+    // Handle Google Calendar authorization/re-authorization
+    const handleGoogleCalendarAuth = async () => {
+        try {
+            logUserAction('google_calendar_auth_attempt', { 
+                scheduleName: schedName,
+                reason: 'missing_calendar_scope'
+            });
+
+            // For users who need additional Calendar permissions, we'll guide them to reconnect
+            Alert.alert(
+                'Google Calendar Permissions Needed',
+                'Your Google account is connected, but we need additional calendar permissions to export your schedule.\n\nWould you like to reconnect with calendar permissions?',
+                [
+                    {
+                        text: 'Cancel',
+                        style: 'cancel',
+                        onPress: () => {
+                            logUserAction('google_calendar_auth_cancelled', { scheduleName: schedName });
+                        }
+                    },
+                    {
+                        text: 'Reconnect',
+                        onPress: () => {
+                            // Guide user to settings or provide manual steps
+                            Alert.alert(
+                                'Update Google Calendar Permissions',
+                                'To enable Google Calendar export:\n\n1. Go to Account Settings\n2. Disconnect Google account\n3. Reconnect and allow Calendar permissions\n\nOr try the export again in a few minutes as permissions may take time to update.',
+                                [
+                                    { text: 'Got it', style: 'default' },
+                                    {
+                                        text: 'Try Export Again',
+                                        onPress: () => {
+                                            logUserAction('google_calendar_retry_after_guidance', { scheduleName: schedName });
+                                            handleExportToGoogleCalendar();
+                                        }
+                                    }
+                                ]
+                            );
+                            
+                            logUserAction('google_calendar_guidance_shown', { 
+                                scheduleName: schedName 
+                            });
+                        }
+                    }
+                ]
+            );
+
+        } catch (error) {
+            console.error('Failed to handle Google Calendar authorization:', error);
+            logError('google_calendar_auth_failed', error, { scheduleName: schedName });
+            Alert.alert('Error', 'Please try the export again or check your Google account settings.');
+        }
+    };
+
+    // Handle the actual export process
+    const handleExportToGoogleCalendar = async () => {
+        try {
+            logUserAction('google_calendar_export_attempt', { 
+                scheduleName: schedName,
+                totalDays: schedule.schedule?.numDays || 0
+            });
+
+            // Check if Google Calendar is connected first
+            const isConnected = await checkGoogleCalendarStatus();
+            
+            if (!isConnected) {
+                // Show option to connect Google Calendar
+                Alert.alert(
+                    'Google Calendar Not Connected',
+                    'To export your schedule, you need to connect your Google Calendar with calendar permissions.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { 
+                            text: 'Connect Calendar', 
+                            onPress: () => handleGoogleCalendarAuth()
+                        }
+                    ]
+                );
+                return;
+            }
+
+            // Get user's timezone - you might want to get this from user preferences
+            // For now, using a default timezone
+            const userTimezone = 'America/Vancouver'; // TODO: Get from user preferences
+            
+            // Export to Google Calendar
+            const result = await exportScheduleToGoogleCalendar(schedule.schedule, userTimezone);
+            
+            // Show success message
+            Alert.alert(
+                'Success!',
+                `Exported ${result.inserted} events to your "Plannr" calendar in Google Calendar.`,
+                [{ text: 'Great!' }]
+            );
+            
+            logUserAction('google_calendar_export_success', { 
+                scheduleName: schedName,
+                eventsExported: result.inserted,
+                calendarId: result.calendarId
+            });
+
+        } catch (error) {
+            console.error('Google Calendar export failed:', error);
+            
+            // Handle specific error types with user-friendly messages
+            let errorMessage = 'Failed to export to Google Calendar. Please try again.';
+            let shouldShowAuthOption = false;
+            
+            if (error.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED')) {
+                errorMessage = 'Google Calendar is not connected or missing calendar permissions.';
+                shouldShowAuthOption = true;
+            } else if (error.message?.includes('GOOGLE_CALENDAR_REAUTH_REQUIRED')) {
+                errorMessage = 'Google Calendar access has expired. Please reconnect your account.';
+                shouldShowAuthOption = true;
+            } else if (error.message?.includes('No events found')) {
+                errorMessage = 'No events found in your schedule to export.';
+            }
+            
+            if (shouldShowAuthOption) {
+                Alert.alert(
+                    'Export Failed',
+                    errorMessage,
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { 
+                            text: 'Fix Connection', 
+                            onPress: () => handleGoogleCalendarAuth()
+                        },
+                        {
+                            text: 'Try Again',
+                            onPress: () => {
+                                // Retry export after a short delay in case permissions are propagating
+                                setTimeout(() => {
+                                    logUserAction('google_calendar_export_retry', { scheduleName: schedName });
+                                    handleExportToGoogleCalendar();
+                                }, 2000);
+                            }
+                        }
+                    ]
+                );
+            } else {
+                Alert.alert(
+                    'Export Failed', 
+                    errorMessage,
+                    [
+                        { text: 'OK', style: 'cancel' },
+                        {
+                            text: 'Try Again',
+                            onPress: () => {
+                                setTimeout(() => {
+                                    logUserAction('google_calendar_export_retry', { scheduleName: schedName });
+                                    handleExportToGoogleCalendar();
+                                }, 1000);
+                            }
+                        }
+                    ]
+                );
+            }
+            
+            logError('google_calendar_export_error', error, {
+                scheduleName: schedName,
+                errorType: error.message?.includes('GOOGLE_CALENDAR') ? 'auth_error' : 'unknown_error'
+            });
+        }
+    };
+
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.SPACING_16, justifyContent: 'space-between', paddingBottom: SPACE }}>
                 <Text style={{ ...styles.title, color: theme.FOREGROUND, alignSelf: 'center' }}>{schedule.name}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'flex-start' }}>
                     <Switch
-                        trackColor={{ false: '#000000', true: '#4166FB' }}
+                        trackColor={{ false: '#000000', true: theme.GRADIENT_START }}
                         thumbColor={'#FFFFFF'}
                         ios_backgroundColor={'#C0C0C0'}
                         onValueChange={async () => { 
@@ -221,6 +394,12 @@ const ScheduleViewScreen = ({ route }) => {
                         <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
                     </TouchableOpacity>
                     */}
+                    <TouchableOpacity 
+                        style={{ width: 32, height: 32, marginRight: 8 }}
+                        onPress={() => exportBottomSheetRef.current?.show()}
+                    >
+                        <ExportCalIcon width={32} height={32} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={styles.subContainer}>
@@ -270,6 +449,13 @@ const ScheduleViewScreen = ({ route }) => {
                 toDelete={schedule.name}
             />
             */}
+            
+            <ExportCalendarBottomSheet 
+                ref={exportBottomSheetRef}
+                onExportGoogle={handleExportToGoogleCalendar}
+                onExportApple={() => addScheduleToAppleCalendar(appState.name, schedule.schedule)}
+                theme={theme}
+            />
         </View>
     );
 }

@@ -31,6 +31,9 @@ export const createUser = async (req, res, next) => {
         // Create default preferences for the user
         await repo.createDefaultPreferences(newUser.id);
 
+        // Create default integrations for the user
+        await repo.createDefaultIntegrations(newUser.id);
+
         res.status(201).json({
             success: true,
             message: 'User created successfully',
@@ -627,6 +630,90 @@ export const markOnboardingComplete = async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error marking onboarding complete:', error);
+        next(error);
+    }
+};
+
+// Integrations Controller Functions
+export const getUserIntegrations = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user by Clerk ID
+        const user = await repo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Get user integrations
+        const integrations = await repo.getUserIntegrations(user.id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Integrations retrieved successfully',
+            data: {
+                googleCalendar: integrations.googleCalendar,
+                todoist: integrations.todoist,
+                notion: integrations.notion,
+                googleTasks: integrations.googleTasks,
+                microsoftTodo: integrations.microsoftTodo,
+                updatedAt: integrations.updatedAt
+            }
+        });
+    } catch (error) {
+        console.error('Error getting user integrations:', error);
+        next(error);
+    }
+};
+
+export const updateUserIntegrations = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        const integrationsData = req.validatedData;
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user by Clerk ID
+        const user = await repo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Update integrations
+        const updatedIntegrations = await repo.updateUserIntegrations(user.id, integrationsData);
+
+        res.status(200).json({
+            success: true,
+            message: 'Integrations updated successfully',
+            data: {
+                googleCalendar: updatedIntegrations.googleCalendar,
+                todoist: updatedIntegrations.todoist,
+                notion: updatedIntegrations.notion,
+                googleTasks: updatedIntegrations.googleTasks,
+                microsoftTodo: updatedIntegrations.microsoftTodo,
+                updatedAt: updatedIntegrations.updatedAt
+            }
+        });
+    } catch (error) {
+        console.error('Error updating user integrations:', error);
         next(error);
     }
 };

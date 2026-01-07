@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { useAppState } from '../context/AppStateContext.js'
 import { useActionLogger } from '../hooks/useActionLogger.js'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -20,6 +20,7 @@ import EventDependencies from '../model/EventDependencies.js'
 import GenerationModal from '../modals/GenerationModal.jsx'
 import SchedulingErrorModal from '../modals/SchedulingErrorModal.jsx'
 import Time24 from '../model/Time24.js'
+import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const GenerateScheduleScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
@@ -385,7 +386,15 @@ const GenerateScheduleScreen = ({ navigation }) => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
+            <View style={styles.titleContainer}>
+                <TouchableOpacity 
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
+                </TouchableOpacity>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
+            </View>
             {views[genStage]}
             <SchedulingErrorModal 
                 isVisible={showErrorModal} 
@@ -409,8 +418,17 @@ const styles = StyleSheet.create({
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
+        flex: 1,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: 64,
-        marginBottom: 8
+        marginBottom: 8,
+    },
+    backButton: {
+        marginRight: 16,
+        padding: 4,
     },
     
 })

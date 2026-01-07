@@ -2,7 +2,7 @@
   "expo": {
     "name": "Plannr",
     "slug": "Plannr",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "install": {
       "exclude": ["react-native-reanimated"]
@@ -20,7 +20,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sthareja19.Plannr",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCalendarsUsageDescription": "Plannr needs access to your calendar to add scheduled events."
       },
       "usesAppleSignIn": true
     },
