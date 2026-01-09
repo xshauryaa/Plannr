@@ -54,7 +54,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
                             navigation.navigate("Generate");
                         }}
                     />
-                    <MenuButton
+                    {/* <MenuButton
                         broad={true}
                         title="Reschedule Tasks"
                         icon="Reschedule"
@@ -62,7 +62,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
                             logUserAction('reschedule_tasks_clicked');
                             bottomSheetRef.current?.show();
                         }}
-                    />
+                    /> */}
                 </View>
             </ScrollView>
             <RescheduleBottomSheet ref={bottomSheetRef} theme={theme}/>
