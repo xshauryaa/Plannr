@@ -3,6 +3,14 @@ import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler
 import { serializeTimeBlock, parseTimeBlock } from '../persistence/TimeBlockHandler';
 import { serializeScheduleDate } from '../persistence/ScheduleDateHandler';
 import ScheduleDate from '../model/ScheduleDate';
+import { apiClient } from './apiClient';
+
+// Global update handler - will be set by the context
+let globalUpdateHandler = null;
+
+export const setGlobalUpdateHandler = (handler) => {
+    globalUpdateHandler = handler;
+};
 
 /**
  * API utility for making authenticated requests to your backend
@@ -21,17 +29,22 @@ export const useAuthenticatedAPI = () => {
                 throw new Error('No authentication token available');
             }
 
-            // Make the API request with the token
-            const apiBaseUrl = 'http://localhost:5001' // process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';  
-            const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+            // Make the API request with the token using our enhanced API client
+            const response = await apiClient.makeRequest(endpoint, {
                 ...options,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'x-clerk-user-id': userId, // Use userId from auth hook instead
+                    'x-clerk-user-id': userId, // Use userId from auth hook
                     ...options.headers,
                 },
-            });
+            }, token);
+
+            // Check if response indicates update requirement
+            const updateCheck = await apiClient.checkForUpdateRequirement(response.clone());
+            if (updateCheck.updateRequired && globalUpdateHandler) {
+                globalUpdateHandler(updateCheck.updateInfo);
+                // Still throw error to handle the API call appropriately
+                throw new Error(`APP_UPDATE_REQUIRED: ${updateCheck.updateInfo.message}`);
+            }
 
             if (!response.ok) {
                 const errorData = await response.text();

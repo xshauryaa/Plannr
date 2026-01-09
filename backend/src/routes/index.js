@@ -3,6 +3,7 @@ import schedulesRoutes from '../modules/schedules/schedules.routes.js';
 import usersRoutes from '../modules/users/users.routes.js';
 import preferencesRoutes from '../modules/preferences/preferences.routes.js';
 import integrationsRoutes from '../modules/integrations/integrations.routes.js';
+import { getMinVersion, getUpdateUrl } from '../config/versionPolicy.js';
 // import importTasksRoutes from '../modules/importTasks/routes/index.js'; // DISABLED FOR LAUNCH
 
 const router = express.Router();
@@ -10,6 +11,17 @@ const router = express.Router();
 // Health check
 router.get('/health', (req, res) => {
     res.status(200).json({ success: true });
+});
+
+// App version info endpoint
+router.get('/app/version', (req, res) => {
+    const platform = req.query.platform || req.headers['x-platform'] || 'ios';
+    
+    res.status(200).json({
+        minVersion: getMinVersion(platform),
+        platform: platform.toLowerCase(),
+        updateUrl: getUpdateUrl(platform)
+    });
 });
 
 // Module routes

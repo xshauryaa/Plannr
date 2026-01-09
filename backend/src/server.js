@@ -3,18 +3,23 @@ import cors from 'cors';
 import { ENV } from './config/env.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middleware/error.js';
+import { enforceMinAppVersion } from './middleware/enforceMinAppVersion.js';
 import { startCronJobs, stopCronJobs } from './config/cron.js';
 
 const app = express();
 const PORT = ENV.PORT;
 
-// Middleware
+// Basic middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files for uploads
 app.use('/uploads', express.static('uploads'));
+
+// Apply version enforcement middleware globally to all API routes
+// This must come before the protected routes but after basic middleware
+app.use(enforceMinAppVersion);
 
 // API Routes
 app.use('/api', apiRoutes);
