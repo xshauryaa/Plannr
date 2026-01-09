@@ -60,6 +60,22 @@ router.delete('/:id/days/:dayId',
     schedulesControllers.deleteDay
 );
 
+// Event Dependencies routes
+router.post('/:id/dependencies', 
+    schedulesValidators.validateSaveDependencies,
+    schedulesControllers.saveEventDependencies
+);
+
+router.put('/:id/dependencies/:depsId', 
+    schedulesValidators.validateUpdateDependencies,
+    schedulesControllers.updateEventDependencies
+);
+
+router.get('/:id/dependencies', 
+    schedulesValidators.validateGetDependencies,
+    schedulesControllers.getEventDependencies
+);
+
 
 // Block operations (updated to use day-based routing)
 router.get('/:id/days/:dayId/blocks', 

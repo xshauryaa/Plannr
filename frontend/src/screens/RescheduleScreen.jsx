@@ -24,7 +24,7 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 const RescheduleScreen = ({ route, navigation }) => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logScheduleAction, logError } = useActionLogger('Reschedule');
-    const { getSchedules, deleteSchedule, saveScheduleWithDays, convertScheduleToBackendJSON } = useAuthenticatedAPI();
+    const { getSchedules, deleteSchedule, saveScheduleWithDays } = useAuthenticatedAPI();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const { schedule } = route.params;
 
@@ -38,7 +38,8 @@ const RescheduleScreen = ({ route, navigation }) => {
     const [rigidEvents, setRigidEvents] = useState(rescheduler.rigidEvents);
     const [flexibleEvents, setFlexibleEvents] = useState(rescheduler.flexibleEvents);
     const [events, setEvents] = useState([...rescheduler.rigidEvents, ...rescheduler.flexibleEvents]);
-    const [deps, setDeps] = useState(new EventDependencies(rescheduler.dependencies.getDependencies()));
+    const [deps, setDeps] = useState(new EventDependencies(rescheduler.dependencies));
+    console.log(deps.dependencies);
     const [showReschedulingModal, setShowReschedulingModal] = useState(false);
 
     const ReplaceWithRescheduled = async (newSchedule) => {

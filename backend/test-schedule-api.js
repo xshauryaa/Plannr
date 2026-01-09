@@ -294,7 +294,9 @@ async function runComprehensiveAPITest() {
         // 1. Create Schedule
         totalTests++;
         console.log('\n📝 TEST 1: Creating schedule...');
-        const scheduleResponse = await makeRequest('POST', '/schedules', testScheduleData);
+        const scheduleResponse = await makeRequest('POST', '/schedules', testScheduleData, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (scheduleResponse.success) {
             scheduleId = scheduleResponse.data.data.id;
@@ -310,7 +312,9 @@ async function runComprehensiveAPITest() {
         console.log('\n📅 TEST 2: Creating days for schedule...');
         
         for (const dayData of testDaysData) {
-            const response = await makeRequest('POST', `/schedules/${scheduleId}/days`, dayData);
+            const response = await makeRequest('POST', `/schedules/${scheduleId}/days`, dayData, {
+                'X-App-Version': '1.1.1'
+            });
             
             if (response.success) {
                 dayIds.push({
@@ -330,7 +334,9 @@ async function runComprehensiveAPITest() {
         // 3. Get All Days for Schedule
         totalTests++;
         console.log('\n📋 TEST 3: Retrieving all days...');
-        const daysResponse = await makeRequest('GET', `/schedules/${scheduleId}/days`);
+        const daysResponse = await makeRequest('GET', `/schedules/${scheduleId}/days`, null, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (daysResponse.success && daysResponse.data.data.length === 7) {
             logTest('Get All Days', true, `Retrieved ${daysResponse.data.data.length} days`);
@@ -349,7 +355,9 @@ async function runComprehensiveAPITest() {
             console.log(`📦 Creating blocks for ${day.dayName}: ${day.blocks.length} blocks`);
             console.log(`📝 First block sample:`, JSON.stringify(day.blocks[0], null, 2));
             
-            const response = await makeRequest('POST', `/schedules/${scheduleId}/days/${day.id}/blocks`, blocksData);
+            const response = await makeRequest('POST', `/schedules/${scheduleId}/days/${day.id}/blocks`, blocksData, {
+                'X-App-Version': '1.1.1'
+            });
             
             if (response.success) {
                 const createdBlocks = response.data.data;
@@ -375,7 +383,9 @@ async function runComprehensiveAPITest() {
         console.log('\n🔍 TEST 5: Testing day-specific block retrieval...');
         
         const firstDay = dayIds[0];
-        const dayBlocksResponse = await makeRequest('GET', `/schedules/${scheduleId}/days/${firstDay.id}/blocks`);
+        const dayBlocksResponse = await makeRequest('GET', `/schedules/${scheduleId}/days/${firstDay.id}/blocks`, null, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (dayBlocksResponse.success) {
             const blocksCount = dayBlocksResponse.data.data.length;
@@ -395,7 +405,9 @@ async function runComprehensiveAPITest() {
         totalTests++;
         console.log('\n📊 TEST 6: Testing individual day retrieval...');
         
-        const dayResponse = await makeRequest('GET', `/schedules/${scheduleId}/days/${firstDay.id}?includeBlocks=true`);
+        const dayResponse = await makeRequest('GET', `/schedules/${scheduleId}/days/${firstDay.id}?includeBlocks=true`, null, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (dayResponse.success && dayResponse.data.data.blocks) {
             logTest('Individual Day Retrieval with Blocks', true, `Retrieved day with ${dayResponse.data.data.blocks.length} blocks`);
@@ -408,7 +420,9 @@ async function runComprehensiveAPITest() {
         totalTests++;
         console.log('\n🗂️ TEST 7: Testing complete schedule retrieval...');
         
-        const completeScheduleResponse = await makeRequest('GET', `/schedules/${scheduleId}?includeBlocks=true`);
+        const completeScheduleResponse = await makeRequest('GET', `/schedules/${scheduleId}?includeBlocks=true`, null, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (completeScheduleResponse.success) {
             logTest('Complete Schedule Retrieval', true, `Retrieved schedule with blocks`);
@@ -421,15 +435,18 @@ async function runComprehensiveAPITest() {
         totalTests++;
         console.log('\n✏️ TEST 8: Testing block updates...');
         
-        if (blockIds.length > 0) {
+        if (blockIds.length > 0 && dayIds.length > 0) {
             const firstBlockId = blockIds[0];
+            const firstDayId = dayIds[0].id;
             const updateData = {
                 title: "Updated Test Block",
                 completed: true,
                 metadata: { updated: true }
             };
             
-            const updateResponse = await makeRequest('PUT', `/schedules/${scheduleId}/blocks/${firstBlockId}`, updateData);
+            const updateResponse = await makeRequest('PUT', `/schedules/${scheduleId}/days/${firstDayId}/blocks/${firstBlockId}`, updateData, {
+                'X-App-Version': '1.1.1'
+            });
             
             if (updateResponse.success) {
                 logTest('Block Update', true, 'Successfully updated block');
@@ -450,7 +467,9 @@ async function runComprehensiveAPITest() {
                 minGap: 45
             };
             
-            const updateResponse = await makeRequest('PUT', `/schedules/${scheduleId}/days/${firstDayId}`, updateData);
+            const updateResponse = await makeRequest('PUT', `/schedules/${scheduleId}/days/${firstDayId}`, updateData, {
+                'X-App-Version': '1.1.1'
+            });
             
             if (updateResponse.success) {
                 logTest('Day Update', true, 'Successfully updated day');
@@ -460,9 +479,80 @@ async function runComprehensiveAPITest() {
             }
         }
         
-        // 10. Test Legacy Compatibility (scheduleId-based block creation)
+        // 10. Test Event Dependencies Integration
         totalTests++;
-        console.log('\n🔄 TEST 10: Testing legacy compatibility...');
+        console.log('\n🔗 TEST 10: Testing event dependencies integration...');
+        
+        // Create test dependencies map based on the events we have
+        const testDependenciesMap = {
+            "Study Math Chapters": ["Math Midterm"],
+            "Fill Health Journal": ["Physio Checkup"],
+            "Slide Draft": ["Write Research Notes"],
+            "Report Draft": ["Slide Draft", "Staff Meeting"],
+            "Design Mockups": ["Slide Draft", "Report Draft"],
+            "Finalize Budget": ["Report Draft"],
+            "Email Follow-Ups": ["Staff Meeting"],
+            "Proofread Notes": ["Write Research Notes"],
+            "Reflective Essay": ["Proofread Notes"],
+            "Buy Gifts": ["Weekly Planning"],
+            "Packing Checklist": ["Buy Gifts"]
+        };
+        
+        // Test saving dependencies
+        const dependenciesResponse = await makeRequest('POST', `/schedules/${scheduleId}/dependencies`, {
+            dependenciesMap: testDependenciesMap
+        }, {
+            'X-App-Version': '1.1.1'
+        });
+        
+        if (dependenciesResponse.success) {
+            const dependenciesId = dependenciesResponse.data.data.id;
+            logTest('Dependencies Creation', true, `ID: ${dependenciesId}`);
+            
+            // Test retrieving dependencies
+            const getDepsResponse = await makeRequest('GET', `/schedules/${scheduleId}/dependencies`, null, {
+                'X-App-Version': '1.1.1'
+            });
+            
+            if (getDepsResponse.success) {
+                const retrievedDeps = getDepsResponse.data.data.dependenciesMap;
+                const originalKeys = Object.keys(testDependenciesMap).length;
+                const retrievedKeys = Object.keys(retrievedDeps).length;
+                
+                if (retrievedKeys === originalKeys) {
+                    logTest('Dependencies Retrieval', true, `Retrieved ${retrievedKeys} dependency mappings`);
+                    
+                    // Test updating dependencies
+                    const updatedDepsMap = {
+                        ...testDependenciesMap,
+                        "New Test Task": ["Study Math Chapters", "Fill Health Journal"]
+                    };
+                    
+                    const updateDepsResponse = await makeRequest('PUT', `/schedules/${scheduleId}/dependencies/${dependenciesId}`, {
+                        dependenciesMap: updatedDepsMap
+                    }, {
+                        'X-App-Version': '1.1.1'
+                    });
+                    
+                    if (updateDepsResponse.success) {
+                        logTest('Dependencies Update', true, 'Successfully updated dependencies');
+                        passedTests++;
+                    } else {
+                        logTest('Dependencies Update', false, updateDepsResponse.data.message);
+                    }
+                } else {
+                    logTest('Dependencies Retrieval', false, `Expected ${originalKeys}, got ${retrievedKeys}`);
+                }
+            } else {
+                logTest('Dependencies Retrieval', false, getDepsResponse.data.message);
+            }
+        } else {
+            logTest('Dependencies Creation', false, dependenciesResponse.data.message);
+        }
+        
+        // 11. Test Legacy Compatibility (scheduleId-based block creation)
+        totalTests++;
+        console.log('\n🔄 TEST 11: Testing legacy compatibility...');
         
         const legacyBlockData = {
             type: "flexible",
@@ -474,7 +564,9 @@ async function runComprehensiveAPITest() {
             metadata: { legacy: true }
         };
         
-        const legacyResponse = await makeRequest('POST', `/schedules/${scheduleId}/blocks`, legacyBlockData);
+        const legacyResponse = await makeRequest('POST', `/schedules/${scheduleId}/blocks`, legacyBlockData, {
+            'X-App-Version': '1.1.1'
+        });
         
         if (legacyResponse.success) {
             logTest('Legacy Block Creation', true, 'Auto-migrated to day-based structure');

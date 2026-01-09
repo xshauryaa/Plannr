@@ -7,6 +7,7 @@ import { serializeRigidEvent, parseRigidEvent } from "./RigidEventHandler.js";
 import { serializeTimeBlock, parseTimeBlock } from "./TimeBlockHandler.js";
 import FlexibleEvent from "../model/FlexibleEvent.js";
 import RigidEvent from "../model/RigidEvent.js";
+import Break from "../model/Break.js";
 
 export const serializeDaySchedule = (daySchedule) => {
     if (!daySchedule) return null;
@@ -48,20 +49,52 @@ export const parseDaySchedule = (rawObj) => {
     }
 
     let eventsList = [];
-    for (const event of rawObj.events) {
-        let parsed = null;
-        if (event.deadline != null) {
-            parsed = parseFlexibleEvent(event);
-        } else if (event.date != null && event.startTime != null && event.endTime != null) {
-            parsed = parseRigidEvent(event);
-        }
-    
-        eventsList.push(parsed);
-    }
-
     let breaksList = [];
-    for (let i = 0; i < rawObj.breaks.length; i++) {
-        breaksList.push(parseBreak(rawObj.breaks[i]));
+
+    if (rawObj.events.length === 0 && rawObj.breaks.length === 0 && rawObj.timeBlocks.length !== 0) {
+        for (const timeBlock of rawObj.timeBlocks) {
+            if (timeBlock.type === 'rigid') {
+                eventsList.push(new RigidEvent(
+                    timeBlock.name,
+                    timeBlock.activityType,
+                    timeBlock.duration,
+                    parseScheduleDate(timeBlock.date),
+                    timeBlock.startTime,
+                    timeBlock.endTime,
+                    timeBlock.backendId || ''
+                ));
+            } else if (timeBlock.type === 'flexible') {
+                eventsList.push(new FlexibleEvent(
+                    timeBlock.name,
+                    timeBlock.activityType,
+                    timeBlock.duration,
+                    timeBlock.priority,
+                    parseScheduleDate(timeBlock.deadline),
+                    timeBlock.backendId || ''
+                ));
+            } else if (timeBlock.type === 'break') {
+                breaksList.push(new Break(
+                    timeBlock.duration,
+                    timeBlock.startTime,
+                    timeBlock.endTime
+                ))
+            }
+        }
+    } else {
+        for (const event of rawObj.events) {
+            let parsed = null;
+            if (event.deadline != null) {
+                parsed = parseFlexibleEvent(event);
+            } else if (event.date != null && event.startTime != null && event.endTime != null) {
+                parsed = parseRigidEvent(event);
+            }
+        
+            eventsList.push(parsed);
+        }
+
+        for (let i = 0; i < rawObj.breaks.length; i++) {
+            breaksList.push(parseBreak(rawObj.breaks[i]));
+        }
     }
     
     let timeBlocksList = [];

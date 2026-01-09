@@ -37,7 +37,7 @@ const HomeScreen = ({ navigation }) => {
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);
-    
+
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hello {appState.name}</Text>

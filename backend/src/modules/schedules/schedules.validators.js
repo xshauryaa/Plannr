@@ -36,6 +36,27 @@ const Time24Schema = z.union([
     return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
 }, { message: 'Invalid time format. Must be HHMM or HMM (e.g., 930, 1745)' });
 
+// Dependencies map schema
+const DependenciesMapSchema = z.record(
+    z.string().min(1, 'Event name cannot be empty'),
+    z.array(z.string().min(1, 'Dependency name cannot be empty'))
+).refine(
+    (map) => {
+        // Additional validation: ensure no circular dependencies (basic check)
+        const eventNames = Object.keys(map);
+        for (const eventName of eventNames) {
+            const dependencies = map[eventName];
+            if (dependencies.includes(eventName)) {
+                return false; // Self-dependency not allowed
+            }
+        }
+        return true;
+    },
+    {
+        message: 'Circular dependencies are not allowed (event cannot depend on itself)'
+    }
+);
+
 // Schedule validation schemas - updated to match frontend Schedule model
 export const createScheduleSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -366,3 +387,90 @@ export const deleteBlockValidator = validateBlockIdParam;
 export const applyOpsValidator = validateDiffOps;
 export const getBlocksInDateRangeValidator = validateDateRangeQuery;
 export const markBlockCompletedValidator = validateBlockIdParam;
+
+/**
+ * ========================================
+ * EVENT DEPENDENCIES VALIDATION SCHEMAS
+ * ========================================
+ */
+
+// Save dependencies schema
+export const saveDependenciesSchema = z.object({
+    dependenciesMap: DependenciesMapSchema
+});
+
+// Update dependencies schema
+export const updateDependenciesSchema = z.object({
+    dependenciesMap: DependenciesMapSchema
+});
+
+// Dependencies ID parameter schema
+export const dependenciesIdParamSchema = z.object({
+    id: z.string().uuid('Invalid schedule ID format'),
+    depsId: z.string().uuid('Invalid dependencies ID format')
+});
+
+// Validation middleware for dependencies
+export const validateSaveDependencies = (req, res, next) => {
+    try {
+        const paramsResult = scheduleIdParamSchema.parse(req.params);
+        const bodyResult = saveDependenciesSchema.parse(req.body);
+        
+        req.validated = {
+            params: paramsResult,
+            body: bodyResult
+        };
+        next();
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: error.errors
+            });
+        }
+        next(error);
+    }
+};
+
+export const validateUpdateDependencies = (req, res, next) => {
+    try {
+        const paramsResult = dependenciesIdParamSchema.parse(req.params);
+        const bodyResult = updateDependenciesSchema.parse(req.body);
+        
+        req.validated = {
+            params: paramsResult,
+            body: bodyResult
+        };
+        next();
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: error.errors
+            });
+        }
+        next(error);
+    }
+};
+
+export const validateGetDependencies = (req, res, next) => {
+    try {
+        const paramsResult = scheduleIdParamSchema.parse(req.params);
+        
+        req.validated = {
+            params: paramsResult
+        };
+        next();
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: error.errors
+            });
+        }
+        next(error);
+    }
+};

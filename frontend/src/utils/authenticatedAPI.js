@@ -1,5 +1,9 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
-import { serializeSchedule, parseSchedule } from '../persistence/ScheduleHandler';
+import { 
+    serializeSchedule, 
+    parseSchedule, 
+    convertEventDependenciesToNameMap 
+} from '../persistence/ScheduleHandler';
 import { serializeTimeBlock, parseTimeBlock } from '../persistence/TimeBlockHandler';
 import { serializeScheduleDate } from '../persistence/ScheduleDateHandler';
 import ScheduleDate from '../model/ScheduleDate';
@@ -341,10 +345,36 @@ export const useAuthenticatedAPI = () => {
                     }
                 }
 
+                // 3. Save event dependencies if they exist
+                let savedDependencies = null;
+                if (scheduleObject.events && scheduleObject.events.length > 0 && convertEventDependenciesToNameMap) {
+                    try {
+                        const dependenciesMap = convertEventDependenciesToNameMap(scheduleObject.events);
+                        if (dependenciesMap && Object.keys(dependenciesMap).length > 0) {
+                            console.log('💾 Saving event dependencies...');
+                            const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`, {
+                                method: 'POST',
+                                body: JSON.stringify({ dependenciesMap }),
+                            });
+                            
+                            if (dependenciesResponse.success) {
+                                savedDependencies = dependenciesResponse.data;
+                                console.log('✅ Event dependencies saved successfully');
+                            } else {
+                                console.warn('⚠️ Failed to save dependencies, but continuing:', dependenciesResponse.message);
+                            }
+                        }
+                    } catch (depError) {
+                        console.warn('⚠️ Failed to save dependencies, but continuing:', depError);
+                        // Don't fail the entire operation if dependencies fail
+                    }
+                }
+
                 console.log('✅ Successfully saved schedule with days-based architecture');
                 return {
                     scheduleId,
                     daysCreated: createdDays.length,
+                    dependenciesSaved: savedDependencies ? true : false,
                     success: true
                 };
 
@@ -426,11 +456,23 @@ export const useAuthenticatedAPI = () => {
 
                 const schedule = scheduleData.data;
 
+                // Get dependencies separately from the dependencies API
+                let dependenciesMap = null;
+                try {
+                    const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`);
+                    if (dependenciesResponse.success && dependenciesResponse.data) {
+                        dependenciesMap = dependenciesResponse.data.dependenciesMap;
+                        console.log('✅ Retrieved dependencies for schedule:', scheduleId);
+                    }
+                } catch (depError) {
+                    console.warn('Failed to retrieve dependencies for schedule:', scheduleId, depError);
+                    // Continue without dependencies - not fatal
+                }
+
                 // Check if this is the new days-based architecture or legacy blocks-based
                 let blocks = [];
                 if (schedule.blocks) {
                     // Legacy blocks-based approach
-                    console
                     blocks = schedule.blocks;
                 } else {
                     // New days-based approach - get blocks through days
@@ -462,10 +504,11 @@ export const useAuthenticatedAPI = () => {
                     minGap: schedule.minGap,
                     workingHoursLimit: schedule.workingHoursLimit,
                     strategy: schedule.strategy,
-                    startTime: schedule.startTime , // Convert integer to Time24 format
+                    startTime: schedule.startTime, // Convert integer to Time24 format
                     endTime: schedule.endTime,
-                    eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
-                    schedule: [] // We'll build this from blocks
+                    eventDependencies: dependenciesMap || {}, // Use fetched dependencies or empty object
+                    schedule: [], // We'll build this from blocks
+                    parseFromBackend: true // Important: This tells ScheduleHandler we're parsing from backend
                 };
 
                 // Group blocks by date to reconstruct the schedule map
@@ -589,12 +632,26 @@ export const useAuthenticatedAPI = () => {
                     .map(async (savedSchedule) => {
                         try {
                             const scheduleObject = await makeAuthenticatedRequest(`/api/schedules/${savedSchedule.backendId}?includeBlocks=true`)
-                                .then(scheduleData => {
+                                .then(async scheduleData => {
                                     if (!scheduleData.success || !scheduleData.data) {
                                         throw new Error('Failed to fetch schedule data from database');
                                     }
 
                                     const schedule = scheduleData.data;
+
+                                    // Get dependencies separately from the dependencies API
+                                    let dependenciesMap = null;
+                                    try {
+                                        const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${savedSchedule.backendId}/dependencies`);
+                                        if (dependenciesResponse.success && dependenciesResponse.data) {
+                                            dependenciesMap = dependenciesResponse.data.dependenciesMap;
+                                            console.log('✅ Retrieved dependencies for schedule:', savedSchedule.backendId);
+                                            console.log('Dependencies Map:', dependenciesMap);
+                                        }
+                                    } catch (depError) {
+                                        console.warn('Failed to retrieve dependencies for schedule:', savedSchedule.backendId, depError);
+                                        // Continue without dependencies - not fatal
+                                    }
 
                                     // console.log('Schedule Data for ID', savedSchedule.backendId, ':', schedule);
 
@@ -607,8 +664,9 @@ export const useAuthenticatedAPI = () => {
                                         strategy: schedule.strategy,
                                         startTime: schedule.startTime,
                                         endTime: schedule.endTime,
-                                        eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
-                                        schedule: []
+                                        eventDependencies: dependenciesMap || {}, // Use fetched dependencies or empty object
+                                        schedule: [],
+                                        parseFromBackend: true // Important: This tells ScheduleHandler we're parsing from backend
                                     };
 
                                     const blocksByDate = {};
@@ -705,6 +763,19 @@ export const useAuthenticatedAPI = () => {
 
                 const { schedule, blocks } = scheduleData.data;
 
+                // Get dependencies separately from the dependencies API
+                let dependenciesMap = null;
+                try {
+                    const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`);
+                    if (dependenciesResponse.success && dependenciesResponse.data) {
+                        dependenciesMap = dependenciesResponse.data.dependenciesMap;
+                        console.log('✅ Retrieved dependencies for schedule:', scheduleId);
+                    }
+                } catch (depError) {
+                    console.warn('Failed to retrieve dependencies for schedule:', scheduleId, depError);
+                    // Continue without dependencies - not fatal
+                }
+
                 const serializedSchedule = {
                     numDays: schedule.numDays,
                     day1Date: schedule.day1Date,
@@ -714,8 +785,9 @@ export const useAuthenticatedAPI = () => {
                     strategy: schedule.strategy,
                     startTime: { hour: Math.floor(schedule.startTime / 100), minute: schedule.startTime % 100 },
                     endTime: { hour: Math.floor(schedule.endTime / 100), minute: schedule.endTime % 100 },
-                    eventDependencies: schedule.metadata?.eventDependencies || { dependencies: [] },
-                    schedule: []
+                    eventDependencies: dependenciesMap || {}, // Use fetched dependencies or empty object
+                    schedule: [],
+                    parseFromBackend: true // Important: This tells ScheduleHandler we're parsing from backend
                 };
 
                 const blocksByDate = {};
@@ -871,6 +943,43 @@ export const useAuthenticatedAPI = () => {
                 return response.data;
             } catch (error) {
                 console.error('Failed to update user integrations:', error);
+                throw error;
+            }
+        },
+
+        // Event Dependencies API
+        saveEventDependencies: async (scheduleId, dependenciesMap) => {
+            try {
+                const response = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`, {
+                    method: 'POST',
+                    body: JSON.stringify({ dependenciesMap }),
+                });
+                return response.data;
+            } catch (error) {
+                console.error('Failed to save event dependencies:', error);
+                throw error;
+            }
+        },
+
+        updateEventDependencies: async (scheduleId, dependenciesId, dependenciesMap) => {
+            try {
+                const response = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies/${dependenciesId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ dependenciesMap }),
+                });
+                return response.data;
+            } catch (error) {
+                console.error('Failed to update event dependencies:', error);
+                throw error;
+            }
+        },
+
+        getEventDependencies: async (scheduleId) => {
+            try {
+                const response = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`);
+                return response.data;
+            } catch (error) {
+                console.error('Failed to get event dependencies:', error);
                 throw error;
             }
         },

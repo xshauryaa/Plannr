@@ -41,6 +41,14 @@ export const schedules = pgTable("schedules", {
   index("schedules_owner_updated_idx").on(t.ownerId, t.updatedAt),
 ]);
 
+export const dependencies = pgTable("dependencies", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    scheduleId: uuid("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),
+    dependenciesMap: jsonb('dependencies_map').notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
 export const days = pgTable("days", {
   id: uuid("id").defaultRandom().primaryKey(),
   scheduleId: uuid("schedule_id").notNull().references(() => schedules.id, { onDelete: "cascade" }),

@@ -17,6 +17,18 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
     const [showModal, setShowModal] = useState(false);
 
     const addFlexibleEvent = (name, type, duration, priority, deadline) => {
+        // Check for duplicate event names in eventsInput
+        const existingEvent = eventsInput.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (existingEvent) {
+            throw new Error('DUPLICATE_EVENT_NAME');
+        }
+        
+        // Check for duplicates in current flexibleEvents as well
+        const duplicateInCurrent = flexibleEvents.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (duplicateInCurrent) {
+            throw new Error('DUPLICATE_EVENT_NAME');
+        }
+        
         const newEvent = new FlexibleEvent(name, type, duration, priority, deadline)
 
         setFlexibleEvents([...flexibleEvents, newEvent])

@@ -17,6 +17,18 @@ const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const [showModal, setShowModal] = useState(false)
 
     const addRigidEvent = (name, type, date, startTime, endTime) => {
+        // Check for duplicate event names in eventsInput
+        const existingEvent = eventsInput.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (existingEvent) {
+            throw new Error('DUPLICATE_EVENT_NAME');
+        }
+        
+        // Check for duplicates in current rigidEvents as well
+        const duplicateInCurrent = rigidEvents.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (duplicateInCurrent) {
+            throw new Error('DUPLICATE_EVENT_NAME');
+        }
+
         const duration = (endTime.hour * 60 + endTime.minute) - (startTime.hour * 60 + startTime.minute);
         const newEvent = new RigidEvent(name, type, duration, date, startTime.toInt(), endTime.toInt())
 

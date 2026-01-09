@@ -1339,3 +1339,184 @@ export const getBlockById = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * ========================================
+ * EVENT DEPENDENCIES CONTROLLERS
+ * ========================================
+ */
+
+/**
+ * Save event dependencies for a schedule
+ * POST /api/schedules/:id/dependencies
+ */
+export const saveEventDependencies = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const { id: scheduleId } = req.validated.params;
+        const { dependenciesMap } = req.validated.body;
+        
+        const result = await repo.upsertEventDependencies(
+            scheduleId,
+            dependenciesMap,
+            user.id
+        );
+        
+        res.status(201).json({
+            success: true,
+            message: 'Event dependencies saved successfully',
+            data: {
+                id: result.id,
+                scheduleId: result.scheduleId,
+                dependenciesMap: result.dependenciesMap,
+                createdAt: result.createdAt,
+                updatedAt: result.updatedAt
+            }
+        });
+        
+    } catch (error) {
+        if (error.message.includes('not found') || error.message.includes('access denied')) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * Update event dependencies by ID
+ * PUT /api/schedules/:id/dependencies/:depsId
+ */
+export const updateEventDependencies = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const { depsId } = req.validated.params;
+        const { dependenciesMap } = req.validated.body;
+        
+        const result = await repo.updateEventDependenciesById(
+            depsId,
+            dependenciesMap,
+            user.id
+        );
+        
+        res.status(200).json({
+            success: true,
+            message: 'Event dependencies updated successfully',
+            data: {
+                id: result.id,
+                scheduleId: result.scheduleId,
+                dependenciesMap: result.dependenciesMap,
+                updatedAt: result.updatedAt
+            }
+        });
+        
+    } catch (error) {
+        if (error.message.includes('not found') || error.message.includes('access denied')) {
+            return res.status(404).json({
+                success: false,
+                message: 'Event dependencies or schedule not found'
+            });
+        }
+        next(error);
+    }
+};
+
+/**
+ * Get event dependencies for a schedule
+ * GET /api/schedules/:id/dependencies
+ */
+export const getEventDependencies = async (req, res, next) => {
+    try {
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const { id: scheduleId } = req.validated.params;
+        
+        const dependencies = await repo.getEventDependenciesByScheduleId(
+            scheduleId,
+            user.id
+        );
+        
+        if (!dependencies) {
+            return res.status(200).json({
+                success: true,
+                data: {
+                    dependenciesMap: {}
+                },
+                message: 'No dependencies found for this schedule'
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                id: dependencies.id,
+                scheduleId: dependencies.scheduleId,
+                dependenciesMap: dependencies.dependenciesMap,
+                createdAt: dependencies.createdAt,
+                updatedAt: dependencies.updatedAt
+            },
+            message: 'Event dependencies retrieved successfully'
+        });
+        
+    } catch (error) {
+        if (error.message.includes('not found') || error.message.includes('access denied')) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+        next(error);
+    }
+};

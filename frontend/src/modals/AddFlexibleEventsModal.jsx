@@ -269,9 +269,19 @@ const AddFlexibleEventsModal = ({ isVisible, onClick, onClose, minDate, numDays 
                                 setWarning("Duration of event cannot be 0")
                                 setShowWarning(true)
                             } else {
-                                setShowWarning(false)
-                                onClick(name, type, parseInt(duration), priority, deadline)
-                                setToDefaults();
+                                try {
+                                    setShowWarning(false);
+                                    onClick(name, type, parseInt(duration), priority, deadline);
+                                    setToDefaults();
+                                    // Success - modal closes automatically via onClick
+                                } catch (error) {
+                                    if (error.message === 'DUPLICATE_EVENT_NAME') {
+                                        setWarning('An event already exists with this name. Please try another name.');
+                                    } else {
+                                        setWarning('Failed to add event. Please try again.');
+                                    }
+                                    // Modal stays open so user can fix the name
+                                }
                             }
                         }}
                     >

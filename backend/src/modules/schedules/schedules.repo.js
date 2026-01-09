@@ -1,5 +1,5 @@
 import { db } from '../../config/db.js';
-import { schedules, blocks, users, days } from '../../db/schema.js';
+import { schedules, blocks, users, days, dependencies } from '../../db/schema.js';
 import { eq, and, gte, lte, isNull, desc, asc, sql } from 'drizzle-orm';
 
 /**
@@ -841,5 +841,158 @@ export const getScheduleStructureInfo = async (scheduleId) => {
         };
     } catch (error) {
         throw new Error(`Failed to get schedule structure info: ${error.message}`);
+    }
+};
+
+/**
+ * ========================================
+ * EVENT DEPENDENCIES REPOSITORY FUNCTIONS
+ * ========================================
+ */
+
+/**
+ * Create or update event dependencies for a schedule
+ * @param {string} scheduleId - Schedule UUID
+ * @param {Object} dependenciesMap - Dependencies map object
+ * @param {string} userId - User ID for ownership validation
+ * @returns {Promise<Object>} Created/updated dependencies record
+ */
+export const upsertEventDependencies = async (scheduleId, dependenciesMap, userId) => {
+    try {
+        // Verify schedule ownership first
+        const schedule = await getScheduleById(scheduleId, userId);
+        if (!schedule) {
+            throw new Error('Schedule not found or access denied');
+        }
+
+        // Check if dependencies already exist
+        const existingDeps = await getEventDependenciesByScheduleId(scheduleId, userId);
+        
+        if (existingDeps) {
+            // Update existing record
+            const [updated] = await db
+                .update(dependencies)
+                .set({ 
+                    dependenciesMap,
+                    updatedAt: new Date()
+                })
+                .where(eq(dependencies.scheduleId, scheduleId))
+                .returning();
+            
+            return updated;
+        } else {
+            // Create new record
+            const [created] = await db
+                .insert(dependencies)
+                .values({
+                    scheduleId,
+                    dependenciesMap
+                })
+                .returning();
+            
+            return created;
+        }
+    } catch (error) {
+        console.error('Error upserting event dependencies:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get event dependencies by schedule ID
+ * @param {string} scheduleId - Schedule UUID
+ * @param {string} userId - User ID for ownership validation
+ * @returns {Promise<Object|null>} Dependencies record or null
+ */
+export const getEventDependenciesByScheduleId = async (scheduleId, userId) => {
+    try {
+        // Verify schedule ownership first
+        const schedule = await getScheduleById(scheduleId, userId);
+        if (!schedule) {
+            throw new Error('Schedule not found or access denied');
+        }
+
+        const [dependencyRecord] = await db
+            .select()
+            .from(dependencies)
+            .where(eq(dependencies.scheduleId, scheduleId))
+            .limit(1);
+        
+        return dependencyRecord || null;
+    } catch (error) {
+        console.error('Error fetching event dependencies:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update event dependencies by ID
+ * @param {string} dependenciesId - Dependencies UUID
+ * @param {Object} dependenciesMap - Updated dependencies map
+ * @param {string} userId - User ID for ownership validation
+ * @returns {Promise<Object>} Updated dependencies record
+ */
+export const updateEventDependenciesById = async (dependenciesId, dependenciesMap, userId) => {
+    try {
+        // Get the dependencies record first to check schedule ownership
+        const [existingDeps] = await db
+            .select({
+                id: dependencies.id,
+                scheduleId: dependencies.scheduleId
+            })
+            .from(dependencies)
+            .where(eq(dependencies.id, dependenciesId))
+            .limit(1);
+
+        if (!existingDeps) {
+            throw new Error('Event dependencies not found');
+        }
+
+        // Verify schedule ownership
+        const schedule = await getScheduleById(existingDeps.scheduleId, userId);
+        if (!schedule) {
+            throw new Error('Schedule not found or access denied');
+        }
+
+        // Update the dependencies
+        const [updated] = await db
+            .update(dependencies)
+            .set({ 
+                dependenciesMap,
+                updatedAt: new Date()
+            })
+            .where(eq(dependencies.id, dependenciesId))
+            .returning();
+        
+        return updated;
+    } catch (error) {
+        console.error('Error updating event dependencies:', error);
+        throw error;
+    }
+};
+
+/**
+ * Delete event dependencies by schedule ID
+ * @param {string} scheduleId - Schedule UUID
+ * @param {string} userId - User ID for ownership validation
+ * @returns {Promise<boolean>} Success status
+ */
+export const deleteEventDependenciesByScheduleId = async (scheduleId, userId) => {
+    try {
+        // Verify schedule ownership first
+        const schedule = await getScheduleById(scheduleId, userId);
+        if (!schedule) {
+            throw new Error('Schedule not found or access denied');
+        }
+
+        const result = await db
+            .delete(dependencies)
+            .where(eq(dependencies.scheduleId, scheduleId))
+            .returning();
+        
+        return result.length > 0;
+    } catch (error) {
+        console.error('Error deleting event dependencies:', error);
+        throw error;
     }
 };
