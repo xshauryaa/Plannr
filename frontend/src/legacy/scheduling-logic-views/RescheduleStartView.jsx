@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView } from 'react-native' 
-import { useAppState } from '../context/AppStateContext'
-import { lightColor, darkColor } from '../design/colors.js'
-import { typography } from '../design/typography.js'
+import { useAppState } from '../../context/AppStateContext'
+import { lightColor, darkColor } from '../../design/colors.js'
+import { typography } from '../../design/typography.js'
 import { Picker } from '@react-native-picker/picker'
-import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg'
+import RescheduleIcon from '../../../assets/system-icons/RescheduleIcon.svg'
 
 const RescheduleStartView = ({ onNext, schedule }) => {
     const { appState } = useAppState();

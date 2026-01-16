@@ -13,6 +13,7 @@ import Apple from '../../assets/auth/Apple.svg';
 import VerificationModal from '../modals/VerificationModal.jsx';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
+import * as Font from 'expo-font';
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -33,6 +34,11 @@ const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPAC
 
 const SignUpScreen = ({ navigation }) => {
     useWarmUpBrowser();
+
+    const [fontsLoaded] = Font.useFonts({
+        'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
+        'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
+    });
 
     const { signUp, setActive, isLoaded } = useSignUp();
     const clerk = useClerk();
@@ -355,6 +361,8 @@ const SignUpScreen = ({ navigation }) => {
             setLoading(false);
         }
     }, [loading, startSSOFlow]);
+
+    if (!fontsLoaded) return null;
 
     return (
         <View style={styles.container}>

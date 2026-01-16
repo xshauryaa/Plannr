@@ -9,12 +9,12 @@ import { typography } from '../design/typography.js';
 import Rescheduler from '../model/Rescheduler.js';
 import EventDependencies from '../model/EventDependencies.js';
 
-import RescheduleStartView from '../scheduling-logic-views/RescheduleStartView.jsx';
-import BreaksView from '../scheduling-logic-views/BreaksView.jsx';
-import RigidEventsView from '../scheduling-logic-views/RigidEventsView.jsx';
-import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx';
-import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx';
-import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx';
+import RescheduleStartView from '../legacy/scheduling-logic-views/RescheduleStartView.jsx';
+import BreaksView from '../legacy/scheduling-logic-views/BreaksView.jsx';
+import RigidEventsView from '../legacy/scheduling-logic-views/RigidEventsView.jsx';
+import FlexibleEventsView from '../legacy/scheduling-logic-views/FlexibleEventsView.jsx';
+import EventDependenciesView from '../legacy/scheduling-logic-views/EventDependenciesView.jsx';
+import FinalCheckView from '../legacy/scheduling-logic-views/FinalCheckView.jsx';
 import GenerationModal from '../modals/GenerationModal.jsx';
 import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 

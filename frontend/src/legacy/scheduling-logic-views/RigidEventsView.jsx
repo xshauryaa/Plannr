@@ -1,38 +1,39 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
-import convertDateToScheduleDate from '../utils/dateConversion.js'
-import FlexibleEvent from '../model/FlexibleEvent'
-import AddFlexibleEventsModal from '../modals/AddFlexibleEventsModal'
-import AddIcon from '../../assets/system-icons/AddIcon.svg'
-import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
-import { useAppState } from '../context/AppStateContext.js'
-import { lightColor, darkColor } from '../design/colors.js'
-import { typography } from '../design/typography.js'
+import { View, Image, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native' 
+import { useAppState } from '../../context/AppStateContext.js'
+import { lightColor, darkColor } from '../../design/colors.js'
+import { typography } from '../../design/typography.js'
 
-const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
+import RigidEvent from '../../model/RigidEvent.js'
+import AddRigidEventsModal from '../../modals/AddRigidEventsModal.jsx'
+import AddIcon from '../../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../../assets/system-icons/CrossIcon.svg';
+
+const RigidEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
-    const [flexibleEvents, setFlexibleEvents] = useState(eventsInput);
-    const [showModal, setShowModal] = useState(false);
+    const [rigidEvents, setRigidEvents] = useState(eventsInput)
+    const [showModal, setShowModal] = useState(false)
 
-    const addFlexibleEvent = (name, type, duration, priority, deadline) => {
+    const addRigidEvent = (name, type, date, startTime, endTime) => {
         // Check for duplicate event names in eventsInput
         const existingEvent = eventsInput.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
         if (existingEvent) {
             throw new Error('DUPLICATE_EVENT_NAME');
         }
         
-        // Check for duplicates in current flexibleEvents as well
-        const duplicateInCurrent = flexibleEvents.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
+        // Check for duplicates in current rigidEvents as well
+        const duplicateInCurrent = rigidEvents.find(event => event.name.trim().toLowerCase() === name.trim().toLowerCase());
         if (duplicateInCurrent) {
             throw new Error('DUPLICATE_EVENT_NAME');
         }
-        
-        const newEvent = new FlexibleEvent(name, type, duration, priority, deadline)
 
-        setFlexibleEvents([...flexibleEvents, newEvent])
-        onNext([...flexibleEvents, newEvent], false)
+        const duration = (endTime.hour * 60 + endTime.minute) - (startTime.hour * 60 + startTime.minute);
+        const newEvent = new RigidEvent(name, type, duration, date, startTime.toInt(), endTime.toInt())
+
+        setRigidEvents([...rigidEvents, newEvent])
+        onNext([...rigidEvents, newEvent], false)
         setShowModal(false)
     }
 
@@ -40,9 +41,9 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
         return (
             <View style={{ ...styles.eventCard, backgroundColor: theme.INPUT }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 250 }}>{eventObj.name}  |  {eventObj.duration} mins  |  Before {eventObj.deadline.getDateString()}</Text>
+                    <Text style={{ ...styles.subHeading, fontSize: typography.bodySize, color: theme.FOREGROUND, width: 250 }}>{eventObj.name}  |  {eventObj.date.getDateString()}  |  {eventObj.startTime.to12HourString()} - {eventObj.endTime.to12HourString()}</Text>
                 </View>
-                <TouchableOpacity onPress={() => { setFlexibleEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
+                <TouchableOpacity onPress={() => { setRigidEvents(prev => prev.filter((_, i) => i !== indexToRemove)) }}>
                     <CrossIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
@@ -52,7 +53,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
     return (
         <View style={styles.subContainer}>
             <View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Flexible events are ones that have deadlines - such as assignments, pre-requisites, etc.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Rigid events are ones that have fixed timings - such as meetings, classes, etc.</Text>
                 <TouchableOpacity 
                     style={styles.button}
                     onPress={() => setShowModal(true)}
@@ -63,7 +64,7 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Events</Text>
                 <View style={{ ...styles.card, height: '60%', backgroundColor: theme.COMP_COLOR }}>
                     <FlatList
-                        data={flexibleEvents}
+                        data={rigidEvents}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={({ item, index }) => index}
                         renderItem={({ item, index }) => eventRender(item, index)}
@@ -79,14 +80,14 @@ const FlexibleEventsView = ({ onNext, minDate, numDays, onBack, eventsInput }) =
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={{ ...styles.button, marginVertical: 0, width: '48%' }}
-                    onPress={() => onNext(flexibleEvents)}
+                    onPress={() => onNext(rigidEvents)}
                 >
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
                 </TouchableOpacity>
             </View>
-            <AddFlexibleEventsModal
+            <AddRigidEventsModal
                 isVisible={showModal}
-                onClick={addFlexibleEvent}
+                onClick={addRigidEvent}
                 onClose={() => setShowModal(false)}
                 minDate={minDate}
                 numDays={numDays}
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
     card: {
         width: '99%',
         borderRadius: 12,
+        backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {
         width: 0,
@@ -121,7 +123,6 @@ const styles = StyleSheet.create({
     },
     eventCard: {
         height: 40, 
-        backgroundColor: "#F0F0F0",
         borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -149,4 +150,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default FlexibleEventsView
+export default RigidEventsView

@@ -8,7 +8,7 @@ import convertDateToScheduleDate from '../utils/dateConversion.js'
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import Time24 from '../model/Time24.js';
 
-const InfoView = ({ onNext }) => {
+const SettingUpView = ({ onNext }) => {
     const { appState } = useAppState();
     const [showPicker, setShowPicker] = useState(false);
     const [name, setName] = useState('');
@@ -31,8 +31,8 @@ const InfoView = ({ onNext }) => {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, enter some information about what you'd like from the schedule.</Text>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What's the name of this schedule</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, tell Plannr what your schedule should look like</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Name this plan</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
@@ -43,10 +43,11 @@ const InfoView = ({ onNext }) => {
                             setName(nativeEvent.text)
                         } }
                     />
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, opacity: 0.3 }}>eg., Midterm Week, Busy Work Week</Text>
                     {showNameWarning && <Text style={styles.warning}>
                         {nameWarningType === 1 ? "Please enter a schedule name" : "Schedule name already exists"}</Text>}
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>What date would you like to schedule from?</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>When should this plan start?</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <Pressable onPress={() => setShowPicker(true)}>
                         <TextInput
@@ -78,7 +79,7 @@ const InfoView = ({ onNext }) => {
                         </View>
                     )}
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>How many days would you like to schedule for?</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Plan for how many days?</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
@@ -92,7 +93,7 @@ const InfoView = ({ onNext }) => {
                     />
                     {showNumDaysWarning && <Text style={styles.warning}>Number of days must be a positive number</Text>}
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Minimum gap between scheduled events (in mins)</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Breathing room between tasks (in mins)</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
@@ -104,9 +105,10 @@ const InfoView = ({ onNext }) => {
                             setMinGap(nativeEvent.text)
                         } }
                     />
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, opacity: 0.3 }}>eg., If you pick 15 min, Plannr won't place tasks back-to-back.</Text>
                     {showMinGapWarning && <Text style={styles.warning}>Minimum gap must be a non-negative number</Text>}
                 </View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Maximum working hours per day</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Daily work limit (in hours)</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
                         style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
@@ -118,6 +120,7 @@ const InfoView = ({ onNext }) => {
                             setMaxHours(nativeEvent.text)
                         } }
                     />
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, opacity: 0.3 }}>Plannr won’t schedule more than this much work in a day.</Text>
                     {showMaxHoursWarning && <Text style={styles.warning}>Maximum working hours must be between 0 and 24</Text>}
                 </View>
             </ScrollView>
@@ -170,16 +173,17 @@ const InfoView = ({ onNext }) => {
                     }
                 }}
             >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Next</Text>
             </TouchableOpacity>
         </KeyboardAvoidingView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     subContainer: {
-        height: '87.5%',
+        flex: 1,
         justifyContent: 'space-between',
+        marginBottom: 32,
     },
     subHeading: {
         fontSize: typography.subHeadingSize,
@@ -217,7 +221,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        marginVertical: 16,
+
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -230,6 +234,6 @@ const styles = StyleSheet.create({
         color: '#FF0000',
         alignSelf: 'center'
     },
-})
+});
 
-export default InfoView
+export default SettingUpView;
