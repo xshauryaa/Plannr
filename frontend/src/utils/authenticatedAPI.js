@@ -1061,17 +1061,34 @@ export const useAuthenticatedAPI = () => {
                         }
                     }
 
-                    // Extract FlexibleEvent data from draft enrichment or fallback to draft fields
-                    const eventData = draft.enrichment?.originalFlexibleEvent || {
-                        name: draft.title,
-                        type: draft.notes?.includes('Activity Type: ') 
-                            ? draft.notes.replace('Activity Type: ', '').trim()
-                            : 'OTHER',
-                        duration: draft.durationMinutes,
-                        priority: draft.priority,
-                        deadline: deadline,
-                        id: draft.id
-                    };
+                    // Extract FlexibleEvent data - prioritize enrichment data if available
+                    let eventData;
+                    if (draft.enrichment?.originalFlexibleEvent) {
+                        // Use the enrichment data which has the correct types from LLM
+                        eventData = {
+                            name: draft.enrichment.originalFlexibleEvent.name || draft.title,
+                            type: draft.enrichment.originalFlexibleEvent.type || 'OTHER',
+                            duration: draft.enrichment.originalFlexibleEvent.duration || draft.durationMinutes,
+                            priority: draft.enrichment.originalFlexibleEvent.priority || draft.priority,
+                            deadline: deadline,
+                            id: draft.enrichment.originalFlexibleEvent.id || draft.id
+                        };
+                    } else {
+                        // Fallback to parsing from draft fields
+                        eventData = {
+                            name: draft.title,
+                            type: draft.notes?.includes('Activity Type: ') 
+                                ? draft.notes.replace('Activity Type: ', '').trim()
+                                : 'OTHER',
+                            duration: draft.durationMinutes,
+                            priority: draft.priority,
+                            deadline: deadline,
+                            id: draft.id
+                        };
+                    }
+
+                    // Debug logging to see what type we're getting
+                    console.log(`🔍 Task: "${draft.title}" - Type from enrichment: ${draft.enrichment?.originalFlexibleEvent?.type}, Type from notes: ${draft.notes?.includes('Activity Type: ') ? draft.notes.replace('Activity Type: ', '').trim() : 'N/A'}, Final type: ${eventData.type}`);
 
                     return new FlexibleEvent(
                         eventData.name,

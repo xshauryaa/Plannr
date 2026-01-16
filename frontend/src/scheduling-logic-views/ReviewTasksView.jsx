@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
@@ -9,7 +9,7 @@ import CollapsibleTaskCard from '../components/CollapsibleTaskCard';
 
 const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
     const { appState } = useAppState();
-    const [todoListInput, setTodoListInput] = useState('');
+    const [taskList, setTaskList] = useState(tasks);
 
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
@@ -19,38 +19,16 @@ const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-            {/* <View>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Make sure everything looks right before we schedule it.</Text>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: 0, marginBottom: 16 }}>Enter or paste any task list you'd normally write in Notes, WhatsApp, Notion, or a doc.</Text>
-                    <TextInput
-                        placeholder="To-do list goes here..."
-                        value={todoListInput}
-                        onChangeText={setTodoListInput}
-                        scrollEnabled={true}
-                        multiline={true}
-                        style={{ 
-                            ...styles.input, 
-                            backgroundColor: theme.INPUT, 
-                            color: theme.FOREGROUND,
-                            minHeight: 250,
-                        }}
-                    />
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, opacity: 0.3 }}>Enter tasks as a list, use "- " for each task. You'll review and edit everything next.</Text>
-                </View>
-            </View> */}
-            <Text>
-                {tasks.map((task, index) => `- ${task.name}`).join('\n')}
-            </Text>
             <FlatList
-                data={tasks}
+                data={taskList}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) => (
                     <CollapsibleTaskCard task={item} key={index} minDate={minDate} numDays={numDays} />
                 )}
+                
             />
             <TouchableOpacity 
-                onPress={ () => onNext(todoListInput) }
+                onPress={ () => onNext() }
             >
                 <LinearGradient
                     colors={[theme.GRADIENT_START, theme.GRADIENT_END]}

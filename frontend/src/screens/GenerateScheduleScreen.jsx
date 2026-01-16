@@ -155,6 +155,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const ReviewTasksHandler = (reviewedTasks) => {
         // Process the reviewedTasks and update flexibleEvents
         console.log('Reviewed tasks:', reviewedTasks);
+        setFlexibleEvents(reviewedTasks);
         setGenStage(3);
     }
 
