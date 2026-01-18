@@ -25,6 +25,7 @@ const AddTasksView = ({ onNext }) => {
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: 0, marginBottom: 16 }}>Enter or paste any task list you'd normally write in Notes, WhatsApp, Notion, or a doc.</Text>
                     <TextInput
                         placeholder="To-do list goes here..."
+                        placeholderTextColor={theme.FOREGROUND + '55'}
                         value={todoListInput}
                         onChangeText={setTodoListInput}
                         scrollEnabled={true}
@@ -104,7 +105,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#000' ,
         paddingVertical: 12,
         paddingHorizontal: 16,
-
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'center',

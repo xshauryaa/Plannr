@@ -1016,7 +1016,7 @@ export const useAuthenticatedAPI = () => {
         },
 
         // Text-to-Tasks API - Combined function for complete workflow
-        parseTextToFlexibleEvents: async (todoListText, preferences = {}) => {
+        parseTextToFlexibleEvents: async (todoListText, preferences = {}, defaultDeadline) => {
             try {
                 console.log('🤖 Starting text-to-tasks parsing...');
                 
@@ -1059,6 +1059,8 @@ export const useAuthenticatedAPI = () => {
                             const date = new Date(draft.deadline);
                             deadline = new ScheduleDate(date.getDate(), date.getMonth() + 1, date.getFullYear());
                         }
+                    } else {
+                        deadline = defaultDeadline || null;
                     }
 
                     // Extract FlexibleEvent data - prioritize enrichment data if available

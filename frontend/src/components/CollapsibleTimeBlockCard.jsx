@@ -5,12 +5,13 @@ import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
 import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
-import Priority from '../model/Priority.js'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Time24 from '../model/Time24.js'
+import ScheduleDate from '../model/ScheduleDate.js'
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg'
+import TimePicker from './TimePicker';
 
 const ActivityTypeColors = {
   [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
@@ -25,8 +26,7 @@ const ActivityTypeColors = {
   [ActivityType.BREAK]:        '#95A5A6',  // Light Gray
 };
 
-
-const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
+const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index, showWarningForIndex }) => {
     const { appState } = useAppState();
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
     
@@ -39,6 +39,36 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
         maxDate = maxDate.getNextDate();
     }
 
+    // Initialize states from timeBlock data - handling both RigidEvent and TimeBlock objects
+    const [name, setName] = useState(timeBlock.name || timeBlock.getName?.() || '');
+    const [type, setType] = useState(timeBlock.activityType || timeBlock.getActivityType?.() || timeBlock.type || timeBlock.getType?.() || ActivityType.PERSONAL);
+    const [date, setDate] = useState(timeBlock.date || timeBlock.getDate?.() || minDate);
+    const [startTime, setStartTime] = useState(timeBlock.startTime || timeBlock.getStartTime?.() || new Time24(900)); // 9:00 AM
+    const [endTime, setEndTime] = useState(timeBlock.endTime || timeBlock.getEndTime?.() || new Time24(1000)); // 10:00 AM
+
+    // Picker visibility states
+    const [showTypePicker, setShowTypePicker] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
+    // Check if this card should show a warning
+    const shouldShowWarning = showWarningForIndex && showWarningForIndex.includes(index);
+
+    // Update parent when state changes
+    const updateTimeBlock = () => {
+        if (onUpdate) {
+            const updatedTimeBlock = {
+                ...timeBlock,
+                name,
+                activityType: type,
+                type,
+                date,
+                startTime,
+                endTime
+            };
+            onUpdate(updatedTimeBlock);
+        }
+    };
+
     const getActivityTypeFromLabel = (label) => {
         const typeMap = {
           'PERSONAL': ActivityType.PERSONAL,
@@ -50,10 +80,10 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
           'RECREATIONAL': ActivityType.RECREATIONAL,
           'ERRAND': ActivityType.ERRAND,
           'OTHER': ActivityType.OTHER,
+          'BREAK': ActivityType.BREAK,
         };
-
-        return typeMap[label];
-    }
+        return typeMap[label] || ActivityType.OTHER;
+    };
 
     const getActivityLabel = (activityType) => {
         const labelMap = {
@@ -66,94 +96,47 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
           [ActivityType.RECREATIONAL]: 'Recreational',
           [ActivityType.ERRAND]: 'Errand',
           [ActivityType.OTHER]: 'Other',
+          [ActivityType.BREAK]: 'Break',
         };
-      
         return labelMap[activityType] || 'Unknown';
-    }
-    
-    const getPriorityFromLabel = (label) => {
-        const priorityMap = {
-          'LOW': Priority.LOW,
-          'MEDIUM': Priority.MEDIUM,
-          'HIGH': Priority.HIGH,
-        };
-
-        return priorityMap[label];
-    }
-
-    const getPriorityLabel = (priority) => {
-        const labelMap = {
-          [Priority.LOW]: 'Low',
-          [Priority.MEDIUM]: 'Medium',
-          [Priority.HIGH]: 'High',
-        };
-      
-        return labelMap[priority] || 'Unknown';
-    }
-    
-    const [name, setName] = useState(task.name || '')
-    const [type, setType] = useState(getActivityTypeFromLabel(task.type) || ActivityType.OTHER)
-    const [duration, setDuration] = useState(task.duration.toString() || '60')
-    const [priority, setPriority] = useState(getPriorityFromLabel(task.priority) || Priority.MEDIUM)
-    const [deadline, setDeadline] = useState(minDate)
-    const [showTypePicker, setShowTypePicker] = useState(false)
-    const [showPriorityPicker, setShowPriorityPicker] = useState(false)
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [warning, setWarning] = useState('')
-    const [showWarning, setShowWarning] = useState(false)
-    const [keyboardVisible, setKeyboardVisible] = useState(false);
-    
-    // Update parent when task data changes
-    const updateTask = () => {
-        if (onUpdate) {
-            const updatedTask = {
-                ...task,
-                name,
-                type,
-                duration: parseInt(duration),
-                priority,
-                deadline
-            };
-            onUpdate(updatedTask);
-        }
     };
-    
+
     // Toggle expand/collapse with animation
     const toggleExpanded = () => {
         const toValue = isExpanded ? 0 : 1;
-        
+
         Animated.timing(rotateAnim, {
             toValue,
             duration: 200,
             useNativeDriver: true,
         }).start();
-        
+
         setIsExpanded(!isExpanded);
     };
-    
+
     const rotateIcon = rotateAnim.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '180deg'],
     });
 
-    {/* Priority & Activity Type inputs */}
+    // Date & Activity Type inputs
     const Panel1 = () => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Priority</Text>
-                    <Pressable onPress={() => { setShowTypePicker(false); setShowPriorityPicker(true); }}>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                    <Pressable onPress={() => { setShowTypePicker(false); setShowDatePicker(true); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
-                            value={getPriorityLabel(priority)}
+                            value={date.getDateString()}
                             editable={false}
                         />
                     </Pressable>
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Type</Text>
-                    <Pressable onPress={() => { setShowTypePicker(true); setShowPriorityPicker(false); }}>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Activity Type</Text>
+                    <Pressable onPress={() => { setShowTypePicker(true); setShowDatePicker(false); }}>
                         <TextInput
                             style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
                             pointerEvents="none"
@@ -163,41 +146,43 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                     </Pressable>
                 </View>
             </View>
-        )
-    }
+        );
+    };
 
-    {/* Event Duration & Deadline inputs */}
+    // Start Time & End Time inputs
     const Panel2 = () => {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est. mins)</Text>
-                    <TextInput
-                        style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                        value={duration}
-                        autoCorrect={false}
-                        autoCapitalize='words'
-                        onChangeText={(text) => {
-                            setDuration(text);
-                            updateTask();
+            <View>
+                <View style={{ marginBottom: 16 }}>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                    <TimePicker
+                        value={startTime}
+                        onChange={(time) => {
+                            setStartTime(time);
+                            updateTimeBlock();
                         }}
-                        keyboardType='numeric'
+                        style={{ alignSelf: 'flex-start' }}
                     />
                 </View>
-                <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowDatePicker(true) }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
-                            pointerEvents="none"
-                            value={deadline.getDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
+                <View>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                    <TimePicker
+                        value={endTime}
+                        onChange={(time) => {
+                            setEndTime(time);
+                            updateTimeBlock();
+                        }}
+                    />
                 </View>
+                {/* Warning message - only show if index is in warning list */}
+                {shouldShowWarning && (
+                    <Text style={{ ...styles.warning, color: '#FF0000' }}>
+                        Start time must be before end time
+                    </Text>
+                )}
             </View>
-        )
-    }
+        );
+    };
 
     return (
         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -210,9 +195,22 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
             {/* Card Header - Always visible */}
             <TouchableOpacity onPress={toggleExpanded} style={styles.cardHeader}>
                 <View style={styles.headerContent}>
-                    <Text style={{ ...styles.taskTitle, color: theme.FOREGROUND }}>
-                        {name || task.name}
-                    </Text>
+                    <View style={{ flex: 1, marginRight: 12 }}>
+                        <TextInput
+                            style={{ ...styles.taskTitle, color: theme.FOREGROUND }}
+                            value={name}
+                            onChangeText={(text) => {
+                                setName(text);
+                                updateTimeBlock();
+                            }}
+                            placeholder="Enter time block name"
+                            placeholderTextColor={theme.PLACEHOLDER}
+                            multiline
+                        />
+                        <Text style={{ ...styles.timeInfo, color: theme.FOREGROUND }}>
+                            {date.getDateString()} • {startTime.to12HourString()} - {endTime.to12HourString()}
+                        </Text>
+                    </View>
                     <Animated.View style={{ transform: [{ rotate: rotateIcon }] }}>
                         <DropDownIcon width={24} height={24} color={theme.FOREGROUND} />
                     </Animated.View>
@@ -223,70 +221,18 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
             {isExpanded && (
                 <View style={styles.expandedContent}>
                     <Panel1 />
-                    {/* Activity Type Picker */}
-                    {showTypePicker && 
-                        <View>
-                            <Picker
-                                selectedValue={type}
-                                onValueChange={(itemValue) => {
-                                    setType(itemValue);
-                                    updateTask();
-                                }}
-                                themeVariant={appState.userPreferences.theme}
-                            >
-                                <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
-                                <Picker.Item label="Meeting" value={ActivityType.MEETING} />
-                                <Picker.Item label="Work" value={ActivityType.WORK} />
-                                <Picker.Item label="Event" value={ActivityType.EVENT} />
-                                <Picker.Item label="Education" value={ActivityType.EDUCATION} />
-                                <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
-                                <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
-                                <Picker.Item label="Errand" value={ActivityType.ERRAND} />
-                                <Picker.Item label="Other" value={ActivityType.OTHER} />
-                            </Picker>
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowTypePicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    }
-                    {/* Priority Picker */}
-                    {showPriorityPicker && 
-                        <View>
-                            <Picker
-                                selectedValue={priority}
-                                onValueChange={(itemValue) => {
-                                    setPriority(itemValue);
-                                    updateTask();
-                                }}
-                                themeVariant={appState.userPreferences.theme}
-                            >
-                                <Picker.Item label="High" value={Priority.HIGH} />
-                                <Picker.Item label="Medium" value={Priority.MEDIUM} />
-                                <Picker.Item label="Low" value={Priority.LOW} />
-                            </Picker>
-                            <TouchableOpacity 
-                                style={styles.button}
-                                onPress={() => setShowPriorityPicker(false)}
-                            >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
-                            </TouchableOpacity>
-                        </View>
-                    }
-                    <Panel2 />
-                    {/** Deadline Picker */}
+                    {/* Date Picker - appears after Panel1 */}
                     {showDatePicker && (
                         <View>
                             <DateTimePicker
-                                value={combineScheduleDateAndTime24(deadline, new Time24(0, 0))}
+                                value={combineScheduleDateAndTime24(date, new Time24(0, 0))}
                                 mode="date"
                                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                                 onChange={(event, date) => {
                                     if (date) {
-                                        setDeadline(convertDateToScheduleDate(date));
-                                        updateTask();
+                                        const newDate = convertDateToScheduleDate(date);
+                                        setDate(newDate);
+                                        updateTimeBlock();
                                     }
                                 }}
                                 minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}
@@ -301,11 +247,42 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                             </TouchableOpacity>
                         </View>
                     )}
+                    {/* Activity Type Picker - appears after Panel1 */}
+                    {showTypePicker && 
+                        <View>
+                            <Picker
+                                selectedValue={type}
+                                onValueChange={(itemValue) => {
+                                    setType(itemValue);
+                                    updateTimeBlock();
+                                }}
+                                themeVariant={appState.userPreferences.theme}
+                            >
+                                <Picker.Item label="Personal" value={ActivityType.PERSONAL} />
+                                <Picker.Item label="Meeting" value={ActivityType.MEETING} />
+                                <Picker.Item label="Work" value={ActivityType.WORK} />
+                                <Picker.Item label="Event" value={ActivityType.EVENT} />
+                                <Picker.Item label="Education" value={ActivityType.EDUCATION} />
+                                <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
+                                <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
+                                <Picker.Item label="Errand" value={ActivityType.ERRAND} />
+                                <Picker.Item label="Other" value={ActivityType.OTHER} />
+                                <Picker.Item label="Break" value={ActivityType.BREAK} />
+                            </Picker>
+                            <TouchableOpacity 
+                                style={styles.button}
+                                onPress={() => setShowTypePicker(false)}
+                            >
+                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                    <Panel2 />
                 </View>
             )}
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     card: {
@@ -344,8 +321,11 @@ const styles = StyleSheet.create({
     taskTitle: {
         fontSize: 20,
         fontFamily: 'PinkSunset-Regular',
-        flex: 1,
-        marginRight: 12,
+        marginBottom: 4,
+    },
+    timeInfo: {
+        fontSize: typography.bodySize,
+        fontFamily: 'AlbertSans',
     },
     expandedContent: {
         marginTop: 16,
@@ -368,7 +348,7 @@ const styles = StyleSheet.create({
     button: {
         width: '100%',
         borderRadius: 16,
-        backgroundColor: '#000' ,
+        backgroundColor: '#000',
         paddingVertical: 16,
         paddingHorizontal: 16,
         marginTop: 8,
@@ -378,10 +358,11 @@ const styles = StyleSheet.create({
     warning: {
         fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
-        marginBottom: 12,
+        marginTop: 12,
+        marginBottom: 8,
         color: '#FF0000',
         alignSelf: 'center'
     },
 });
 
-export default CollapsibleTaskCard;
+export default CollapsibleTimeBlockCard;

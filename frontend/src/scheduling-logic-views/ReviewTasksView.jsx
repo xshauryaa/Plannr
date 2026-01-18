@@ -23,12 +23,22 @@ const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
                 data={taskList}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) => (
-                    <CollapsibleTaskCard task={item} key={index} minDate={minDate} numDays={numDays} />
+                    <CollapsibleTaskCard 
+                        task={item} 
+                        key={index} 
+                        minDate={minDate} 
+                        numDays={numDays}
+                        onUpdate={(updatedTask) => {
+                            const newTaskList = [...taskList];
+                            newTaskList[index] = updatedTask;
+                            setTaskList(newTaskList);
+                        }}
+                    />
                 )}
                 
             />
             <TouchableOpacity 
-                onPress={ () => onNext() }
+                onPress={ () => onNext(taskList) }
             >
                 <LinearGradient
                     colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
