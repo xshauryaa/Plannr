@@ -551,6 +551,7 @@ export const useAuthenticatedAPI = () => {
                     }
                     
                     // Convert database block to serialized TimeBlock format
+                    // Note: startTime and endTime must be in Time24 integer format (HHMM) for parseTimeBlock to work
                     const serializedBlock = {
                         name: block.title,
                         date: block.dateObject || { 
@@ -560,8 +561,8 @@ export const useAuthenticatedAPI = () => {
                         },
                         activityType: block.category,
                         priority: block.priority,
-                        startTime: block.startAt,
-                        endTime: block.endAt,
+                        startTime: block.startAt, // Already in Time24 format from database
+                        endTime: block.endAt,     // Already in Time24 format from database
                         duration: block.duration,
                         completed: block.completed,
                         deadline: block.deadlineObject || (block.deadline ? { 

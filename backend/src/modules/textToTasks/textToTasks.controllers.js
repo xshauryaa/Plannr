@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import * as repo from './textToTasks.repo.js';
 import * as schedulesRepo from '../schedules/schedules.repo.js';
+import * as userRepo from '../users/users.repo.js';
 import llmProvider from '../../services/llm/index.js';
 import { 
     TaskDraftSchema, 
@@ -196,7 +197,25 @@ const convertLLMTasksToDrafts = (sessionId, validTasks) => {
 export const parseText = async (req, res, next) => {
     try {
         const { text, preferences = {} } = req.validated.body;
-        const userId = req.auth.userId;
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const userId = user.id;
         
         // Generate input hash and stats (don't store raw text)
         const inputHash = generateInputHash(text);
@@ -311,7 +330,25 @@ export const getDrafts = async (req, res, next) => {
     try {
         const { sessionId } = req.validated.params;
         const { includeExcluded } = req.validated.query;
-        const userId = req.auth.userId;
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const userId = user.id;
         
         const session = await repo.getSessionById(sessionId, userId);
         if (!session) {
@@ -344,7 +381,25 @@ export const getDrafts = async (req, res, next) => {
 export const enrichDrafts = async (req, res, next) => {
     try {
         const { sessionId, defaults = {}, overrides = {} } = req.validated.body;
-        const userId = req.auth.userId;
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const userId = user.id;
         
         const session = await repo.getSessionById(sessionId, userId);
         if (!session) {
@@ -431,7 +486,25 @@ export const enrichDrafts = async (req, res, next) => {
 export const generateSchedule = async (req, res, next) => {
     try {
         const { sessionId, dateRange, strategy = 'earliest-fit', workingHours = {} } = req.validated.body;
-        const userId = req.auth.userId;
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const userId = user.id;
         
         const session = await repo.getSessionById(sessionId, userId);
         if (!session) {
@@ -570,7 +643,25 @@ export const generateSchedule = async (req, res, next) => {
 export const deleteSession = async (req, res, next) => {
     try {
         const { sessionId } = req.validated.params;
-        const userId = req.auth.userId;
+        const clerkUserId = req.headers['x-clerk-user-id'];
+        
+        if (!clerkUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        // Get user from Clerk ID
+        const user = await userRepo.getUserByClerkId(clerkUserId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const userId = user.id;
         
         await repo.deleteSession(sessionId, userId);
         

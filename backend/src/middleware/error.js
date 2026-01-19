@@ -29,8 +29,10 @@ export function errorHandler(err, req, res, next) {
 
   // Fallback: 500
   console.error("Unhandled error:", err);
+  console.error("Error stack:", err?.stack);
   return res.status(500).json({
     error: "Something went wrong",
+    message: ENV.NODE_ENV !== "production" ? err?.message : undefined,
     ...(ENV.NODE_ENV !== "production" ? { stack: err?.stack } : {}),
   });
 }
