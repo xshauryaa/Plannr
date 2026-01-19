@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, text, timestamp, boolean, integer, jsonb, date, index, uniqueIndex
+  pgTable, uuid, text, timestamp, boolean, integer, jsonb, date, index, uniqueIndex, real
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -200,4 +200,48 @@ export const taskDrafts = pgTable("task_drafts", {
 }, (table) => ({
   sessionIdx: index("task_drafts_session_idx").on(table.sessionId),
   providerTaskIdx: index("task_drafts_provider_task_idx").on(table.providerTaskId),
+}));
+
+// Text-to-Tasks sessions
+export const textToTasksSessions = pgTable("text_to_tasks_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("parsing"), // 'parsing', 'enriching', 'scheduled', 'failed'
+  inputHash: text("input_hash").notNull(), // SHA256 hash of input text
+  inputStats: jsonb("input_stats"), // { chars, lines, itemsDetected }
+  dateRangeStart: timestamp("date_range_start", { withTimezone: true }),
+  dateRangeEnd: timestamp("date_range_end", { withTimezone: true }),
+  llmProvider: text("llm_provider"), // 'gemini', 'openai', etc.
+  llmModel: text("llm_model"), // 'gemini-1.5-flash', etc.
+  llmTokensIn: integer("llm_tokens_in"),
+  llmTokensOut: integer("llm_tokens_out"),
+  parseLatencyMs: integer("parse_latency_ms"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  userIdx: index("text_to_tasks_sessions_user_idx").on(table.userId),
+  statusIdx: index("text_to_tasks_sessions_status_idx").on(table.status),
+  hashIdx: index("text_to_tasks_sessions_hash_idx").on(table.inputHash),
+}));
+
+// Text-to-Tasks draft tasks
+export const textToTasksDrafts = pgTable("text_to_tasks_drafts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => textToTasksSessions.id, { onDelete: "cascade" }),
+  orderIndex: integer("order_index").notNull(),
+  title: text("title").notNull(),
+  notes: text("notes"),
+  deadline: timestamp("deadline", { withTimezone: true }),
+  preferredStart: timestamp("preferred_start", { withTimezone: true }),
+  priority: text("priority").notNull().default("MEDIUM"), // 'LOW', 'MEDIUM', 'HIGH'
+  durationMinutes: integer("duration_minutes"),
+  included: boolean("included").notNull().default(true),
+  warnings: jsonb("warnings").default("[]"), // Array of warning objects
+  confidence: real("confidence"), // 0.0-1.0 LLM confidence score
+  enrichment: jsonb("enrichment"), // User overrides and defaults applied
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  sessionIdx: index("text_to_tasks_drafts_session_idx").on(table.sessionId),
+  orderIdx: index("text_to_tasks_drafts_order_idx").on(table.sessionId, table.orderIndex),
 }));

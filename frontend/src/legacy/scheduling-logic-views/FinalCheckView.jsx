@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platform, TouchableWithoutFeedback, Keyboard, ScrollView, KeyboardAvoidingView } from 'react-native' 
-import { useAppState } from '../context/AppStateContext';
-import TimePicker from '../components/TimePicker.jsx';
-import convertTimeToTime24 from '../utils/timeConversion';
-import { lightColor, darkColor } from '../design/colors';
-import { typography } from '../design/typography.js'
+import { useAppState } from '../../context/AppStateContext';
+import TimePicker from '../../components/TimePicker.jsx';
+import convertTimeToTime24 from '../../utils/timeConversion';
+import { lightColor, darkColor } from '../../design/colors';
+import { typography } from '../../design/typography.js'
 
-import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
-import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
-import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
-import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg';
+import EarliestFitIcon from '../../../assets/strategy-icons/EarliestFitIcon.svg';
+import BalancedWorkIcon from '../../../assets/strategy-icons/BalancedWorkIcon.svg';
+import DeadlineOrientedIcon from '../../../assets/strategy-icons/DeadlineOrientedIcon.svg';
+import RescheduleIcon from '../../../assets/system-icons/RescheduleIcon.svg';
 
 const FinalCheckView = ({ onNext, buttonText = 'Generate Schedule' }) => {
     const { appState } = useAppState();

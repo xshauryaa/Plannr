@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { View, Image, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native' 
-import EventDependencies from '../model/EventDependencies';
-import AddDependencyModal from '../modals/AddDependencyModal';
-import AddIcon from '../../assets/system-icons/AddIcon.svg'
-import CrossIcon from '../../assets/system-icons/CrossIcon.svg';
+import EventDependencies from '../../model/EventDependencies';
+import AddDependencyModal from '../../modals/AddDependencyModal';
+import AddIcon from '../../../assets/system-icons/AddIcon.svg'
+import CrossIcon from '../../../assets/system-icons/CrossIcon.svg';
 
-import { useAppState } from '../context/AppStateContext';
-import { lightColor, darkColor } from '../design/colors';
-import { typography } from '../design/typography.js';
+import { useAppState } from '../../context/AppStateContext';
+import { lightColor, darkColor } from '../../design/colors';
+import { typography } from '../../design/typography.js';
 
 const EventDependenciesView = ({ onNext, events, depsInput }) => {
     const { appState } = useAppState();

@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Text, View, Animated, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, ScrollView } from 'react-native'
 import * as Font from 'expo-font'
 
-import { useAppState } from '../context/AppStateContext'
-import { useActionLogger } from '../hooks/useActionLogger.js'
+import { useAppState } from '../../context/AppStateContext'
+import { useActionLogger } from '../../hooks/useActionLogger.js'
 
-import { lightColor, darkColor } from '../design/colors.js'
-import { spacing, padding } from '../design/spacing.js'
-import { typography  } from '../design/typography.js'
-import { getAvatarList, getRandomAvatar } from '../utils/avatarUtils.js'
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
+import { lightColor, darkColor } from '../../design/colors.js'
+import { spacing, padding } from '../../design/spacing.js'
+import { typography  } from '../../design/typography.js'
+import { getAvatarList, getRandomAvatar } from '../../utils/avatarUtils.js'
+import { useAuthenticatedAPI } from '../../utils/authenticatedAPI.js'
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 

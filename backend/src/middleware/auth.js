@@ -19,7 +19,8 @@ export async function requireAuth(req, res, next) {
     if (!token) return res.status(401).json({ error: "Missing bearer token" });
 
     // Dev fallback: allow tokens like "dev:<userId>:<email>"
-    if (ENV.AUTH_DEV === "true" && token.startsWith("dev:")) {
+    if (ENV.AUTH_DEV && token.startsWith("dev:")) {
+      console.log('🔧 Using development auth mode');
       const [, devId = crypto.randomUUID(), email = null] = token.split(":");
       const userId = await upsertUser({ clerkUserId: devId, email });
       req.auth = { userId, clerkUserId: devId, email };

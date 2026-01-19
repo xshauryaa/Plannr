@@ -16,4 +16,5 @@ export const ENV = {
     AUTH_DEV: process.env.AUTH_DEV === 'true',
     API_URL: process.env.API_URL || 'https://plannr-690n.onrender.com', // Your Render deployment URL
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 }
