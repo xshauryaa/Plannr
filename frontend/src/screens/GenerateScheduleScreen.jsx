@@ -8,6 +8,7 @@ import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
 
 import Time24 from '../model/Time24.js'
 import ScheduleDate from '../model/ScheduleDate.js';
+import RigidEvent from '../model/RigidEvent.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import Scheduler from '../model/Scheduler.js'
@@ -184,10 +185,37 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const BusyTimesHandler = (busyTimes) => {
         // Process the busy times and update rigid events
         console.log('Busy times:', busyTimes);
-        setRigidEvents(busyTimes);
+        
+        // Convert plain objects to RigidEvent instances
+        const rigidEventInstances = busyTimes.map(busyTime => {
+            // Convert date object to ScheduleDate instance
+            const scheduleDate = new ScheduleDate(
+                busyTime.date.date, 
+                busyTime.date.month, 
+                busyTime.date.year
+            );
+            
+            // Convert time objects to integer format (e.g., {hour: 14, minute: 30} -> 1430)
+            const startTimeInt = busyTime.startTime.hour * 100 + busyTime.startTime.minute;
+            const endTimeInt = busyTime.endTime.hour * 100 + busyTime.endTime.minute;
+            
+            // Create RigidEvent instance
+            return new RigidEvent(
+                busyTime.name,
+                busyTime.activityType || busyTime.type, // Handle both property names
+                busyTime.duration,
+                scheduleDate,
+                startTimeInt,
+                endTimeInt,
+                busyTime.id
+            );
+        });
+        
+        console.log('🔧 Converted rigid events:', rigidEventInstances);
+        setRigidEvents(rigidEventInstances);
         
         // CRITICAL: Add rigid events to the scheduler
-        scheduler.setRigidEvents(busyTimes);
+        scheduler.setRigidEvents(rigidEventInstances);
         
         // Also set any breaks (currently empty in this workflow)
         scheduler.setBreaks(breaks);
@@ -356,14 +384,28 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 
                 console.log('✅ Schedule and days saved to backend:', saveResult);
                 
-                // Update local schedule with backend ID
+                // Update local schedule with backend ID and updated time blocks
                 if (saveResult.success && saveResult.scheduleId) {
+                    const updatedScheduleWithBackendId = saveResult.updatedScheduleObject;
+                    
                     setAppState(prevState => ({
                         ...prevState,
                         savedSchedules: prevState.savedSchedules.map(s => 
-                            s.name === name ? { ...s, backendId: saveResult.scheduleId } : s
-                        )
+                            s.name === name ? { 
+                                ...s, 
+                                backendId: saveResult.scheduleId,
+                                schedule: updatedScheduleWithBackendId  // Use the updated schedule with backend IDs
+                            } : s
+                        ),
+                        // Also update active schedule if this is the active one
+                        activeSchedule: prevState.activeSchedule && prevState.activeSchedule.name === name ? {
+                            ...prevState.activeSchedule,
+                            backendId: saveResult.scheduleId,
+                            schedule: updatedScheduleWithBackendId
+                        } : prevState.activeSchedule
                     }));
+                    
+                    console.log('🔗 Updated frontend schedule with backend IDs for time blocks');
                 }
                 
             } catch (backendError) {

@@ -372,6 +372,16 @@ export const useAuthenticatedAPI = () => {
                             throw new Error(`Failed to add blocks to day ${i + 1}: ${blocksResponse.message}`);
                         }
 
+                        // CRITICAL FIX: Update frontend TimeBlock objects with backend IDs
+                        const createdBlocks = blocksResponse.data || [];
+                        console.log('🔍 Backend returned blocks:', createdBlocks);
+                        timeBlocks.forEach((frontendBlock, blockIndex) => {
+                            if (createdBlocks[blockIndex] && createdBlocks[blockIndex].id) {
+                                frontendBlock.setBackendId(createdBlocks[blockIndex].id);
+                                console.log(`🔗 Updated block "${frontendBlock.name}" with backend ID:`, createdBlocks[blockIndex].id);
+                            }
+                        });
+
                         console.log(`✅ Added ${blocksData.length} blocks to day ${i + 1}`);
                     }
                 }
@@ -406,6 +416,7 @@ export const useAuthenticatedAPI = () => {
                     scheduleId,
                     daysCreated: createdDays.length,
                     dependenciesSaved: savedDependencies ? true : false,
+                    updatedScheduleObject: scheduleObject, // Return the updated schedule with backend IDs
                     success: true
                 };
 
