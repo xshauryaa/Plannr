@@ -35,17 +35,23 @@ export const useAuthenticatedAPI = () => {
             
             let authToken = token;
             
+            // Only allow development auth in development environment
             if (!token) {
-                // Use development token for testing when no Clerk token available
-                console.log('🔧 No Clerk token available, using development auth');
-                authToken = 'dev:frontend-user-123:frontend-dev@plannr.app';
+                if (__DEV__) {
+                    // Use development token for testing when no Clerk token available (DEV ONLY)
+                    console.log('🔧 No Clerk token available, using development auth');
+                    authToken = 'dev:frontend-user-123:frontend-dev@plannr.app';
+                } else {
+                    // In production, require valid authentication
+                    throw new Error('Authentication required. Please sign in to continue.');
+                }
             }
 
             // Make the API request with the token using our enhanced API client
             const response = await apiClient.makeRequest(endpoint, {
                 ...options,
                 headers: {
-                    'x-clerk-user-id': userId || 'dev-user-id', // Use userId from auth hook or dev fallback
+                    'x-clerk-user-id': userId || (__DEV__ ? 'dev-user-id' : null), // Only use dev fallback in development
                     ...options.headers,
                 },
             }, authToken);
@@ -62,8 +68,8 @@ export const useAuthenticatedAPI = () => {
                 const errorData = await response.text();
                 console.error('API Error Response:', errorData);
                 
-                // If we get 401 and we used a Clerk token, try with development token
-                if (response.status === 401 && token && authToken === token) {
+                // Only retry with development token in development environment
+                if (response.status === 401 && token && authToken === token && __DEV__) {
                     console.log('🔧 Clerk token failed with 401, retrying with development auth');
                     
                     const retryResponse = await apiClient.makeRequest(endpoint, {
@@ -77,14 +83,23 @@ export const useAuthenticatedAPI = () => {
                     if (!retryResponse.ok) {
                         const retryErrorData = await retryResponse.text();
                         console.error('Development auth also failed:', retryErrorData);
-                        throw new Error(`API request failed: ${retryResponse.status} - ${retryErrorData}`);
+                        throw new Error(`Authentication failed. Please try signing out and back in.`);
                     }
                     
                     console.log('✅ Development auth retry successful');
                     return await retryResponse.json();
                 }
                 
-                throw new Error(`API request failed: ${response.status} - ${errorData}`);
+                // Provide user-friendly error messages in production
+                if (response.status === 401) {
+                    throw new Error('Authentication failed. Please sign out and back in.');
+                } else if (response.status >= 500) {
+                    throw new Error('Server error. Please try again later.');
+                } else if (response.status >= 400) {
+                    throw new Error('Request failed. Please check your input and try again.');
+                } else {
+                    throw new Error('Network error. Please check your connection and try again.');
+                }
             }
 
             return await response.json();

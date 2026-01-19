@@ -7,7 +7,7 @@ import * as textToTasksControllers from './textToTasks.controllers.js';
 const router = Router();
 
 // Apply authentication to all routes - TEMPORARILY DISABLED for testing
-// router.use(requireAuth);
+// 
 
 /**
  * Text-to-Tasks API Routes

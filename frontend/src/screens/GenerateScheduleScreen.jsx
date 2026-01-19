@@ -157,9 +157,19 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 inputLength: todoListInput?.length || 0
             });
 
-            // You might want to show an error modal or message to the user
-            // For now, we'll just stay on the current stage
-            alert(`Failed to parse your tasks: ${error.message}\n\nPlease try again or enter tasks manually.`);
+            // Show user-friendly error message without exposing internal details
+            let userMessage = "We couldn't get your tasks. Please try again or enter them manually.";
+            
+            // Provide more specific guidance based on error type
+            if (error.message?.includes('Authentication')) {
+                userMessage = "Authentication failed. Please sign out and back in, then try again.";
+            } else if (error.message?.includes('Network') || error.message?.includes('Server')) {
+                userMessage = "Connection error. Please check your internet and try again.";
+            } else if (error.message?.includes('APP_UPDATE_REQUIRED')) {
+                userMessage = "Please update the app to continue using this feature.";
+            }
+            
+            alert(userMessage);
             
             // Reset to the add tasks stage
             setGenStage(1);
