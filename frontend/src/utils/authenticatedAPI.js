@@ -93,6 +93,23 @@ export const useAuthenticatedAPI = () => {
                 // Provide user-friendly error messages in production
                 if (response.status === 401) {
                     throw new Error('Authentication failed. Please sign out and back in.');
+                } else if (response.status === 429) {
+                    // Rate limiting - provide helpful message
+                    const errorData = await response.text();
+                    let rateLimitError;
+                    try {
+                        const errorJson = JSON.parse(errorData);
+                        if (errorJson.message?.includes('text-to-tasks')) {
+                            rateLimitError = new Error('TOO_MANY_REQUESTS: Text-to-tasks rate limit exceeded');
+                        } else {
+                            rateLimitError = new Error('TOO_MANY_REQUESTS: Rate limit exceeded');
+                        }
+                        rateLimitError.retryAfter = errorJson.retryAfter;
+                        rateLimitError.resetTime = errorJson.resetTime;
+                    } catch {
+                        rateLimitError = new Error('TOO_MANY_REQUESTS: Rate limit exceeded');
+                    }
+                    throw rateLimitError;
                 } else if (response.status >= 500) {
                     throw new Error('Server error. Please try again later.');
                 } else if (response.status >= 400) {

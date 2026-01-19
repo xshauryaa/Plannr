@@ -4,6 +4,7 @@ import { ENV } from './config/env.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middleware/error.js';
 import { enforceMinAppVersion } from './middleware/enforceMinAppVersion.js';
+import { generalApiRateLimit } from './middleware/rateLimiters.js';
 import { startCronJobs, stopCronJobs } from './config/cron.js';
 
 const app = express();
@@ -13,6 +14,9 @@ const PORT = ENV.PORT;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply general rate limiting to all API routes
+app.use('/api', generalApiRateLimit);
 
 // Serve static files for uploads
 app.use('/uploads', express.static('uploads'));

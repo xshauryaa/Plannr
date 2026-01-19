@@ -163,6 +163,8 @@ const GenerateScheduleScreen = ({ navigation }) => {
             // Provide more specific guidance based on error type
             if (error.message?.includes('Authentication')) {
                 userMessage = "Authentication failed. Please sign out and back in, then try again.";
+            } else if (error.message?.includes('TOO_MANY_REQUESTS') || error.status === 429) {
+                userMessage = "You've reached the hourly limit for text-to-tasks parsing. Please try again in a bit or enter your tasks manually.";
             } else if (error.message?.includes('Network') || error.message?.includes('Server')) {
                 userMessage = "Connection error. Please check your internet and try again.";
             } else if (error.message?.includes('APP_UPDATE_REQUIRED')) {

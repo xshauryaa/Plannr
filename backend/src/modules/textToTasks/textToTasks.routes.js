@@ -1,13 +1,15 @@
 import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
+import { textToTasksRateLimit } from '../../middleware/rateLimiters.js';
 import * as textToTasksValidators from './textToTasks.validators.js';
 import * as textToTasksControllers from './textToTasks.controllers.js';
 
 const router = Router();
 
-// Apply authentication to all routes - TEMPORARILY DISABLED for testing
-// 
+// Apply authentication and rate limiting to all routes
+// router.use(requireAuth);
+router.use(textToTasksRateLimit);
 
 /**
  * Text-to-Tasks API Routes

@@ -21,4 +21,9 @@ export const ENV = {
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     CLERK_JWT_KEY: process.env.CLERK_JWT_KEY, // Add this for JWT verification
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    
+    // Rate limiting configuration
+    SKIP_RATE_LIMITS: process.env.SKIP_RATE_LIMITS === 'true',
+    TEXT_TO_TASKS_RATE_LIMIT: parseInt(process.env.TEXT_TO_TASKS_RATE_LIMIT) || 10, // per hour
+    GENERAL_API_RATE_LIMIT: parseInt(process.env.GENERAL_API_RATE_LIMIT) || 100, // per 15 minutes
 }
