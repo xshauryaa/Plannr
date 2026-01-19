@@ -27,11 +27,10 @@ export async function requireAuth(req, res, next) {
       return next();
     }
 
-    // 1) Verify Clerk token
+    // 1) Verify Clerk token using the standard method
     const { payload } = await verifyToken(token, {
-      secretKey: ENV.CLERK_SECRET_KEY,          // required
-      // Optionally: authorizedParties: [ENV.APP_URL],
-      //             clockSkewInMs: 5000,
+      secretKey: ENV.CLERK_SECRET_KEY,
+      // Let Clerk handle JWT key resolution automatically
     });
 
     const clerkUserId = payload.sub;
@@ -57,6 +56,24 @@ export async function requireAuth(req, res, next) {
     next();
   } catch (err) {
     console.error("Auth error:", err);
+    
+    // More detailed error logging for JWT issues
+    if (err.reason === 'jwk-failed-to-resolve') {
+      console.error("❌ JWT Key resolution failed. Check CLERK_JWT_KEY environment variable.");
+      console.error("Available env vars:", {
+        hasClerkSecretKey: !!ENV.CLERK_SECRET_KEY,
+        hasClerkJwtKey: !!ENV.CLERK_JWT_KEY,
+        nodeEnv: ENV.NODE_ENV,
+        authDevMode: ENV.AUTH_DEV
+      });
+    }
+    
+    if (err.reason === 'token-invalid') {
+      console.error("❌ Invalid token format. Token preview:", 
+        authHeader ? authHeader.substring(0, 20) + '...' : 'No token provided'
+      );
+    }
+    
     return res.status(401).json({ error: "Unauthorized" });
   }
 }

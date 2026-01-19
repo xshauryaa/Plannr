@@ -4,6 +4,7 @@ import { ENV } from './config/env.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middleware/error.js';
 import { enforceMinAppVersion } from './middleware/enforceMinAppVersion.js';
+import { requireAuth } from './middleware/auth.js';
 import { startCronJobs, stopCronJobs } from './config/cron.js';
 
 const app = express();
@@ -20,6 +21,15 @@ app.use('/uploads', express.static('uploads'));
 // Apply version enforcement middleware globally to all API routes
 // This must come before the protected routes but after basic middleware
 app.use(enforceMinAppVersion);
+
+// Apply authentication to all API routes (except health and version checks)
+app.use('/api', (req, res, next) => {
+    // Skip auth for health check and version endpoint
+    if (req.path === '/health' || req.path === '/app/version') {
+        return next();
+    }
+    return requireAuth(req, res, next);
+});
 
 // API Routes
 app.use('/api', apiRoutes);

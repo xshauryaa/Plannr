@@ -632,12 +632,13 @@ export const useAuthenticatedAPI = () => {
                             onboarded: Boolean(userProfile.data.onboarded),
                             firstLaunch: false,
                             userPreferences: {
-                                theme: preferences.uiMode === 'dark' ? 'dark' : 'light',
-                                defaultStrategy: preferences.defaultStrategy || 'earliest-fit',
-                                defaultMinGap: String(preferences.minGapMinutes || 15),
-                                defaultMaxWorkingHours: String(preferences.maxWorkHoursPerDay || 8),
-                                taskRemindersEnabled: Boolean(preferences.notificationsEnabled ?? true),
-                                leadMinutes: String(preferences.leadMinutes || 30),
+                                theme: preferences.data.theme || 'light',
+                                defaultStrategy: preferences.data.defaultStrategy || 'earliest-fit',
+                                defaultMinGap: preferences.data.defaultMinGap || '15',
+                                defaultMaxWorkingHours: preferences.data.defaultMaxWorkingHours || '8',
+                                taskRemindersEnabled: preferences.data.taskRemindersEnabled ?? true,
+                                leadMinutes: preferences.data.leadMinutes || '30',
+                                nickname: preferences.data.nickname || ''
                             },
                             savedSchedules: schedules.data.map(schedule => ({
                                 name: schedule.title,

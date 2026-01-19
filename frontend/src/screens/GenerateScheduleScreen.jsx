@@ -421,7 +421,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 <View style={styles.progressBarBackground}>
                     <Animated.View 
                         style={[
-                            styles.progressBarForeground, 
+                            { ...styles.progressBarForeground, backgroundColor: theme.FOREGROUND }, 
                             { 
                                 width: progressAnim.interpolate({
                                     inputRange: [0, 100],

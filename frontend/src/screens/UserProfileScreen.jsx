@@ -231,11 +231,25 @@ const UserProfileScreen = ({ navigation }) => {
             console.log('ℹ️ Server response:', response);
             
             // If server returns normalized/validated preferences, merge them into app state
-            if (response && response.userPreferences) {
-                setAppState(prevState => ({ ...prevState, userPreferences: response.userPreferences }));
-                console.log('🔁 Local appState.userPreferences updated from server response.');
+            if (response && response.data) {
+                // Map backend response to frontend format
+                const updatedPreferences = {
+                    theme: response.data.theme || appState.userPreferences.theme,
+                    defaultStrategy: response.data.defaultStrategy || appState.userPreferences.defaultStrategy,
+                    defaultMinGap: response.data.defaultMinGap || appState.userPreferences.defaultMinGap,
+                    defaultMaxWorkingHours: response.data.defaultMaxWorkingHours || appState.userPreferences.defaultMaxWorkingHours,
+                    taskRemindersEnabled: response.data.taskRemindersEnabled ?? appState.userPreferences.taskRemindersEnabled,
+                    leadMinutes: response.data.leadMinutes || appState.userPreferences.leadMinutes,
+                    nickname: response.data.nickname || appState.userPreferences.nickname
+                };
+                
+                setAppState(prevState => ({ 
+                    ...prevState, 
+                    userPreferences: updatedPreferences 
+                }));
+                console.log('🔁 Local appState.userPreferences updated from server response:', updatedPreferences);
             } else {
-                console.log('ℹ️ Server did not return userPreferences; keeping local state as-is.');
+                console.log('ℹ️ Server did not return preferences data; keeping local state as-is.');
             }
         } catch (error) {
             console.error('💥 Error saving preferences via authenticatedAPI:', error);
