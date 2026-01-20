@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { useAppState } from '../context/AppStateContext.js';
-import { useActionLogger } from '../hooks/useActionLogger.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
-import { lightColor, darkColor } from '../design/colors.js';
-import { spacing, padding } from '../design/spacing.js';
-import { typography } from '../design/typography.js';
-import Rescheduler from '../model/Rescheduler.js';
-import EventDependencies from '../model/EventDependencies.js';
+import { useAppState } from '../../context/AppStateContext.js';
+import { useActionLogger } from '../../hooks/useActionLogger.js';
+import { useAuthenticatedAPI } from '../../utils/authenticatedAPI.js';
+import { lightColor, darkColor } from '../../design/colors.js';
+import { spacing, padding } from '../../design/spacing.js';
+import { typography } from '../../design/typography.js';
+import Rescheduler from '../../model/Rescheduler.js';
+import EventDependencies from '../../model/EventDependencies.js';
 
-import RescheduleStartView from '../legacy/scheduling-logic-views/RescheduleStartView.jsx';
-import BreaksView from '../legacy/scheduling-logic-views/BreaksView.jsx';
-import RigidEventsView from '../legacy/scheduling-logic-views/RigidEventsView.jsx';
-import FlexibleEventsView from '../legacy/scheduling-logic-views/FlexibleEventsView.jsx';
-import EventDependenciesView from '../legacy/scheduling-logic-views/EventDependenciesView.jsx';
-import FinalCheckView from '../legacy/scheduling-logic-views/FinalCheckView.jsx';
-import GenerationModal from '../modals/GenerationModal.jsx';
+import RescheduleStartView from '../scheduling-logic-views/RescheduleStartView.jsx';
+import BreaksView from '../scheduling-logic-views/BreaksView.jsx';
+import RigidEventsView from '../scheduling-logic-views/RigidEventsView.jsx';
+import FlexibleEventsView from '../scheduling-logic-views/FlexibleEventsView.jsx';
+import EventDependenciesView from '../scheduling-logic-views/EventDependenciesView.jsx';
+import FinalCheckView from '../scheduling-logic-views/FinalCheckView.jsx';
+import GenerationModal from '../../modals/GenerationModal.jsx';
 import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const { width, height } = Dimensions.get('window');

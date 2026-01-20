@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native' 
+import { View, Text, StyleSheet, Pressable, TextInput, Platform, TouchableOpacity, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native' 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
@@ -25,11 +25,12 @@ const SettingUpView = ({ onNext }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     return (
-        <KeyboardAvoidingView 
-            style={styles.subContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView 
+                style={styles.subContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+            >
             <ScrollView showsVerticalScrollIndicator={false}>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>First, tell Plannr what your schedule should look like</Text>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Name this plan</Text>
@@ -176,6 +177,7 @@ const SettingUpView = ({ onNext }) => {
                 <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Next</Text>
             </TouchableOpacity>
         </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 }
 

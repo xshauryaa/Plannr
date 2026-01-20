@@ -3,21 +3,26 @@ import { View, Text, StyleSheet, TouchableOpacity, Pressable, TextInput, Platfor
 import { LinearGradient } from 'expo-linear-gradient';
 import AIIcon from '../../assets/system-icons/AIIcon.svg';
 import { useAppState } from '../context/AppStateContext';
-import TimePicker from '../components/TimePicker.jsx';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import convertTimeToTime24 from '../utils/timeConversion';
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24';
 import { lightColor, darkColor } from '../design/colors';
 import { typography } from '../design/typography.js'
+import Time24 from '../model/Time24';
 
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
 import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg';
+import ScheduleDate from '../model/ScheduleDate';
 
 const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
     const { appState } = useAppState();
     const [startTime, setStartTime] = useState(convertTimeToTime24(new Date()));
     const [endTime, setEndTime] = useState(convertTimeToTime24(new Date()));
     const [strategy, setStrategy] = useState(appState.userPreferences.defaultStrategy);
+    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
     const warning = "End time must be after start time";
 
@@ -35,13 +40,79 @@ const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>Set your daily schedule window, then we'll generate your plan.</Text>
                         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12, marginBottom: 0 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Days start at</Text>
-                                <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
+                                <View style={{ width: '50%' }}>
+                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Days start at</Text>
+                                    <Pressable onPress={() => { setShowStartTimePicker(true); setShowEndTimePicker(false); }}>
+                                        <TextInput
+                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                            pointerEvents="none"
+                                            value={startTime.to12HourString()}
+                                            editable={false}
+                                        />
+                                    </Pressable>
+                                </View>
+                                <View style={{ width: '50%' }}>
+                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Days end at</Text>
+                                    <Pressable onPress={() => { setShowStartTimePicker(false); setShowEndTimePicker(true); }}>
+                                        <TextInput
+                                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                            pointerEvents="none"
+                                            value={endTime.to12HourString()}
+                                            editable={false}
+                                        />
+                                    </Pressable>
+                                </View>
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Days end at</Text>
-                                <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
-                            </View>
+                            {/* Start Time Picker */}
+                            {showStartTimePicker && (
+                                <View>
+                                    <DateTimePicker
+                                        value={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), startTime)}
+                                        mode="time"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        minimumDate={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), new Time24(0))}
+                                        maximumDate={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), new Time24(2359))}
+                                        onChange={(event, selectedTime) => {
+                                            if (selectedTime) {
+                                                const newStartTime = convertTimeToTime24(selectedTime);
+                                                setStartTime(newStartTime);
+                                            }
+                                        }}
+                                        themeVariant={appState.userPreferences.theme}
+                                    />
+                                    <TouchableOpacity 
+                                        style={styles.button}
+                                        onPress={() => setShowStartTimePicker(false)}
+                                    >
+                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            {/* End Time Picker */}
+                            {showEndTimePicker && (
+                                <View>
+                                    <DateTimePicker
+                                        value={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), endTime)}
+                                        mode="time"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        minimumDate={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), new Time24(0))}
+                                        maximumDate={combineScheduleDateAndTime24(new ScheduleDate(1, 1, 2026), new Time24(2359))}
+                                        onChange={(event, selectedTime) => {
+                                            if (selectedTime) {
+                                                const newEndTime = convertTimeToTime24(selectedTime);
+                                                setEndTime(newEndTime);
+                                            }
+                                        }}
+                                        themeVariant={appState.userPreferences.theme}
+                                    />
+                                    <TouchableOpacity 
+                                        style={styles.button}
+                                        onPress={() => setShowEndTimePicker(false)}
+                                    >
+                                        <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                             {showWarning && <Text style={styles.warning}>{warning}</Text>}
                         </View>
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND+'55'}}>Plannr will only schedule tasks within this window.</Text>

@@ -16,6 +16,7 @@ import EventDependencies from '../model/EventDependencies.js'
 
 import GenerationModal from '../modals/GenerationModal.jsx'
 import SchedulingErrorModal from '../modals/SchedulingErrorModal.jsx'
+import AbandonSchedulingModal from '../modals/AbandonSchedulingModal.jsx'
 import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 import LoadingScreen from './LoadingScreen.jsx'
 import SettingUpView from '../scheduling-logic-views/SettingUpView.jsx'
@@ -34,6 +35,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
     const [genStage, setGenStage] = useState(0); // 0: Set Up, 1: Add Tasks, 2: Review Tasks, 3: Busy Times, 4: Finishing Up
     const [showGenerationModal, setShowGenerationModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showAbandonModal, setShowAbandonModal] = useState(false);
     const [isSavingToBackend, setIsSavingToBackend] = useState(false);
     const [scheduler, setScheduler] = useState(new Scheduler(1, new ScheduleDate(1, 1, 1970), 'Sunday', 15, 8));
     const [name, setName] = useState('');
@@ -112,14 +114,15 @@ const GenerateScheduleScreen = ({ navigation }) => {
             for (let i = 0; i < numDays - 1; i++) {
                 maxDate = maxDate.getNextDate();
             }
-            const result = await parseTextToFlexibleEvents(todoListInput, {
+            console.log('Determined maxDate for parsing:', maxDate);
+            const result = await parseTextToFlexibleEvents(todoListInput, maxDate, {
                 defaultDuration: 60,
                 workingHours: { 
                     start: 9, 
                     end: 17 
                 },
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            }, maxDate);
+            });
 
             if (result.success) {
                 console.log('✅ Successfully parsed tasks:', result);
@@ -493,13 +496,13 @@ const GenerateScheduleScreen = ({ navigation }) => {
             <View style={styles.titleContainer}>
                 <TouchableOpacity 
                     style={styles.backButton}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => setShowAbandonModal(true)}
                 >
                     <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
                 <Text style={{ ...styles.title, color: theme.FOREGROUND}}>{titles[genStage]}</Text>
             </View>
-            { isLoading ? <LoadingScreen message='Understanding your tasks...' /> : views[genStage] }
+            { isLoading ? (genStage === 1) ? <LoadingScreen message='Understanding your tasks...' /> : <LoadingScreen message="Just a moment..." /> : views[genStage] }
             <SchedulingErrorModal 
                 isVisible={showErrorModal} 
                 action1={() => { navigation.replace("MainTabs"); setShowErrorModal(false); }} 
@@ -509,6 +512,12 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 isVisible={showGenerationModal} 
                 onViewSchedule={() => { navigation.replace("View", { schedName: name }); setShowGenerationModal(false); }} 
                 isSavingToBackend={isSavingToBackend}
+            />
+            <AbandonSchedulingModal 
+                isVisible={showAbandonModal}
+                goTo={() => navigation.goBack()}
+                onClose={() => setShowAbandonModal(false)}
+                goToName="previous"
             />
         </View>
     );

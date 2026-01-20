@@ -7,11 +7,11 @@ import { Picker } from '@react-native-picker/picker'
 import ActivityType from '../model/ActivityType.js'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
+import convertTimeToTime24 from '../utils/timeConversion'
 import Time24 from '../model/Time24.js'
 import ScheduleDate from '../model/ScheduleDate.js'
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg'
-import TimePicker from './TimePicker';
 
 const ActivityTypeColors = {
   [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
@@ -49,22 +49,15 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
     // Picker visibility states
     const [showTypePicker, setShowTypePicker] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
     // Check if this card should show a warning
     const shouldShowWarning = showWarningForIndex && showWarningForIndex.includes(index);
 
     // Update parent when state changes
-    const updateTimeBlock = () => {
+    const updateTimeBlock = (updatedTimeBlock) => {
         if (onUpdate) {
-            const updatedTimeBlock = {
-                ...timeBlock,
-                name,
-                activityType: type,
-                type,
-                date,
-                startTime,
-                endTime
-            };
             onUpdate(updatedTimeBlock);
         }
     };
@@ -148,42 +141,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
             </View>
         );
     };
-
-    // Start Time & End Time inputs
-    const Panel2 = () => {
-        return (
-            <View>
-                <View style={{ marginBottom: 16 }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
-                    <TimePicker
-                        value={startTime}
-                        onChange={(time) => {
-                            setStartTime(time);
-                            updateTimeBlock();
-                        }}
-                        style={{ alignSelf: 'flex-start' }}
-                    />
-                </View>
-                <View>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
-                    <TimePicker
-                        value={endTime}
-                        onChange={(time) => {
-                            setEndTime(time);
-                            updateTimeBlock();
-                        }}
-                    />
-                </View>
-                {/* Warning message - only show if index is in warning list */}
-                {shouldShowWarning && (
-                    <Text style={{ ...styles.warning, color: '#FF0000' }}>
-                        Start time must be before end time
-                    </Text>
-                )}
-            </View>
-        );
-    };
-
+    
     return (
         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
             {/* Colored left edge */}
@@ -201,7 +159,10 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                             value={name}
                             onChangeText={(text) => {
                                 setName(text);
-                                updateTimeBlock();
+                                updateTimeBlock({
+                                    ...timeBlock,
+                                    name: text
+                                });
                             }}
                             placeholder="Enter time block name"
                             placeholderTextColor={theme.PLACEHOLDER}
@@ -232,7 +193,10 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                     if (date) {
                                         const newDate = convertDateToScheduleDate(date);
                                         setDate(newDate);
-                                        updateTimeBlock();
+                                        updateTimeBlock({
+                                            ...timeBlock,
+                                            date: newDate
+                                        });
                                     }
                                 }}
                                 minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}
@@ -254,7 +218,10 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                 selectedValue={type}
                                 onValueChange={(itemValue) => {
                                     setType(itemValue);
-                                    updateTimeBlock();
+                                    updateTimeBlock({
+                                        ...timeBlock,
+                                        activityType: itemValue
+                                    });
                                 }}
                                 themeVariant={appState.userPreferences.theme}
                             >
@@ -277,7 +244,98 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                             </TouchableOpacity>
                         </View>
                     }
-                    <Panel2 />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <View style={{ width: '50%' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
+                            <Pressable onPress={() => { setShowStartTimePicker(true); setShowEndTimePicker(false); setShowTypePicker(false); setShowDatePicker(false); }}>
+                                <TextInput
+                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                    pointerEvents="none"
+                                    value={startTime.to12HourString()}
+                                    editable={false}
+                                />
+                            </Pressable>
+                        </View>
+                        <View style={{ width: '50%' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
+                            <Pressable onPress={() => { setShowEndTimePicker(true); setShowStartTimePicker(false); setShowTypePicker(false); setShowDatePicker(false); }}>
+                                <TextInput
+                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                    pointerEvents="none"
+                                    value={endTime.to12HourString()}
+                                    editable={false}
+                                />
+                            </Pressable>
+                        </View>
+                    </View>
+                    <View>
+                        {/* Start Time Picker */}
+                        {showStartTimePicker && (
+                            <View>
+                                <DateTimePicker
+                                    value={combineScheduleDateAndTime24(date, startTime)}
+                                    mode="time"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    minimumDate={combineScheduleDateAndTime24(date, new Time24(0))}
+                                    maximumDate={combineScheduleDateAndTime24(date, new Time24(2359))}
+                                    onChange={(event, selectedTime) => {
+                                        if (selectedTime) {
+                                            const newStartTime = convertTimeToTime24(selectedTime);
+                                            setStartTime(newStartTime);
+                                            updateTimeBlock({
+                                                ...timeBlock,
+                                                startTime: newStartTime
+                                            });
+                                            console.log('Selected Start Time:', newStartTime.to12HourString());
+                                        }
+                                    }}
+                                    themeVariant={appState.userPreferences.theme}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.button}
+                                    onPress={() => setShowStartTimePicker(false)}
+                                >
+                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        {/* End Time Picker */}
+                        {showEndTimePicker && (
+                            <View>
+                                <DateTimePicker
+                                    value={combineScheduleDateAndTime24(date, endTime)}
+                                    mode="time"
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    minimumDate={combineScheduleDateAndTime24(date, new Time24(0))}
+                                    maximumDate={combineScheduleDateAndTime24(date, new Time24(2359))}
+                                    onChange={(event, selectedTime) => {
+                                        if (selectedTime) {
+                                            const newEndTime = convertTimeToTime24(selectedTime);
+                                            setEndTime(newEndTime);
+                                            updateTimeBlock({
+                                                ...timeBlock,
+                                                endTime: newEndTime
+                                            });
+                                            console.log('Selected End Time:', newEndTime.to12HourString());
+                                        }
+                                    }}
+                                    themeVariant={appState.userPreferences.theme}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.button}
+                                    onPress={() => setShowEndTimePicker(false)}
+                                >
+                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        {/* Warning message - only show if index is in warning list */}
+                        {shouldShowWarning && (
+                            <Text style={{ ...styles.warning, color: '#FF0000' }}>
+                                Start time must be before end time
+                            </Text>
+                        )}
+                    </View>
                 </View>
             )}
         </View>

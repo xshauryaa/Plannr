@@ -1061,7 +1061,7 @@ export const useAuthenticatedAPI = () => {
         },
 
         // Text-to-Tasks API - Combined function for complete workflow
-        parseTextToFlexibleEvents: async (todoListText, preferences = {}, defaultDeadline) => {
+        parseTextToFlexibleEvents: async (todoListText, defaultDeadline, preferences = { defaultDuration: 60, workingHours: { start: 9, end: 17 }, timezone: 'America/New_York' }) => {
             try {
                 console.log('🤖 Starting text-to-tasks parsing...');
                 

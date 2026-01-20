@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
@@ -14,19 +14,18 @@ const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     return (
-        <KeyboardAvoidingView 
-            style={styles.subContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
-            <FlatList
-                data={taskList}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item, index }) => (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView 
+                style={styles.subContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+            >
+            <ScrollView showsVerticalScrollIndicator={false}>
+                {taskList.map((task, index) => (
                     <CollapsibleTaskCard 
-                        task={item} 
-                        key={index} 
-                        minDate={minDate} 
+                        task={task}
+                        key={index}
+                        minDate={minDate}
                         numDays={numDays}
                         onUpdate={(updatedTask) => {
                             const newTaskList = [...taskList];
@@ -34,9 +33,8 @@ const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
                             setTaskList(newTaskList);
                         }}
                     />
-                )}
-                
-            />
+                ))}
+            </ScrollView>
             <TouchableOpacity 
                 onPress={ () => onNext(taskList) }
             >
@@ -50,6 +48,7 @@ const ReviewTasksView = ({ tasks, onNext, minDate, numDays }) => {
                 </LinearGradient>
             </TouchableOpacity>
         </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 };
 

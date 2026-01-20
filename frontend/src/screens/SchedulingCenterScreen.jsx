@@ -7,7 +7,6 @@ import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import MenuButton from '../components/MenuButton.jsx';
 import Insights from '../components/Insights.jsx';
-import RescheduleBottomSheet from '../components/RescheduleBottomSheet.jsx';
 const { width, height } = Dimensions.get('window');
 
 const WIDTH = width - (padding.SCREEN_PADDING * 2);
@@ -65,7 +64,6 @@ const SchedulingCenterScreen = ({ navigation }) => {
                     /> */}
                 </View>
             </ScrollView>
-            <RescheduleBottomSheet ref={bottomSheetRef} theme={theme}/>
         </View>
     );
 }

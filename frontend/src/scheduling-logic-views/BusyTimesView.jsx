@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
@@ -55,6 +55,7 @@ const BusyTimesView = ({ timeBlocks, onNext, minDate, numDays }) => {
                     invalidIndices.push(index);
                 }
             }
+            console.log(`Time Block ${index}: Start - ${startTime.toString()}, End - ${endTime.toString()}`);
         });
 
         if (invalidIndices.length > 0) {
@@ -70,11 +71,12 @@ const BusyTimesView = ({ timeBlocks, onNext, minDate, numDays }) => {
     };
 
     return (
-        <KeyboardAvoidingView 
-            style={styles.subContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView 
+                style={styles.subContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+            >
             <View>
                 {/* Subheading */}
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
@@ -89,11 +91,8 @@ const BusyTimesView = ({ timeBlocks, onNext, minDate, numDays }) => {
                     <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center', fontSize: 16 }}>Add Busy Time</Text>
                 </TouchableOpacity>
             </View>
-
-            <FlatList
-                data={timeBlockList}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item, index }) => (
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginBottom: 16 }}>
+                {timeBlockList.map((item, index) => (
                     <CollapsibleTimeBlockCard 
                         timeBlock={item} 
                         key={index}
@@ -114,9 +113,8 @@ const BusyTimesView = ({ timeBlocks, onNext, minDate, numDays }) => {
                             }
                         }}
                     />
-                )}
-                
-            />
+                ))}
+            </ScrollView>
             {/* Warning message for invalid time blocks */}
             {showWarning && (
                 <Text style={{ ...styles.warning, color: '#FF0000' }}>
@@ -141,6 +139,7 @@ const BusyTimesView = ({ timeBlocks, onNext, minDate, numDays }) => {
                 onClose={() => setShowModal(false)}
             />
         </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 };
 

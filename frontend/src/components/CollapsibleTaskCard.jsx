@@ -164,40 +164,7 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                 </View>
             </View>
         )
-    }
-
-    {/* Event Duration & Deadline inputs */}
-    const Panel2 = () => {
-        return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est. mins)</Text>
-                    <TextInput
-                        style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
-                        value={duration}
-                        autoCorrect={false}
-                        autoCapitalize='words'
-                        onChangeText={(text) => {
-                            setDuration(text);
-                            updateTask();
-                        }}
-                        keyboardType='numeric'
-                    />
-                </View>
-                <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowDatePicker(true) }}>
-                        <TextInput
-                            style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
-                            pointerEvents="none"
-                            value={deadline.getDateString()}
-                            editable={false}
-                        />
-                    </Pressable>
-                </View>
-            </View>
-        )
-    }
+    };
 
     return (
         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -275,7 +242,35 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                             </TouchableOpacity>
                         </View>
                     }
-                    <Panel2 />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <View style={{ width: '50%' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Duration (est. mins)</Text>
+                            <TextInput
+                                style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                value={duration}
+                                autoCorrect={false}
+                                autoCapitalize='words'
+                                onChangeText={(text) => {
+                                    setDuration(text);
+                                }}
+                                onBlur={() => {
+                                    updateTask();
+                                }}
+                                keyboardType='numeric'
+                            />
+                        </View>
+                        <View style={{ width: '50%' }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
+                            <Pressable onPress={() => { setShowDatePicker(true) }}>
+                                <TextInput
+                                    style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND}}
+                                    pointerEvents="none"
+                                    value={deadline.getDateString()}
+                                    editable={false}
+                                />
+                            </Pressable>
+                        </View>
+                    </View>
                     {/** Deadline Picker */}
                     {showDatePicker && (
                         <View>

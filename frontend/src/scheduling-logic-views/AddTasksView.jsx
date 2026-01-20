@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useAppState } from '../context/AppStateContext'
 import { lightColor, darkColor } from '../design/colors.js'
 import { typography } from '../design/typography.js'
@@ -14,11 +14,12 @@ const AddTasksView = ({ onNext }) => {
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
     return (
-        <KeyboardAvoidingView 
-            style={styles.subContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-        >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView 
+                style={styles.subContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+            >
             <View>
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Just paste your to-do list. We'll handle the rest.</Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
@@ -61,6 +62,7 @@ const AddTasksView = ({ onNext }) => {
                 </LinearGradient>
             </TouchableOpacity>
         </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 };
 

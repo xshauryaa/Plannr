@@ -9,7 +9,6 @@ import TodaysTasksScreen from '../screens/TodaysTasksScreen';
 import UserProfileStack from './UserProfileStack.jsx';
 import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
-import RescheduleScreen from '../screens/RescheduleScreen.jsx';
 import ScheduleViewScreen from '../screens/ScheduleViewScreen.jsx';
 
 const Stack = createStackNavigator();
@@ -35,7 +34,6 @@ export default function AppStack() {
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="View" component={ScheduleViewScreen} />
       <Stack.Screen name="Generate" component={GenerateScheduleScreen} />
-      <Stack.Screen name="Reschedule" component={RescheduleScreen} />
     </Stack.Navigator>
   );
 }
