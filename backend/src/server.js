@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Apply general rate limiting to all API routes
-app.use('/api', generalApiRateLimit);
+// app.use('/api', generalApiRateLimit);
 
 // Serve static files for uploads
 app.use('/uploads', express.static('uploads'));
