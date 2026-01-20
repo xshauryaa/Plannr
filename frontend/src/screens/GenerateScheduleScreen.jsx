@@ -240,6 +240,7 @@ const GenerateScheduleScreen = ({ navigation }) => {
     }
 
     const Generation = async (startTime, endTime, strategy) => {
+        setIsLoading(true);
         logScheduleAction('generate', {
             strategy,
             startTime: startTime.toString(),
@@ -436,8 +437,10 @@ const GenerateScheduleScreen = ({ navigation }) => {
                 savedToBackend: true
             });
             
+            setIsLoading(false);
             setShowGenerationModal(true);
         } catch (error) {
+            setIsLoading(false);
             setShowErrorModal(true);
             logError('schedule_generation_failed', error, {
                 strategy,

@@ -35,11 +35,11 @@ const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND}}>Set your daily schedule window, then we'll generate your plan.</Text>
                         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, gap: 12, marginBottom: 0 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Start Time</Text>
+                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Days start at</Text>
                                 <TimePicker value={startTime} onChange={(time) => { setStartTime(time); }} />
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>End Time</Text>
+                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, width: 60 }}>Days end at</Text>
                                 <TimePicker value={endTime} onChange={(time) => { setEndTime(time); }} />
                             </View>
                             {showWarning && <Text style={styles.warning}>{warning}</Text>}
@@ -53,7 +53,7 @@ const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
                                     style={{ ...styles.choiceButton, backgroundColor: (strategy == 'earliest-fit') ? theme.SELECTION : theme.INPUT  }}
                                     onPress={() => { setStrategy('earliest-fit') }}
                                 >
-                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Earliest Fit</Text>
+                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'earliest-fit') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Get things done early</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -62,7 +62,7 @@ const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
                                     style={{ ...styles.choiceButton, backgroundColor: (strategy == 'balanced-work') ? theme.SELECTION : theme.INPUT  }}
                                     onPress={() => { setStrategy('balanced-work') }}
                                 >
-                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Balanced Work</Text>
+                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'balanced-work') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Spread it out evenly</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={{ width: '100%', flexDirection: 'row',  alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}>
@@ -71,7 +71,7 @@ const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
                                     style={{ ...styles.choiceButton, backgroundColor: (strategy == 'deadline-oriented') ? theme.SELECTION : theme.INPUT  }}
                                     onPress={() => { setStrategy('deadline-oriented') }}
                                 >
-                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Deadline Oriented</Text>
+                                        <Text style={{ fontSize: typography.subHeadingSize, fontFamily: 'AlbertSans', color: (strategy == 'deadline-oriented') ? theme.SELECTED_TEXT : theme.FOREGROUND}}>Focus on deadlines</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
