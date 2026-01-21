@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
-import { useAppState } from '../context/AppStateContext.js';
-import { lightColor, darkColor } from '../design/colors.js';
-import { spacing, padding } from '../design/spacing.js';
-import { typography } from '../design/typography.js';
+import { useAppState } from '../../context/AppStateContext.js';
+import { lightColor, darkColor } from '../../design/colors.js';
+import { spacing, padding } from '../../design/spacing.js';
+import { typography } from '../../design/typography.js';
 import Google from '../../assets/auth/Google.svg';
 import Apple from '../../assets/auth/Apple.svg';
 
@@ -41,11 +41,11 @@ const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple
             <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <View style={[styles.handle, { backgroundColor: theme.FOREGROUND_MUTED }]} />
+                    <View style={[styles.handle, { backgroundColor: theme.INPUT }]} />
                     <Text style={[styles.title, { color: theme.FOREGROUND }]}>
                         Export Schedule
                     </Text>
-                    <Text style={[styles.subtitle, { color: theme.FOREGROUND_MUTED }]}>
+                    <Text style={[styles.subtitle, { color: theme.FOREGROUND }]}>
                         Choose where to export your schedule
                     </Text>
                 </View>

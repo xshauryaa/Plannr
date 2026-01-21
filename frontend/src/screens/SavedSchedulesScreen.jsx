@@ -14,6 +14,8 @@ const SavedSchedulesScreen = ({ navigation }) => {
     const { logAction, logScreenView } = useActionLogger('SavedSchedules');
     let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
 
+    const activeScheduleName = appState.activeSchedule?.name;
+
     React.useEffect(() => {
         logScreenView({
             totalSavedSchedules: appState.savedSchedules.length,
@@ -66,14 +68,29 @@ const SavedSchedulesScreen = ({ navigation }) => {
                                         {/* Background Image */}
                                         <Image source={imageMap[appState.userPreferences.theme]} style={styles.bgImage} />
                                         <View style={{ ...styles.bottomCover, backgroundColor: theme.COMP_COLOR }}> 
-                                            <View>
-                                                <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
-                                                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
-                                                    {item?.schedule?.getFirstDate ? 
-                                                        `${item.schedule.getFirstDate().getDateString()} onwards` : 
-                                                        'Schedule details loading...'
-                                                    }
-                                                </Text>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', alignSelf: 'center' }}>
+                                                <View>
+                                                    <Text style={{ ...styles.heading, color: theme.FOREGROUND }}>{item.name}</Text>
+                                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, opacity: 0.5 }}>
+                                                        {item?.schedule?.getFirstDate ? 
+                                                            `${item.schedule.getFirstDate().getDateString()} onwards` : 
+                                                            'Schedule details loading...'
+                                                        }
+                                                    </Text>
+                                                </View>
+                                                { item.name !== activeScheduleName ? null : (
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8, backgroundColor: theme.GREEN + '30', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 64, borderColor: theme.GREEN, borderWidth: 1 }}>
+                                                        <View style={{ height: 8, width: 8, borderRadius: 12, backgroundColor: theme.GREEN }} />
+                                                        <Text style={{
+                                                            fontSize: typography.subHeadingSize - 4,
+                                                            fontFamily: 'AlbertSans',
+                                                            color: theme.FOREGROUND,
+                                                            marginBottom: 0,
+                                                        }}>
+                                                            Active
+                                                        </Text>
+                                                    </View>
+                                                )}
                                             </View>
                                         </View>
                                     </View>

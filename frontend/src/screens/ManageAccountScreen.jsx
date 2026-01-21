@@ -276,7 +276,7 @@ const ManageAccountScreen = ({ navigation }) => {
                         placeholderTextColor={theme.FOREGROUND_SECONDARY}
                     />
                     
-                    <Text style={{ ...styles.disabledText, color: theme.FOREGROUND_SECONDARY }}>
+                    <Text style={{ ...styles.disabledText, color: theme.FOREGROUND }}>
                         Emails cannot be changed.
                     </Text>
                 </View>

@@ -28,10 +28,10 @@ export const useAuthenticatedAPI = () => {
         try {
             // Get the current session token from Clerk
             const token = await getToken();
-            console.log('🔍 Retrieved token for key:', token ? 'PRESENT' : 'NULL');
-            if (token) {
-                console.log('🔍 Token preview:', token.substring(0, 20) + '...');
-            }
+            // console.log('🔍 Retrieved token for key:', token ? 'PRESENT' : 'NULL');
+            // if (token) {
+            //     console.log('🔍 Token preview:', token.substring(0, 20) + '...');
+            // }
             
             let authToken = token;
             
