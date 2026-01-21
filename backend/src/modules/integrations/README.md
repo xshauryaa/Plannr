@@ -76,7 +76,7 @@ Checks if the user has connected Google Calendar with the required permissions.
 ## Required Google OAuth Scope
 
 The integration requires the following OAuth scope:
-- `https://www.googleapis.com/auth/calendar.events`
+- `https://www.googleapis.com/auth/calendar.app.created` - Allows creating secondary calendars and managing events on those calendars
 
 ## Calendar Management
 
