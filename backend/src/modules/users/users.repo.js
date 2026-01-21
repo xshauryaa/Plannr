@@ -1,5 +1,5 @@
 import { db } from '../../config/db.js';
-import { users, preferences, integrations } from '../../db/schema.js';
+import { users, preferences } from '../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 
 /**
@@ -136,62 +136,5 @@ export const markUserAsOnboarded = async (userId) => {
         return updatedUser;
     } catch (error) {
         throw new Error(`Failed to mark user as onboarded: ${error.message}`);
-    }
-};
-
-// Integrations Repository Functions
-export const getUserIntegrations = async (userId) => {
-    try {
-        const [userIntegrations] = await db
-            .select()
-            .from(integrations)
-            .where(eq(integrations.userId, userId))
-            .limit(1);
-
-        // If no integrations record exists, create one with default values
-        if (!userIntegrations) {
-            return await createDefaultIntegrations(userId);
-        }
-
-        return userIntegrations;
-    } catch (error) {
-        throw new Error(`Failed to get user integrations: ${error.message}`);
-    }
-};
-
-export const createDefaultIntegrations = async (userId) => {
-    try {
-        const [newIntegrations] = await db.insert(integrations).values({
-            userId,
-            googleCalendar: false,
-            todoist: false,
-            notion: false,
-            googleTasks: false,
-            microsoftTodo: false,
-        }).returning();
-
-        return newIntegrations;
-    } catch (error) {
-        throw new Error(`Failed to create default integrations: ${error.message}`);
-    }
-};
-
-export const updateUserIntegrations = async (userId, integrationsData) => {
-    try {
-        // First ensure the integrations record exists
-        await getUserIntegrations(userId);
-
-        const [updatedIntegrations] = await db
-            .update(integrations)
-            .set({
-                ...integrationsData,
-                updatedAt: new Date(),
-            })
-            .where(eq(integrations.userId, userId))
-            .returning();
-
-        return updatedIntegrations;
-    } catch (error) {
-        throw new Error(`Failed to update user integrations: ${error.message}`);
     }
 };

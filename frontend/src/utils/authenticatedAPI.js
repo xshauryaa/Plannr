@@ -28,10 +28,10 @@ export const useAuthenticatedAPI = () => {
         try {
             // Get the current session token from Clerk
             const token = await getToken();
-            console.log('🔍 Retrieved token for key:', token ? 'PRESENT' : 'NULL');
-            if (token) {
-                console.log('🔍 Token preview:', token.substring(0, 20) + '...');
-            }
+            // console.log('🔍 Retrieved token for key:', token ? 'PRESENT' : 'NULL');
+            // if (token) {
+            //     console.log('🔍 Token preview:', token.substring(0, 20) + '...');
+            // }
             
             let authToken = token;
             
@@ -943,9 +943,10 @@ export const useAuthenticatedAPI = () => {
             }
         },
 
-        exportScheduleToGoogleCalendar: async (schedule, userTimezone = 'UTC') => {
+        exportScheduleToGoogleCalendar: async (schedule, userTimezone = 'UTC', accessToken = null, scheduleName = null, userName = null) => {
             try {
                 console.log('🔄 Starting Google Calendar export...');
+                console.log('🔍 Access token provided:', !!accessToken);
                 
                 if (!schedule || !schedule.getSchedule) {
                     throw new Error('Invalid schedule object provided');
@@ -984,10 +985,29 @@ export const useAuthenticatedAPI = () => {
 
                 console.log(`📅 Exporting ${events.length} events to Google Calendar`);
 
+                // Prepare request body with optional fields
+                const requestBody = { events };
+                if (accessToken) {
+                    requestBody.accessToken = accessToken;
+                }
+                if (scheduleName) {
+                    requestBody.scheduleName = scheduleName;
+                }
+                if (userName) {
+                    requestBody.userName = userName;
+                }
+
+                console.log('🔍 [DEBUG] Request body:', {
+                    eventCount: events.length,
+                    hasAccessToken: !!accessToken,
+                    scheduleName,
+                    userName
+                });
+
                 // Send to backend API
                 const response = await makeAuthenticatedRequest('/api/integrations/google-calendar/export', {
                     method: 'POST',
-                    body: JSON.stringify({ events })
+                    body: JSON.stringify(requestBody)
                 });
 
                 console.log('✅ Successfully exported to Google Calendar:', response.data);
@@ -995,30 +1015,6 @@ export const useAuthenticatedAPI = () => {
 
             } catch (error) {
                 console.error('❌ Google Calendar export failed:', error);
-                throw error;
-            }
-        },
-
-        // Integrations operations
-        getUserIntegrations: async () => {
-            try {
-                const response = await makeAuthenticatedRequest('/api/users/integrations');
-                return response.data;
-            } catch (error) {
-                console.error('Failed to get user integrations:', error);
-                throw error;
-            }
-        },
-
-        updateUserIntegrations: async (integrations) => {
-            try {
-                const response = await makeAuthenticatedRequest('/api/users/integrations', {
-                    method: 'PUT',
-                    body: JSON.stringify(integrations),
-                });
-                return response.data;
-            } catch (error) {
-                console.error('Failed to update user integrations:', error);
                 throw error;
             }
         },

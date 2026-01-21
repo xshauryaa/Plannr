@@ -8,7 +8,7 @@ import axios from 'axios';
  */
 
 const GOOGLE_CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3';
-const REQUIRED_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+const REQUIRED_SCOPE = 'https://www.googleapis.com/auth/calendar.app.created';
 
 /**
  * Get Google OAuth access token from Clerk
@@ -18,26 +18,110 @@ const REQUIRED_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
  */
 const getGoogleAccessToken = async (userId) => {
     try {
-        const oauthTokens = await clerkClient.users.getUserOauthAccessToken(userId, 'google');
+        console.log('🔍 [DEBUG] Starting OAuth token fetch for userId:', userId);
         
-        if (!oauthTokens || oauthTokens.length === 0) {
+        // First try to get the user to make sure they exist
+        try {
+            const user = await clerkClient.users.getUser(userId);
+            console.log('🔍 [DEBUG] User found:', !!user);
+            console.log('🔍 [DEBUG] User external accounts:', user.externalAccounts?.length || 0);
+            
+            // Log external accounts for debugging
+            if (user.externalAccounts && user.externalAccounts.length > 0) {
+                user.externalAccounts.forEach((account, index) => {
+                    console.log(`🔍 [DEBUG] External account ${index}:`, {
+                        provider: account.provider,
+                        approved_scopes: account.approvedScopes,
+                        email: account.emailAddress
+                    });
+                });
+                
+                // Check if user has Google OAuth connected
+                const googleAccount = user.externalAccounts.find(account => 
+                    account.provider === 'oauth_google'
+                );
+                
+                if (!googleAccount) {
+                    console.log('❌ [DEBUG] No Google OAuth account found');
+                    throw new Error('GOOGLE_CALENDAR_NOT_CONNECTED');
+                }
+                
+                console.log('✅ [DEBUG] Google OAuth account found');
+                
+                // Check if user has approved the required calendar scope
+                if (!googleAccount.approvedScopes) {
+                    console.log('⚠️ [DEBUG] Google OAuth connected but scopes not accessible via backend SDK');
+                    console.log('💡 [DEBUG] This means OAuth tokens need to be refreshed or accessed differently');
+                    
+                    // Return a special error that indicates connection exists but needs refresh
+                    throw new Error('GOOGLE_CALENDAR_NEEDS_REAUTH');
+                } else {
+                    console.log('🔍 [DEBUG] Google OAuth approved scopes:', googleAccount.approvedScopes);
+                    
+                    // Check if the required scope is approved
+                    if (googleAccount.approvedScopes.includes(REQUIRED_SCOPE)) {
+                        console.log('✅ [DEBUG] Required calendar scope is approved, but backend SDK cannot access tokens');
+                        console.log('💡 [DEBUG] This is a known limitation - frontend should handle the token access');
+                        
+                        // Since the user has approved the scope but backend can't access tokens,
+                        // we'll need to get the token from the frontend instead
+                        // throw new Error('GOOGLE_CALENDAR_USE_FRONTEND_TOKEN');
+                    } else {
+                        console.log('❌ [DEBUG] Required calendar scope not approved');
+                        throw new Error('GOOGLE_CALENDAR_NEEDS_REAUTH');
+                    }
+                }
+            }
+        } catch (userError) {
+            console.log('❌ [DEBUG] User error during token fetch:', userError.message);
+            if (userError.message === 'GOOGLE_CALENDAR_NEEDS_REAUTH') {
+                throw userError; // Preserve the NEEDS_REAUTH error
+            }
+            if (userError.message === 'GOOGLE_CALENDAR_USE_FRONTEND_TOKEN') {
+                throw userError; // Preserve the USE_FRONTEND_TOKEN error
+            }
             throw new Error('GOOGLE_CALENDAR_NOT_CONNECTED');
         }
 
-        const tokenData = oauthTokens[0];
+        const oauthTokens = await clerkClient.users.getUserOauthAccessToken(userId, 'google');
+        
+        console.log('🔍 [DEBUG] OAuth tokens retrieved:', !!oauthTokens);
+        console.log('🔍 [DEBUG] OAuth tokens length:', oauthTokens?.data?.length || 0);
+
+        if (!oauthTokens || oauthTokens.data.length === 0) {
+            console.log('❌ [DEBUG] No OAuth tokens found');
+            throw new Error('GOOGLE_CALENDAR_NEEDS_REAUTH');
+        }
+
+        const tokenData = oauthTokens.data[0];
+        
+        console.log('🔍 [DEBUG] Token data exists:', !!tokenData);
+        
+        if (!tokenData) {
+            console.log('❌ [DEBUG] Token data is null/undefined');
+            throw new Error('GOOGLE_CALENDAR_NEEDS_REAUTH');
+        }
+        
+        console.log('🔍 [DEBUG] Token scopes:', tokenData.scopes);
+        console.log('🔍 [DEBUG] Required scope:', REQUIRED_SCOPE);
+        console.log('🔍 [DEBUG] Scopes includes required:', tokenData.scopes?.includes(REQUIRED_SCOPE));
         
         // Check if the required scope is present
         if (!tokenData.scopes || !tokenData.scopes.includes(REQUIRED_SCOPE)) {
+            console.log('❌ [DEBUG] Required scope not found in token scopes');
             throw new Error('GOOGLE_CALENDAR_NOT_CONNECTED');
         }
 
+        console.log('✅ [DEBUG] Token validation successful');
         return tokenData.token;
     } catch (error) {
-        if (error.message === 'GOOGLE_CALENDAR_NOT_CONNECTED') {
+        if (error.message === 'GOOGLE_CALENDAR_NOT_CONNECTED' || 
+            error.message === 'GOOGLE_CALENDAR_NEEDS_REAUTH' || 
+            error.message === 'GOOGLE_CALENDAR_USE_FRONTEND_TOKEN') {
             throw error;
         }
         console.error('Error fetching Google OAuth token:', error);
-        throw new Error('GOOGLE_CALENDAR_NOT_CONNECTED');
+        throw new Error('GOOGLE_CALENDAR_NEEDS_REAUTH');
     }
 };
 
@@ -45,11 +129,12 @@ const getGoogleAccessToken = async (userId) => {
  * Find or create the Plannr calendar
  * @param {string} accessToken - Google OAuth access token
  * @param {string} timeZone - User's timezone
+ * @param {string} calendarName - Custom calendar name (optional, defaults to 'Plannr')
  * @returns {Promise<string>} Calendar ID
  */
-const findOrCreatePlannrCalendar = async (accessToken, timeZone = 'UTC') => {
+const findOrCreatePlannrCalendar = async (accessToken, timeZone = 'UTC', calendarName = 'Plannr') => {
     try {
-        // First, check if Plannr calendar already exists
+        // First, check if calendar with this name already exists
         const calendarListResponse = await axios.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -57,18 +142,18 @@ const findOrCreatePlannrCalendar = async (accessToken, timeZone = 'UTC') => {
             }
         });
 
-        // Look for existing Plannr calendar
+        // Look for existing calendar with the specified name
         const plannrCalendar = calendarListResponse.data.items?.find(
-            calendar => calendar.summary === 'Plannr'
+            calendar => calendar.summary === calendarName
         );
 
         if (plannrCalendar) {
             return plannrCalendar.id;
         }
 
-        // Create new Plannr calendar if not found
+        // Create new calendar if not found
         const createCalendarResponse = await axios.post(`${GOOGLE_CALENDAR_API_BASE}/calendars`, {
-            summary: 'Plannr',
+            summary: calendarName,
             timeZone: timeZone,
             description: 'Events added by Plannr'
         }, {
@@ -108,13 +193,12 @@ const insertGoogleCalendarEvent = async (accessToken, calendarId, event) => {
                 dateTime: event.end,
                 ...(event.timeZone && { timeZone: event.timeZone })
             },
-            source: {
-                title: 'Plannr',
-                url: `plannr://event/${event.uid}`
-            },
+            // Note: Google Calendar doesn't accept custom URL schemes like plannr://
+            // So we'll use the extendedProperties to store our app-specific data
             extendedProperties: {
                 private: {
-                    plannrUid: event.uid
+                    plannrUid: event.uid,
+                    plannrSource: 'plannr-app'
                 }
             }
         };
@@ -145,7 +229,7 @@ const insertGoogleCalendarEvent = async (accessToken, calendarId, event) => {
  */
 export const exportToGoogleCalendar = async (req, res, next) => {
     try {
-        const { events } = req.validatedData;
+        const { events, accessToken, scheduleName, userName } = req.validatedData;
         const userId = req.headers['x-clerk-user-id'];
 
         if (!userId) {
@@ -155,33 +239,72 @@ export const exportToGoogleCalendar = async (req, res, next) => {
             });
         }
 
-        // Get Google access token
-        let accessToken;
+        console.log('🔍 [DEBUG] Export request received:', {
+            userId,
+            eventCount: events?.length || 0,
+            hasAccessToken: !!accessToken,
+            scheduleName,
+            userName
+        });
+
+        // Create calendar name using the same format as Apple Calendar export
+        // Format: "[User Name]: [Schedule Name] - Plannr"
+        let calendarName = 'Plannr'; // Default fallback
+        if (userName && scheduleName) {
+            calendarName = `${userName}: ${scheduleName} - Plannr`;
+        } else if (scheduleName) {
+            calendarName = `${scheduleName} - Plannr`;
+        } else if (userName) {
+            calendarName = `${userName} - Plannr`;
+        }
+
+        console.log('🔍 [DEBUG] Calendar name will be:', calendarName);
+
+        // Get Google access token - simplified approach
+        let googleAccessToken;
+        
+        console.log('🔍 [DEBUG] Attempting to get Google OAuth access token...');
+        
         try {
-            accessToken = await getGoogleAccessToken(userId);
+            googleAccessToken = await getGoogleAccessToken(userId);
+            console.log('✅ [DEBUG] Successfully got OAuth access token');
         } catch (error) {
+            console.log('❌ [DEBUG] Failed to get OAuth access token:', error.message);
+            
             if (error.message === 'GOOGLE_CALENDAR_NOT_CONNECTED') {
                 return res.status(409).json({
                     success: false,
                     error: 'GOOGLE_CALENDAR_NOT_CONNECTED',
                     message: 'Google Calendar is not connected or missing required permissions'
                 });
+            } else if (error.message === 'GOOGLE_CALENDAR_NEEDS_REAUTH') {
+                return res.status(409).json({
+                    success: false,
+                    error: 'GOOGLE_CALENDAR_NEEDS_REAUTH',
+                    message: 'Google Calendar connection needs re-authentication. Please grant calendar permissions again.'
+                });
+            } else if (error.message === 'GOOGLE_CALENDAR_USE_FRONTEND_TOKEN') {
+                return res.status(409).json({
+                    success: false,
+                    error: 'GOOGLE_CALENDAR_USE_FRONTEND_TOKEN',
+                    message: 'Google Calendar is connected but backend cannot access tokens. Please use frontend token.'
+                });
             }
             throw error;
         }
 
-        // Check cache for calendar ID first
-        let calendarId = await repo.getCachedGoogleCalendarId(userId);
+        // Check cache for calendar ID first (using the calendar name as key)
+        let calendarId = await repo.getCachedGoogleCalendarId(userId, calendarName);
         
         if (!calendarId) {
             // Determine timezone from first event or default to UTC
             const timeZone = events[0]?.timeZone || 'UTC';
             
-            // Find or create Plannr calendar
-            calendarId = await findOrCreatePlannrCalendar(accessToken, timeZone);
+            // Find or create calendar with custom name
+            calendarId = await findOrCreatePlannrCalendar(googleAccessToken, timeZone, calendarName);
             
-            // Cache the calendar ID
-            await repo.cacheGoogleCalendarId(userId, calendarId);
+            // Cache the calendar ID with the calendar name
+            await repo.cacheGoogleCalendarId(userId, calendarId, calendarName);
         }
 
         // Insert all events
@@ -190,7 +313,7 @@ export const exportToGoogleCalendar = async (req, res, next) => {
 
         for (const event of events) {
             try {
-                const googleEventId = await insertGoogleCalendarEvent(accessToken, calendarId, event);
+                const googleEventId = await insertGoogleCalendarEvent(googleAccessToken, calendarId, event);
                 insertResults.push({
                     uid: event.uid,
                     eventId: googleEventId
@@ -254,11 +377,19 @@ export const getGoogleCalendarStatus = async (req, res, next) => {
                 }
             });
         } catch (error) {
+            let responseData = { connected: false };
+            
+            if (error.message === 'GOOGLE_CALENDAR_NEEDS_REAUTH') {
+                responseData.needsReauth = true;
+                responseData.message = 'Google Calendar is connected but needs re-authentication to access tokens';
+            } else {
+                responseData.needsReauth = false;
+                responseData.message = 'Google Calendar not connected';
+            }
+            
             res.status(200).json({
                 success: true,
-                data: {
-                    connected: false
-                }
+                data: responseData
             });
         }
 

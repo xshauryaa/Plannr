@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { ENV } from '../config/env.js';
 
 /**
@@ -19,14 +19,14 @@ export const textToTasksRateLimit = rateLimit({
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     keyGenerator: (req) => {
         // Use user ID for rate limiting (from authentication middleware)
-        return req.user?.id || req.headers['x-clerk-user-id'] || req.ip;
+        return req.user?.id || req.headers['x-clerk-user-id'] || ipKeyGenerator(req);
     },
     skip: (req) => {
         // Skip rate limiting in development environment if configured
         return ENV.NODE_ENV === 'development' && ENV.SKIP_RATE_LIMITS;
     },
     handler: (req, res, next) => {
-        const userId = req.user?.id || req.headers['x-clerk-user-id'] || req.ip;
+        const userId = req.user?.id || req.headers['x-clerk-user-id'] || 'unknown';
         console.warn(`🚫 Rate limit exceeded for text-to-tasks - User: ${userId}`);
         
         res.status(429).json({
@@ -56,8 +56,8 @@ export const generalApiRateLimit = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => {
-        // Use user ID if available, otherwise fall back to IP
-        return req.user?.id || req.headers['x-clerk-user-id'] || req.ip;
+        // Use user ID if available, otherwise fall back to IPv6-safe IP
+        return req.user?.id || req.headers['x-clerk-user-id'] || ipKeyGenerator(req);
     },
     skip: (req) => {
         // Skip rate limiting in development if configured
@@ -79,7 +79,7 @@ export const strictRateLimit = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => {
-        return req.user?.id || req.headers['x-clerk-user-id'] || req.ip;
+        return req.user?.id || req.headers['x-clerk-user-id'] || ipKeyGenerator(req);
     },
     skip: (req) => {
         return ENV.NODE_ENV === 'development' && ENV.SKIP_RATE_LIMITS;

@@ -287,19 +287,10 @@ const UserProfileScreen = ({ navigation }) => {
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND, marginBottom: 4 }}>
                     <MenuButton
-                        broad={false}
+                        broad={true}
                         title="Manage Your Account"
                         icon="Profile"
                         navTo={() => { navigation.navigate("ManageAccount") }}
-                    />
-                    <MenuButton
-                        broad={false}
-                        title="Integrations"
-                        icon="Link"
-                        navTo={() => { 
-                            logAction('integrations_button_clicked');
-                            navigation.navigate("Integrations") 
-                        }}
                     />
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>

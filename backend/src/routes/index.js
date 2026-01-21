@@ -5,7 +5,6 @@ import preferencesRoutes from '../modules/preferences/preferences.routes.js';
 import integrationsRoutes from '../modules/integrations/integrations.routes.js';
 import textToTasksRoutes from '../modules/textToTasks/textToTasks.routes.js';
 import { getMinVersion, getUpdateUrl } from '../config/versionPolicy.js';
-// import importTasksRoutes from '../modules/importTasks/routes/index.js'; // DISABLED FOR LAUNCH
 
 const router = express.Router();
 
@@ -31,6 +30,5 @@ router.use('/users', usersRoutes);
 router.use('/preferences', preferencesRoutes);
 router.use('/integrations', integrationsRoutes);
 router.use('/text-to-tasks', textToTasksRoutes);
-// router.use('/import', importTasksRoutes); // DISABLED FOR LAUNCH - will enable after launch
 
 export default router;

@@ -99,49 +99,172 @@ const ScheduleViewScreen = ({ route }) => {
                 reason: 'missing_calendar_scope'
             });
 
-            // For users who need additional Calendar permissions, we'll guide them to reconnect
-            Alert.alert(
-                'Google Calendar Permissions Needed',
-                'Your Google account is connected, but we need additional calendar permissions to export your schedule.\n\nWould you like to reconnect with calendar permissions?',
-                [
-                    {
-                        text: 'Cancel',
-                        style: 'cancel',
-                        onPress: () => {
-                            logUserAction('google_calendar_auth_cancelled', { scheduleName: schedName });
-                        }
-                    },
-                    {
-                        text: 'Reconnect',
-                        onPress: () => {
-                            // Guide user to settings or provide manual steps
-                            Alert.alert(
-                                'Update Google Calendar Permissions',
-                                'To enable Google Calendar export:\n\n1. Go to Account Settings\n2. Disconnect Google account\n3. Reconnect and allow Calendar permissions\n\nOr try the export again in a few minutes as permissions may take time to update.',
-                                [
-                                    { text: 'Got it', style: 'default' },
-                                    {
-                                        text: 'Try Export Again',
-                                        onPress: () => {
-                                            logUserAction('google_calendar_retry_after_guidance', { scheduleName: schedName });
-                                            handleExportToGoogleCalendar();
-                                        }
-                                    }
-                                ]
-                            );
-                            
-                            logUserAction('google_calendar_guidance_shown', { 
-                                scheduleName: schedName 
-                            });
-                        }
-                    }
-                ]
+            // Check if user already has Google OAuth connected
+            console.log('🔍 Checking user external accounts...');
+            console.log('🔍 User external accounts count:', user.externalAccounts?.length || 0);
+            
+            // Debug: Log all external accounts
+            if (user.externalAccounts && user.externalAccounts.length > 0) {
+                user.externalAccounts.forEach((account, index) => {
+                    console.log(`🔍 Auth check - External account ${index}:`, {
+                        provider: account.provider,
+                        email: account.emailAddress,
+                        verification: account.verification?.status
+                    });
+                });
+            }
+            
+            const existingGoogleAccount = user.externalAccounts?.find(
+                account => account.provider === 'google' || account.provider === 'oauth_google'
             );
+            
+            if (existingGoogleAccount) {
+                console.log('✅ User already has Google OAuth connected');
+                console.log('🔍 Checking if we need additional scopes...');
+                
+                // User is already signed in with Google, but we might need additional scopes
+                // Since we can't easily check scopes on the frontend, we'll show a message
+                // explaining that we need calendar permissions
+                Alert.alert(
+                    'Google Calendar Permissions',
+                    'You\'re already signed in with Google, but we need additional calendar permissions to export your schedule. This will redirect you to Google to grant calendar access.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                            text: 'Grant Permissions',
+                            onPress: async () => {
+                                try {
+                                    // Force a new OAuth flow with additional scopes
+                                    const { createdSessionId, setActive } = await startSSOFlow({
+                                        strategy: 'oauth_google',
+                                        redirectUrl: 'plannr://sso-callback',
+                                        scopes: [
+                                            'openid',
+                                            'https://www.googleapis.com/auth/userinfo.email',
+                                            'https://www.googleapis.com/auth/userinfo.profile',
+                                            'https://www.googleapis.com/auth/calendar.app.created',
+                                            'https://www.googleapis.com/auth/calendar.calendarlist.readonly',
+                                        ],
+                                    });
+                                    
+                                    if (createdSessionId) {
+                                        await setActive({ session: createdSessionId });
+                                        
+                                        Alert.alert(
+                                            'Permissions Updated!',
+                                            'Google Calendar permissions have been updated. You can now export your schedule.',
+                                            [
+                                                { text: 'Later', style: 'cancel' },
+                                                {
+                                                    text: 'Export Now',
+                                                    onPress: () => {
+                                                        setTimeout(() => handleExportToGoogleCalendar(), 1000);
+                                                    }
+                                                }
+                                            ]
+                                        );
+                                    }
+                                } catch (error) {
+                                    console.error('Failed to update permissions:', error);
+                                    Alert.alert(
+                                        'Permission Update Failed',
+                                        'Failed to update Google Calendar permissions. The export might still work - would you like to try it?',
+                                        [
+                                            { text: 'Cancel', style: 'cancel' },
+                                            {
+                                                text: 'Try Export',
+                                                onPress: () => handleExportToGoogleCalendar()
+                                            }
+                                        ]
+                                    );
+                                }
+                            }
+                        }
+                    ]
+                );
+                return;
+            }
+
+            // No existing Google account - proceed with normal OAuth flow
+            console.log('🔍 No existing Google account, starting OAuth flow...');
+            
+            // Start Google OAuth flow with calendar permissions
+            const { createdSessionId, setActive } = await startSSOFlow({
+                strategy: 'oauth_google',
+                redirectUrl: 'plannr://sso-callback',
+                scopes: [
+                    'openid',
+                    'https://www.googleapis.com/auth/userinfo.email',
+                    'https://www.googleapis.com/auth/userinfo.profile',
+                    'https://www.googleapis.com/auth/calendar.app.created',
+                    'https://www.googleapis.com/auth/calendar.calendarlist.readonly',
+                ],
+            });
+
+            if (createdSessionId) {
+                await setActive({ session: createdSessionId });
+                
+                logUserAction('google_calendar_auth_success', { 
+                    scheduleName: schedName 
+                });
+
+                // Show success message and offer to retry export
+                Alert.alert(
+                    'Google Calendar Connected!',
+                    'Your Google Calendar is now connected with calendar permissions. Would you like to export your schedule now?',
+                    [
+                        { text: 'Later', style: 'cancel' },
+                        {
+                            text: 'Export Now',
+                            onPress: () => {
+                                logUserAction('google_calendar_export_after_auth', { scheduleName: schedName });
+                                setTimeout(() => handleExportToGoogleCalendar(), 1000);
+                            }
+                        }
+                    ]
+                );
+            } else {
+                // OAuth flow completed but no session created (user might have cancelled)
+                logUserAction('google_calendar_auth_incomplete', { scheduleName: schedName });
+                
+                Alert.alert(
+                    'Connection Incomplete',
+                    'Google Calendar connection was not completed. Please try again if you want to export your schedule.',
+                    [{ text: 'OK' }]
+                );
+            }
 
         } catch (error) {
-            console.error('Failed to handle Google Calendar authorization:', error);
+            console.error('Google Calendar OAuth error:', error);
             logError('google_calendar_auth_failed', error, { scheduleName: schedName });
-            Alert.alert('Error', 'Please try the export again or check your Google account settings.');
+
+            // Handle specific OAuth error cases
+            if (error.errors && error.errors.length > 0) {
+                const errorCode = error.errors[0]?.code;
+                
+                switch (errorCode) {
+                    case 'oauth_access_denied':
+                        // User cancelled the OAuth process
+                        logUserAction('google_calendar_auth_cancelled', { scheduleName: schedName });
+                        break;
+                    case 'clerk_network_error':
+                        Alert.alert(
+                            'Network Error', 
+                            'Please check your internet connection and try again.'
+                        );
+                        break;
+                    default:
+                        Alert.alert(
+                            'Connection Failed',
+                            'Failed to connect Google Calendar. Please try again or check your Google account settings.'
+                        );
+                }
+            } else {
+                Alert.alert(
+                    'Connection Failed',
+                    'Failed to connect Google Calendar. Please try again.'
+                );
+            }
         }
     };
 
@@ -153,18 +276,22 @@ const ScheduleViewScreen = ({ route }) => {
                 totalDays: schedule.schedule?.numDays || 0
             });
 
-            // Check if Google Calendar is connected first
-            const isConnected = await checkGoogleCalendarStatus();
+            console.log('🔍 Starting Google Calendar export...');
             
-            if (!isConnected) {
-                // Show option to connect Google Calendar
+            // Check if user has Google account connected
+            const googleAccount = user.externalAccounts?.find(
+                account => account.provider === 'google' || account.provider === 'oauth_google'
+            );
+            
+            if (!googleAccount) {
+                console.log('❌ No Google account found, prompting to connect...');
                 Alert.alert(
                     'Google Calendar Not Connected',
-                    'To export your schedule, you need to connect your Google Calendar with calendar permissions.',
+                    'You need to connect your Google account first to export to Google Calendar.',
                     [
                         { text: 'Cancel', style: 'cancel' },
-                        { 
-                            text: 'Connect Calendar', 
+                        {
+                            text: 'Connect Google',
                             onPress: () => handleGoogleCalendarAuth()
                         }
                     ]
@@ -172,12 +299,88 @@ const ScheduleViewScreen = ({ route }) => {
                 return;
             }
 
-            // Get user's timezone - you might want to get this from user preferences
-            // For now, using a default timezone
+            console.log('✅ Google account found:', {
+                provider: googleAccount.provider,
+                email: googleAccount.emailAddress,
+                verification: googleAccount.verification?.status
+            });
+
+            // Step 2: Get user's timezone - you might want to get this from user preferences
             const userTimezone = 'America/Vancouver'; // TODO: Get from user preferences
             
-            // Export to Google Calendar
-            const result = await exportScheduleToGoogleCalendar(schedule.schedule, userTimezone);
+            // Step 3: Prepare user and schedule names for calendar naming
+            const userName = user?.firstName || user?.fullName || 'User';
+            const currentScheduleName = schedName || 'Schedule';
+            
+            // Step 4: Export to Google Calendar - let backend handle token retrieval
+            try {
+                console.log('🔍 Attempting to export schedule via backend...');
+                
+                const result = await exportScheduleToGoogleCalendar(
+                    schedule.schedule, 
+                    userTimezone, 
+                    null,  // Let backend handle OAuth tokens
+                    currentScheduleName, // Pass schedule name
+                    userName  // Pass user name
+                );
+                
+                // Show success message
+                Alert.alert(
+                    'Success!',
+                    `Exported ${result.inserted} events to your "Plannr" calendar in Google Calendar.`,
+                    [{ text: 'Great!' }]
+                );
+                
+                logUserAction('google_calendar_export_success', { 
+                    scheduleName: schedName,
+                    eventsExported: result.inserted,
+                    calendarId: result.calendarId
+                });
+                return;
+                
+            } catch (exportError) {
+                console.log('🔍 Export error details:', exportError);
+                console.log('🔍 Export error message:', exportError.message);
+                
+                // Check if we need to use frontend token (Clerk backend SDK limitation)
+                if (exportError.message?.includes('GOOGLE_CALENDAR_USE_FRONTEND_TOKEN')) {
+                    console.log('🔍 Backend cannot access OAuth tokens - user has permissions but tokens not accessible');
+                    console.log('💡 Need to refresh OAuth connection to get accessible tokens');
+                    
+                    Alert.alert(
+                        'Calendar Connection Issue',
+                        'Your Google Calendar is connected but we need to refresh the connection to export your schedule.',
+                        [
+                            { text: 'Cancel', style: 'cancel' },
+                            { 
+                                text: 'Refresh Connection', 
+                                onPress: () => handleGoogleCalendarAuth()
+                            }
+                        ]
+                    );
+                    return;
+                }
+                
+                // Check if it's other auth-related errors
+                if (exportError.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED') || 
+                    exportError.message?.includes('GOOGLE_CALENDAR_NEEDS_REAUTH')) {
+                    Alert.alert(
+                        'Google Calendar Permissions Required',
+                        'We need additional calendar permissions to export your schedule. This will redirect you to Google.',
+                        [
+                            { text: 'Cancel', style: 'cancel' },
+                            { 
+                                text: 'Grant Permissions', 
+                                onPress: () => handleGoogleCalendarAuth()
+                            }
+                        ]
+                    );
+                    return;
+                }
+                
+                // Re-throw the error to be handled by the outer catch
+                throw exportError;
+            }
             
             // Show success message
             Alert.alert(

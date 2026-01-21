@@ -13,7 +13,10 @@ export const googleCalendarExportSchema = z.object({
         start: z.string().datetime('Invalid start datetime format'),
         end: z.string().datetime('Invalid end datetime format'),
         timeZone: z.string().optional()
-    })).min(1, 'At least one event is required')
+    })).min(1, 'At least one event is required'),
+    accessToken: z.string().optional(), // Optional access token from frontend
+    scheduleName: z.string().optional(), // Optional schedule name for calendar title
+    userName: z.string().optional() // Optional user name for calendar title
 });
 
 /**
