@@ -68,6 +68,14 @@ export const useAuthenticatedAPI = () => {
                 const errorData = await response.text();
                 console.error('API Error Response:', errorData);
                 
+                // Try to parse JSON error response for specific error codes
+                let parsedError = null;
+                try {
+                    parsedError = JSON.parse(errorData);
+                } catch (parseError) {
+                    // If parsing fails, continue with text error handling
+                }
+                
                 // Only retry with development token in development environment
                 if (response.status === 401 && token && authToken === token && __DEV__) {
                     console.log('🔧 Clerk token failed with 401, retrying with development auth');
@@ -88,6 +96,16 @@ export const useAuthenticatedAPI = () => {
                     
                     console.log('✅ Development auth retry successful');
                     return await retryResponse.json();
+                }
+                
+                // Handle specific error codes from backend
+                if (parsedError && parsedError.error) {
+                    if (parsedError.error === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' || parsedError.error === 'GOOGLE_ACCOUNT_NOT_FOUND') {
+                        const specificError = new Error(parsedError.error);
+                        specificError.message = parsedError.message || specificError.message;
+                        specificError.errorCode = parsedError.error;
+                        throw specificError;
+                    }
                 }
                 
                 // Provide user-friendly error messages in production
@@ -1015,6 +1033,24 @@ export const useAuthenticatedAPI = () => {
 
             } catch (error) {
                 console.error('❌ Google Calendar export failed:', error);
+                
+                // Handle specific Google Calendar authentication errors
+                if (error.errorCode === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' || error.errorCode === 'GOOGLE_ACCOUNT_NOT_FOUND') {
+                    // Import Alert here to avoid circular dependencies
+                    const { Alert } = require('react-native');
+                    Alert.alert(
+                        'Google Calendar Access Required',
+                        'Plannr currently does not have access to your Google Calendar. Please sign out and sign in with your Google account again to grant access.',
+                        [{ text: 'OK', style: 'default' }]
+                    );
+                    
+                    // Re-throw the error so calling code can handle it appropriately
+                    const authError = new Error('GOOGLE_CALENDAR_AUTH_ERROR');
+                    authError.originalError = error;
+                    authError.errorCode = error.errorCode;
+                    throw authError;
+                }
+                
                 throw error;
             }
         },

@@ -337,10 +337,27 @@ export const exportToGoogleCalendar = async (req, res, next) => {
     } catch (error) {
         console.error('Google Calendar export error:', error);
         
+        // Handle specific authentication errors
+        if (error.message === 'GOOGLE_CALENDAR_NOT_CONNECTED') {
+            return res.status(409).json({
+                success: false,
+                error: 'GOOGLE_ACCOUNT_NOT_FOUND',
+                message: 'Google account not found for your Clerk user account'
+            });
+        }
+        
+        if (error.message === 'GOOGLE_CALENDAR_NEEDS_REAUTH') {
+            return res.status(409).json({
+                success: false,
+                error: 'GOOGLE_ACCOUNT_REAUTH_NEEDED',
+                message: 'Google Calendar requires re-authentication to access required scopes'
+            });
+        }
+        
         if (error.message === 'GOOGLE_CALENDAR_REAUTH_REQUIRED') {
             return res.status(409).json({
                 success: false,
-                error: 'GOOGLE_CALENDAR_REAUTH_REQUIRED',
+                error: 'GOOGLE_ACCOUNT_REAUTH_NEEDED',
                 message: 'Google Calendar requires re-authentication'
             });
         }
