@@ -1019,30 +1019,6 @@ export const useAuthenticatedAPI = () => {
             }
         },
 
-        // Integrations operations
-        getUserIntegrations: async () => {
-            try {
-                const response = await makeAuthenticatedRequest('/api/users/integrations');
-                return response.data;
-            } catch (error) {
-                console.error('Failed to get user integrations:', error);
-                throw error;
-            }
-        },
-
-        updateUserIntegrations: async (integrations) => {
-            try {
-                const response = await makeAuthenticatedRequest('/api/users/integrations', {
-                    method: 'PUT',
-                    body: JSON.stringify(integrations),
-                });
-                return response.data;
-            } catch (error) {
-                console.error('Failed to update user integrations:', error);
-                throw error;
-            }
-        },
-
         // Event Dependencies API
         saveEventDependencies: async (scheduleId, dependenciesMap) => {
             try {
