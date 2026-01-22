@@ -15,6 +15,7 @@ import ExportCalIcon from '../../assets/system-icons/ExportCalIcon.svg';
 import DeleteIcon from '../../assets/system-icons/DeleteIcon.svg';
 import DeleteScheduleModal from '../modals/DeleteScheduleModal.jsx';
 import ExportCalendarBottomSheet from '../components/ExportCalendarBottomSheet.jsx';
+import LoadingScreen from './LoadingScreen.jsx';
 
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
@@ -37,6 +38,7 @@ const ScheduleViewScreen = ({ route }) => {
     const [selectedTB, setSelectedTB] = useState(null);
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const indicatorX = useRef(new Animated.Value(0)).current;
     const exportBottomSheetRef = useRef(null);
     
@@ -271,6 +273,7 @@ const ScheduleViewScreen = ({ route }) => {
     // Handle the actual export process
     const handleExportToGoogleCalendar = async () => {
         try {
+            setIsLoading(true);
             logUserAction('google_calendar_export_attempt', { 
                 scheduleName: schedName,
                 totalDays: schedule.schedule?.numDays || 0
@@ -457,8 +460,12 @@ const ScheduleViewScreen = ({ route }) => {
                 scheduleName: schedName,
                 errorType: error.message?.includes('GOOGLE_CALENDAR') ? 'auth_error' : 'unknown_error'
             });
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    if (isLoading) { return <LoadingScreen />; }
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
