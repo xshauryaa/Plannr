@@ -9,6 +9,7 @@ import Priority from '../model/Priority.js'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import Time24 from '../model/Time24.js'
+import FlexibleEvent from '../model/FlexibleEvent';
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg'
 
@@ -104,17 +105,16 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     
     // Update parent when task data changes
-    const updateTask = () => {
+    const updateTask = (updatedTask) => {
         if (onUpdate) {
-            const updatedTask = {
-                ...task,
-                name,
-                type,
-                duration: parseInt(duration),
-                priority,
-                deadline
-            };
-            onUpdate(updatedTask);
+            const updatedFlexibleEvent = new FlexibleEvent(
+                updatedTask.name,
+                updatedTask.type,
+                updatedTask.duration,
+                updatedTask.priority,
+                updatedTask.deadline
+            );
+            onUpdate(updatedFlexibleEvent);
         }
     };
     
@@ -197,7 +197,10 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                                 selectedValue={type}
                                 onValueChange={(itemValue) => {
                                     setType(itemValue);
-                                    updateTask();
+                                    updateTask({
+                                        ...task,
+                                        type: itemValue
+                                    });
                                 }}
                                 themeVariant={appState.userPreferences.theme}
                             >
@@ -226,7 +229,10 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                                 selectedValue={priority}
                                 onValueChange={(itemValue) => {
                                     setPriority(itemValue);
-                                    updateTask();
+                                    updateTask({
+                                        ...task,
+                                        priority: itemValue
+                                    });
                                 }}
                                 themeVariant={appState.userPreferences.theme}
                             >
@@ -252,9 +258,10 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                                 autoCapitalize='words'
                                 onChangeText={(text) => {
                                     setDuration(text);
-                                }}
-                                onBlur={() => {
-                                    updateTask();
+                                    updateTask({
+                                        ...task,
+                                        duration: parseInt(text)
+                                    })
                                 }}
                                 keyboardType='numeric'
                             />
@@ -281,7 +288,10 @@ const CollapsibleTaskCard = ({ task, minDate, numDays, onUpdate }) => {
                                 onChange={(event, date) => {
                                     if (date) {
                                         setDeadline(convertDateToScheduleDate(date));
-                                        updateTask();
+                                        updateTask({
+                                            ...task,
+                                            deadline: convertDateToScheduleDate(date)
+                                        });
                                     }
                                 }}
                                 minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}

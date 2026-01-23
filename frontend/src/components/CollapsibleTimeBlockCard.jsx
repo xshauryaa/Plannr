@@ -9,6 +9,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import convertDateToScheduleDate from '../utils/dateConversion.js'
 import convertTimeToTime24 from '../utils/timeConversion'
 import Time24 from '../model/Time24.js'
+import RigidEvent from '../model/RigidEvent';
 import ScheduleDate from '../model/ScheduleDate.js'
 import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
 import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg'
@@ -58,7 +59,15 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
     // Update parent when state changes
     const updateTimeBlock = (updatedTimeBlock) => {
         if (onUpdate) {
-            onUpdate(updatedTimeBlock);
+            const updatedRigidEvent = new RigidEvent(
+                updatedTimeBlock.name,
+                updatedTimeBlock.activityType,
+                (updatedTimeBlock.endTime.hour - updatedTimeBlock.startTime.hour) * 60 + (updatedTimeBlock.endTime.minute - updatedTimeBlock.startTime.minute),
+                updatedTimeBlock.date,
+                updatedTimeBlock.startTime.toInt(),
+                updatedTimeBlock.endTime.toInt()
+            );
+            onUpdate(updatedRigidEvent);
         }
     };
 
