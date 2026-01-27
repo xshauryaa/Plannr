@@ -61,7 +61,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
         if (onUpdate) {
             const updatedRigidEvent = new RigidEvent(
                 updatedTimeBlock.name,
-                updatedTimeBlock.activityType,
+                updatedTimeBlock.type,
                 (updatedTimeBlock.endTime.hour - updatedTimeBlock.startTime.hour) * 60 + (updatedTimeBlock.endTime.minute - updatedTimeBlock.startTime.minute),
                 updatedTimeBlock.date,
                 updatedTimeBlock.startTime.toInt(),
@@ -229,7 +229,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                     setType(itemValue);
                                     updateTimeBlock({
                                         ...timeBlock,
-                                        activityType: itemValue
+                                        type: itemValue
                                     });
                                 }}
                                 themeVariant={appState.userPreferences.theme}

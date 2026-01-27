@@ -232,6 +232,16 @@ const styles = StyleSheet.create({
         color: '#FF0000',
         alignSelf: 'center'
     },
+    button: {
+        width: '100%',
+        borderRadius: 16,
+        backgroundColor: '#000' ,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        marginTop: 8,
+        marginBottom: 8,
+        alignSelf: 'center'
+    },
 })
 
 export default FinishingUpView

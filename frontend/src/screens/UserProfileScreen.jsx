@@ -509,6 +509,14 @@ const UserProfileScreen = ({ navigation }) => {
                         <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Request a Feature</Text>
                         <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
                     </TouchableOpacity>
+                    <View style={{ ...styles.divider, backgroundColor: theme.FOREGROUND }} />
+                    <TouchableOpacity 
+                        style={styles.linkButton} 
+                        onPress={() => handleOpenExternalLink('mailto:shaurya@useplannr.co')}
+                    >
+                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Contact us</Text>
+                        <Link width={24} height={24} style={{ marginRight: 8 }} color={theme.FOREGROUND} opacity={0.5} />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Logout Button */}
